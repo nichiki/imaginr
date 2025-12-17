@@ -1,0 +1,87 @@
+# ========================================
+# GLOBAL BASE - 全30枚共通設定
+# ========================================
+# キャラクター固定部分、品質、カメラ基本設定
+# 各ルック・ショットで上書き可能
+
+meta:
+  style: realistic
+  genre: high fashion editorial
+  series: "Virtual AI Model Lookbook"
+  aesthetic:
+    - fashion model
+    - editorial photography
+    - professional model posing
+    - high fashion
+
+# キャラクター固定設定（LoRAで学習済みの特徴と合わせる）
+subject:
+  type: human
+  role: professional fashion model
+  sex: female
+  age: young adult
+  ethnicity: japanese
+  posing:
+    style: high fashion editorial
+    quality:
+      - elongated elegant posture
+      - weight shifted naturally
+      - relaxed shoulders
+      - graceful body lines
+      - confident presence
+
+appearance:
+  face:
+    eyes:
+      color: brown
+      shape: natural
+  hair:
+    style: straight
+    length: long
+    color: chestnut brown
+    texture: silky, natural flow
+  body:
+    build: slim
+    breast:
+      size: medium
+  skin:
+    texture: natural, soft, poreless
+    tone: fair, warm undertone
+    highlights: natural skin glow
+
+# 品質設定（共通）
+quality:
+  rendering: photorealistic
+  details:
+    - professional photography
+    - magazine quality
+    - Vogue editorial
+    - organic texture
+
+# カメラ基本設定（ルックで上書き可能）
+camera:
+  hardware: 35mm film camera
+  film_stock: Kodak Portra 400
+  lens: 85mm f/1.4
+  focus: slight soft focus
+
+# 共通フィルム質感（concept.mdより）
+effects:
+  analog_texture:
+    medium: shot on 35mm film
+    grain: natural film grain
+    microcontrast: subtle
+    highlight_rolloff: soft organic rolloff
+    halation: gentle halation on highlights
+    matte_shadows: true
+    bloom: soft bloom
+    tone: muted colors, analog warmth
+    texture: organic film texture
+
+# 共通構図方針
+composition:
+  principles:
+    - minimal scene
+    - negative space emphasis
+    - single subject focus
+    - minimal props

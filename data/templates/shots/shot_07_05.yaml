@@ -1,0 +1,51 @@
+# ========================================
+# SHOT 07-05 - Swimwear #5
+# ========================================
+
+shot:
+  look_id: "07"
+  shot_number: 5
+  name: "Swimwear - Back View"
+
+fashion:
+  color_scheme: white or cream
+  outfit:
+    - type: bikini with belt detail
+      color: white or cream
+      material: textured fabric
+      details: fashion-forward, belt detail at waist, editorial design
+  styling_notes: designer bikini, back detail showcase
+
+pose:
+  base: standing back to camera
+  body:
+    torso: back visible
+    legs: natural stance
+    arms: relaxed
+    head: looking over shoulder slightly
+  camera_relation: from behind, slight turn
+  emphasis: back silhouette, elegant
+
+expression:
+  type: subtle smile
+  eyes:
+    direction: over shoulder toward camera
+    quality: soft, confident
+  mouth: gentle hint of smile
+  overall: elegant, sophisticated
+
+composition:
+  shot: full body or three-quarter
+  angle: from behind
+  framing: back as focus, looking over shoulder
+  distance: medium-full
+
+environment:
+  background: bright studio, white or cream
+  atmosphere: light, airy
+
+lighting:
+  type: bright soft light
+  direction: front (hitting back)
+  quality: bright, clean
+  color: warm white

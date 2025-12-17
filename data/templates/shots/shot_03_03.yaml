@@ -1,0 +1,50 @@
+# ========================================
+# SHOT 03-03 - Ethereal Form #3
+# ========================================
+
+shot:
+  look_id: "03"
+  shot_number: 3
+  name: "Ethereal Form - Minimal White"
+
+fashion:
+  color_scheme: pure white
+  outfit:
+    - type: minimal white dress
+      color: white
+      material: light cotton or linen blend
+      details: simple cut, flowing hem, moves with body
+  styling_notes: minimal, clean, focus on movement
+
+pose:
+  base: standing
+  action: subtle weight shift, dress hem swaying
+  body:
+    torso: natural, relaxed
+    legs: one foot slightly forward, creating movement
+    arms: relaxed at sides
+  camera_relation: three-quarter view
+  emphasis: subtle dress movement at hem
+
+expression:
+  type: soft smile
+  eyes:
+    direction: toward camera
+    quality: warm, gentle
+  mouth: small soft smile
+  overall: quiet joy
+
+composition:
+  shot: full body
+  angle: eye level
+  framing: clean, minimal
+  distance: full
+
+environment:
+  background: white studio
+  atmosphere: bright, simple
+
+lighting:
+  type: soft natural feel
+  direction: soft side light
+  quality: clean, bright

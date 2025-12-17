@@ -1,0 +1,102 @@
+# ========================================
+# HERO IMAGE - Making Page
+# 創造の瞬間、書いている様子
+# ========================================
+
+meta:
+  style: realistic
+  genre: creative portrait
+  aesthetic:
+    - artist at work
+    - creative process
+    - contemplative moment
+
+subject:
+  type: human
+  role: creative artist
+  sex: female
+  age: young adult
+  ethnicity: japanese
+
+appearance:
+  face:
+    eyes:
+      color: brown
+      shape: natural
+  hair:
+    style: straight
+    length: long
+    color: chestnut brown
+    texture: silky, natural flow
+  body:
+    build: slim
+  skin:
+    texture: natural, soft
+    tone: fair, warm undertone
+  makeup:
+    style: natural, minimal
+    lips: natural
+    eyes: minimal
+    skin: natural
+
+fashion:
+  color_scheme: simple, muted
+  outfit:
+    - type: casual creative wear
+      color: white, cream, or soft gray
+      material: comfortable natural fabric
+      details: simple shirt or sweater, relaxed
+  styling_notes: artist at work, comfortable and focused
+
+pose:
+  base: sitting, writing or drawing
+  body:
+    torso: slightly hunched over work, focused
+    arms: one hand writing/drawing, engaged with work
+    head: slightly bowed, looking at work
+  camera_relation: profile or three-quarter from behind
+  emphasis: hands at work, creative moment
+
+expression:
+  type: deep concentration
+  eyes:
+    direction: looking down at work
+    quality: focused, absorbed
+  mouth: relaxed, natural
+  overall: lost in creative process, contemplative
+
+composition:
+  shot: upper body from side or behind
+  angle: slightly above or eye level
+  framing: intimate, documentary feel
+  distance: medium
+  focus: hands and work in focus, or face in profile
+
+environment:
+  background: creative workspace
+  atmosphere: intimate, quiet, creative
+  elements:
+    - notebook or sketchbook
+    - pen or pencil in hand
+    - scattered papers, tools around
+    - soft natural light from window
+
+lighting:
+  type: natural window light
+  direction: soft side light
+  quality: gentle, contemplative
+  color: warm natural daylight
+
+quality:
+  rendering: photorealistic
+  details:
+    - intimate documentary style
+    - natural moment captured
+    - high contrast
+    - monochrome or desaturated
+
+effects:
+  color_grade:
+    style: black and white or high contrast monochrome
+    contrast: high
+    saturation: desaturated or monochrome

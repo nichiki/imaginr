@@ -1,0 +1,50 @@
+# ========================================
+# SHOT 07-03 - Swimwear #3
+# ========================================
+
+shot:
+  look_id: "07"
+  shot_number: 3
+  name: "Swimwear - Cutout Design"
+
+fashion:
+  color_scheme: black
+  outfit:
+    - type: cutout one-piece swimsuit
+      color: black
+      material: matte fabric
+      details: geometric cutout design, modern, architectural, fashion-forward
+  styling_notes: design-focused swimsuit, editorial statement piece
+
+pose:
+  base: standing
+  body:
+    torso: slight angle to show design
+    legs: weight on one leg
+    arms: one hand on hip
+  camera_relation: three-quarter
+  emphasis: showing swimsuit design, editorial
+
+expression:
+  type: cool confident
+  eyes:
+    direction: direct to camera
+    quality: strong, editorial
+  mouth: closed
+  overall: high fashion attitude
+
+composition:
+  shot: full body
+  angle: eye level
+  framing: design-focused
+  distance: medium-full
+
+environment:
+  background: dark studio, black or charcoal
+  atmosphere: dramatic, editorial
+
+lighting:
+  type: dramatic studio
+  direction: strong side light
+  quality: contrast, sculptural
+  color: neutral cool

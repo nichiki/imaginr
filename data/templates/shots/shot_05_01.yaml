@@ -1,0 +1,52 @@
+# ========================================
+# SHOT 05-01 - Void Essence #1
+# ========================================
+
+shot:
+  look_id: "05"
+  shot_number: 1
+  name: "Void Essence - Mauve Geometry"
+
+fashion:
+  color_scheme: mauve, dusty purple-pink
+  outfit:
+    - type: geometric cut sculptural top
+      color: mauve
+      material: structured fabric
+      details: angular cuts, architectural shape, asymmetric
+    - type: wide leg trousers
+      color: mauve, matching
+      material: flowing fabric
+      details: high waisted, clean drape
+    - type: minimal heels
+      color: nude or mauve
+      material: leather
+      details: simple, sculptural
+  styling_notes: monochromatic mauve, geometric shapes
+
+pose:
+  base: standing twisted
+  body:
+    torso: rotated, creating abstract line
+    legs: grounded, stable base
+    arms: one raised creating angle
+  camera_relation: three-quarter
+  emphasis: body as sculpture, angular lines
+
+expression:
+  type: blank object
+  eyes:
+    direction: distant, unfocused
+    quality: empty, sculpture-like
+  mouth: closed, neutral
+  overall: object, not person
+
+environment:
+  background: white gallery wall with large mauve abstract painting
+  props: color field painting in mauve tones behind model
+
+lighting:
+  type: hard directional
+  direction: strong side light from left
+  quality: sharp shadows, sculptural
+  color: neutral white

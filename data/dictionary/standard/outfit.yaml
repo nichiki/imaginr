@@ -1,0 +1,94 @@
+# outfit関連の辞書
+
+entries:
+  # outfit.type - 衣装タイプ
+  - key: type
+    context: outfit
+    values:
+      - value: dress
+        label: dress (ドレス)
+      - value: suit
+        label: suit (スーツ)
+      - value: casual wear
+        label: casual wear (カジュアル)
+      - value: formal wear
+        label: formal wear (フォーマル)
+      - value: swimwear
+        label: swimwear (水着)
+      - value: lingerie
+        label: lingerie (ランジェリー)
+      - value: evening gown
+        label: evening gown (イブニングドレス)
+      - value: cocktail dress
+        label: cocktail dress (カクテルドレス)
+      - value: streetwear
+        label: streetwear (ストリート)
+      - value: athletic wear
+        label: athletic wear (スポーツウェア)
+
+  # outfit.material - 素材
+  - key: material
+    context: outfit
+    values:
+      - value: silk
+        label: silk (シルク)
+      - value: cotton
+        label: cotton (コットン)
+      - value: leather
+        label: leather (レザー)
+      - value: velvet
+        label: velvet (ベルベット)
+      - value: satin
+        label: satin (サテン)
+      - value: lace
+        label: lace (レース)
+      - value: denim
+        label: denim (デニム)
+      - value: wool
+        label: wool (ウール)
+      - value: chiffon
+        label: chiffon (シフォン)
+      - value: mesh
+        label: mesh (メッシュ)
+      - value: latex
+        label: latex (ラテックス)
+      - value: PVC
+        label: PVC
+
+  # outfit.fit - フィット感
+  - key: fit
+    context: outfit
+    values:
+      - value: tight
+        label: tight (タイト)
+      - value: loose
+        label: loose (ルーズ)
+      - value: fitted
+        label: fitted (フィット)
+      - value: oversized
+        label: oversized (オーバーサイズ)
+      - value: slim
+        label: slim (スリム)
+      - value: relaxed
+        label: relaxed (リラックス)
+
+  # outfit.style - スタイル
+  - key: style
+    context: outfit
+    values:
+      - value: elegant
+        label: elegant (エレガント)
+      - value: minimalist
+        label: minimalist (ミニマリスト)
+      - value: avant-garde
+        label: avant-garde (アバンギャルド)
+      - value: classic
+        label: classic (クラシック)
+      - value: modern
+        label: modern (モダン)
+      - value: vintage
+        label: vintage (ヴィンテージ)
+      - value: bohemian
+        label: bohemian (ボヘミアン)
+      - value: edgy
+        label: edgy (エッジー)

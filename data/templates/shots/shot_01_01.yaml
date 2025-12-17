@@ -1,0 +1,58 @@
+# ========================================
+# SHOT 01-01 - Midnight Silhouette #1
+# ========================================
+# 服装1 × ポーズ1 × 表情1
+
+shot:
+  look_id: "01"
+  shot_number: 1
+  name: "Midnight Silhouette - First Shadow"
+
+# 服装選択: パターン1
+fashion:
+  color_scheme: black monochrome
+  outfit:
+    - type: long coat
+      color: black
+      material: matte wool blend
+      details: oversized, below knee length
+    - type: black turtleneck dress
+      color: black
+      material: thin knit with sheer mesh panel at decollete
+      details: fitted, midi length, sleeveless, transparent mesh from neck to chest area
+  styling_notes: minimal layering, coat over simple knit dress
+
+# ポーズ選択: パターン1
+pose:
+  base: standing
+  direction: three-quarter view, facing camera-right
+  body:
+    torso: angled toward camera-right, elegant posture
+    legs: together, one slightly forward
+    arms: actively taking off coat, pulling it down from shoulders
+  action: in the middle of removing coat, coat sliding down arms, one shoulder exposed
+  coat_position: halfway off, hanging at elbows, revealing bare shoulders and sheer layer
+  camera_relation: three-quarter angle, body turned right
+  emphasis: taking off coat moment, sensual reveal
+
+# 表情選択: パターン1
+expression:
+  type: neutral cool
+  eyes:
+    direction: forward (profile view)
+    quality: calm, distant
+  mouth: closed, relaxed
+  overall: emotionless confidence
+
+# 構図（このショット固有）
+composition:
+  shot: full body
+  angle: eye level
+  framing: centered with left negative space
+  distance: medium-full
+
+# ライティング微調整
+lighting:
+  direction: from camera-left
+  rim_light: strong on right edge (camera-right side of subject)
+  face: partially lit, shadow on far side

@@ -1,0 +1,178 @@
+# ========================================
+# LOOK 04 - Digital Noir
+# ========================================
+# サイバー・メタリック
+# キーワード: テクノロジー、硬質、光沢、近未来
+
+look:
+  id: "04"
+  name: "Digital Noir"
+  concept: "サイバー、メタリック、近未来"
+  keywords:
+    - cyberpunk
+    - metallic
+    - futuristic
+    - tech
+    - hard edge
+    - sleek
+
+mood:
+  tone: cold, futuristic, powerful
+  atmosphere: digital, synthetic
+  poetry: "近未来の冷たい光の中で"
+
+# メイク（Look 04用）- クールだけど抑え目
+appearance:
+  makeup:
+    style: clean futuristic, editorial but not overdone
+    lips: nude or soft mauve, subtle
+    eyes: clean graphic liner, subtle smoky, no heavy color
+    skin: flawless, porcelain, natural highlight
+    brows: sharp, defined
+
+# ライティング設定 - ネオンサイバーパンク
+lighting:
+  key: dramatic, hard edge
+  type: hard light with neon colored rim light
+  direction: strong side or back light
+  secondary:
+    type: neon rim light
+    color: neon purple, hot pink, or electric blue
+    purpose: define edges, create cyberpunk glow
+  shadow:
+    quality: defined, sharp
+    depth: deep
+  color: cool white base with neon accent (purple/pink/blue rim)
+
+# 環境設定
+environment:
+  background:
+    type: dark studio with neon light spill
+    color: black, dark gray with neon reflections
+    texture: clean, sleek, hints of neon glow
+  atmosphere: cyberpunk, neon-noir, synthetic
+
+# カラーパレット
+color_palette:
+  primary: black, silver, chrome
+  secondary: dark gray, white
+  accent: neon purple, hot pink, electric blue
+  neon: purple and pink rim lights, cyberpunk glow
+  saturation: high contrast, metallic sheen, vivid neon accents
+
+# 構図傾向
+composition:
+  shot: full body to three-quarter
+  framing:
+    - strong lines
+    - dramatic negative space
+  angle: eye level to slightly low (power)
+  distance: medium to full
+
+# フィルム質感調整
+effects:
+  analog_texture:
+    grain: minimal
+    contrast: high
+    tonal_palette: cold, metallic
+
+# 服装パターン（5種）
+fashion_options:
+  - id: 1
+    description: "メタリックシルバージャケット"
+    items:
+      - metallic silver jacket
+      - black base layer
+    texture: reflective, chrome-like
+
+  - id: 2
+    description: "黒 × クロームのパネル状トップス"
+    items:
+      - black top with chrome panels
+      - sleek pants
+    texture: mixed matte and shine
+
+  - id: 3
+    description: "テック系ボディスーツ"
+    items:
+      - tech-inspired bodysuit
+      - sleek, fitted
+    texture: smooth, second-skin
+
+  - id: 4
+    description: "光沢カーゴパンツ + ハーネス"
+    items:
+      - shiny cargo pants
+      - harness over top
+    texture: glossy, structured
+
+  - id: 5
+    description: "反射素材のコート"
+    items:
+      - reflective material coat
+      - minimal underneath
+    texture: mirror-like, catches light
+
+# ポーズパターン（5種）
+pose_options:
+  - id: 1
+    description: "直立で機械的に"
+    base: standing rigid
+    body: straight, robotic, precise
+    emphasis: mechanical perfection
+
+  - id: 2
+    description: "指先を揃えた精密なポーズ"
+    base: standing
+    body: fingers together, precise gestures
+    emphasis: calculated precision
+
+  - id: 3
+    description: "足を肩幅に開き強い存在感"
+    base: standing wide
+    body: power stance, grounded
+    emphasis: dominance, strength
+
+  - id: 4
+    description: "顔をやや上げて未来を見る構図"
+    base: standing
+    direction: chin up, looking upward
+    emphasis: visionary, forward-looking
+
+  - id: 5
+    description: "逆光で輪郭を強く出す立ち姿"
+    base: standing
+    lighting: backlit silhouette
+    emphasis: dramatic edge light
+
+# 表情パターン（5種）
+expression_options:
+  - id: 1
+    description: "冷静で無機質"
+    type: cold neutral
+    eyes: emotionless, distant
+    intensity: robotic
+
+  - id: 2
+    description: "ロボティックな無表情"
+    type: robotic blank
+    eyes: fixed, unblinking feel
+    intensity: artificial
+
+  - id: 3
+    description: "意志の硬さを感じる鋭い目"
+    type: sharp determined
+    eyes: intense, focused
+    intensity: powerful
+
+  - id: 4
+    description: "目線だけで圧を出す"
+    type: intense gaze
+    eyes: piercing, commanding
+    intensity: dominant
+
+  - id: 5
+    description: "プログラムされたようなcalm blank"
+    type: programmed calm
+    eyes: serene but empty
+    intensity: uncanny

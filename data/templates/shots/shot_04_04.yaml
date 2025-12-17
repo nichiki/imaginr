@@ -1,0 +1,63 @@
+# ========================================
+# SHOT 04-04 - Digital Noir #4
+# ========================================
+
+shot:
+  look_id: "04"
+  shot_number: 4
+  name: "Digital Noir - Cargo Harness"
+
+fashion:
+  color_scheme: black, gunmetal
+  outfit:
+    - type: fitted top
+      color: black
+      material: tech fabric or leather
+      details: simple, fitted base
+    - type: glossy cargo pants
+      color: black with slight sheen
+      material: coated fabric, vinyl-like
+      details: cargo pockets, tapered, futuristic utility
+    - type: harness
+      color: black
+      material: leather or nylon
+      details: chest harness, strappy, utilitarian
+    - type: boots
+      color: black
+      material: chunky combat style
+      details: heavy, industrial
+  styling_notes: utility cyberpunk, harness as accent
+
+pose:
+  base: standing
+  direction: chin slightly up
+  body:
+    torso: proud, looking upward
+    legs: natural stance
+    arms: at sides or one hand on harness strap
+  camera_relation: three-quarter, low angle
+  emphasis: visionary, forward-looking
+
+expression:
+  type: programmed calm
+  eyes:
+    direction: upward, into distance
+    quality: serene but empty, seeing the future
+  mouth: relaxed, neutral
+  overall: prophetic calm
+
+composition:
+  shot: three-quarter to full body
+  angle: low angle (heroic)
+  framing: looking up, sky/void above
+  distance: medium-full
+
+environment:
+  background: dark, gradient to lighter above
+
+lighting:
+  type: dramatic uplight with neon
+  direction: from below and side
+  quality: dramatic, futuristic
+  color: cool base with neon purple/pink accent
+  neon: purple and pink glow from below

@@ -1,65 +1,665 @@
-import Image from "next/image";
+'use client';
+
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { FileTree } from '@/components/file-tree';
+import { SnippetPanel } from '@/components/snippet-panel';
+import { PreviewPanel } from '@/components/preview-panel';
+import { YamlEditor, YamlEditorRef } from '@/components/yaml-editor';
+import { fileAPI, FileTreeItem } from '@/lib/file-api';
+import {
+  resolveAndMergeAsync,
+  objectToYaml,
+  generatePromptText,
+  FileData,
+} from '@/lib/yaml-utils';
+import { Snippet, snippetAPI } from '@/lib/snippet-api';
+import {
+  dictionaryAPI,
+  buildDictionaryCache,
+  DictionaryEntry,
+} from '@/lib/dictionary-api';
+import { loadState, saveState } from '@/lib/storage';
 
 export default function Home() {
+  // ファイルツリー
+  const [fileTree, setFileTree] = useState<FileTreeItem[]>([]);
+  // ファイル内容のキャッシュ
+  const [files, setFiles] = useState<FileData>({});
+  // 選択中のファイル
+  const [selectedFile, setSelectedFile] = useState<string>('');
+  // ローディング状態
+  const [isLoading, setIsLoading] = useState(true);
+  // 保存中状態
+  const [isSaving, setIsSaving] = useState(false);
+  // 未保存の変更があるか
+  const [isDirty, setIsDirty] = useState(false);
+  // フォルダ開閉状態
+  const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
+  // スニペット一覧（補完用）
+  const [snippets, setSnippets] = useState<Snippet[]>([]);
+  // 辞書キャッシュ（補完用）
+  const [dictionaryCache, setDictionaryCache] = useState<Map<string, DictionaryEntry[]>>(new Map());
+
+  // マージ結果
+  const [mergedYaml, setMergedYaml] = useState('');
+  const [promptText, setPromptText] = useState('');
+  const [lookName, setLookName] = useState<string | undefined>(undefined);
+  const [isYamlValid, setIsYamlValid] = useState(true);
+
+  // プレビューパネルの高さ
+  const [previewHeight, setPreviewHeight] = useState(280);
+  // 左ペインの幅
+  const [leftPanelWidth, setLeftPanelWidth] = useState(280);
+  // 右ペインの幅
+  const [rightPanelWidth, setRightPanelWidth] = useState(280);
+
+  // 初期化済みフラグ
+  const initialized = useRef(false);
+  // YamlEditorへのref
+  const yamlEditorRef = useRef<YamlEditorRef>(null);
+
+  // リサイズ用のref
+  const resizeType = useRef<'preview' | 'left' | 'right' | null>(null);
+  const startPos = useRef(0);
+  const startSize = useRef(0);
+
+  // 全フォルダのパスを収集
+  function collectAllFolders(items: FileTreeItem[]): string[] {
+    const folders: string[] = [];
+    for (const item of items) {
+      if (item.type === 'folder') {
+        folders.push(item.path);
+        if (item.children) {
+          folders.push(...collectAllFolders(item.children));
+        }
+      }
+    }
+    return folders;
+  }
+
+  // 初期読み込み
+  useEffect(() => {
+    async function loadFiles() {
+      try {
+        // 保存された状態を復元
+        const savedState = loadState();
+        setPreviewHeight(savedState.previewHeight);
+        setLeftPanelWidth(savedState.leftPanelWidth);
+        setRightPanelWidth(savedState.rightPanelWidth);
+
+        const tree = await fileAPI.listFiles();
+        setFileTree(tree);
+
+        // フォルダの開閉状態: 保存されていればそれを使用、なければ全て開く
+        if (savedState.expandedFolders !== null) {
+          setExpandedFolders(new Set(savedState.expandedFolders));
+        } else {
+          // 初回起動時: デフォルトで全フォルダを開く
+          setExpandedFolders(new Set(collectAllFolders(tree)));
+        }
+
+        // 保存されたファイルがあればそれを選択、なければ最初のshotファイル
+        let fileToSelect = savedState.selectedFile;
+        if (!fileToSelect) {
+          fileToSelect = findFirstFile(tree, 'shots') || '';
+        }
+
+        if (fileToSelect) {
+          setSelectedFile(fileToSelect);
+          // 選択ファイルを読み込み（_base/_layersは非同期マージ時に動的読み込み）
+          const content = await fileAPI.readFile(fileToSelect);
+          setFiles({ [fileToSelect]: content });
+        }
+
+        // スニペットを読み込み
+        try {
+          const snippetData = await snippetAPI.list();
+          setSnippets(snippetData);
+        } catch (e) {
+          console.error('Failed to load snippets:', e);
+        }
+
+        // 辞書を読み込み
+        try {
+          const dictData = await dictionaryAPI.list();
+          const cache = buildDictionaryCache(dictData);
+          setDictionaryCache(cache);
+        } catch (e) {
+          console.error('Failed to load dictionary:', e);
+        }
+
+        initialized.current = true;
+      } catch (error) {
+        console.error('Failed to load files:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }
+    loadFiles();
+  }, []);
+
+  // ツリーから最初のファイルを探す
+  function findFirstFile(items: FileTreeItem[], preferFolder?: string): string | null {
+    for (const item of items) {
+      if (item.type === 'folder' && item.children) {
+        if (!preferFolder || item.name === preferFolder) {
+          const found = findFirstFile(item.children);
+          if (found) return found;
+        }
+      } else if (item.type === 'file') {
+        return item.path;
+      }
+    }
+    // preferFolderで見つからなかったら全体から探す
+    if (preferFolder) {
+      return findFirstFile(items);
+    }
+    return null;
+  }
+
+  // 現在のファイル内容
+  const currentContent = useMemo(
+    () => files[selectedFile] || '',
+    [files, selectedFile]
+  );
+
+  // ファイルパス一覧（補完用）
+  const allFilePaths = useMemo(() => {
+    const collectFiles = (items: FileTreeItem[]): string[] => {
+      const paths: string[] = [];
+      for (const item of items) {
+        if (item.type === 'file') {
+          paths.push(item.path);
+        } else if (item.children) {
+          paths.push(...collectFiles(item.children));
+        }
+      }
+      return paths;
+    };
+    return collectFiles(fileTree);
+  }, [fileTree]);
+
+  // ファイル読み込み関数（非同期マージ用）
+  const readFileForMerge = useCallback(async (path: string): Promise<string | null> => {
+    try {
+      return await fileAPI.readFile(path);
+    } catch {
+      return null;
+    }
+  }, []);
+
+  // filesのrefを保持（useEffect内で最新値を参照するため）
+  const filesRef = useRef(files);
+  useEffect(() => {
+    filesRef.current = files;
+  }, [files]);
+
+  // マージ結果とプロンプトテキスト（非同期で計算）
+  // 依存配列からfilesを外し、currentContentの変更で発火
+  useEffect(() => {
+    if (!selectedFile || !currentContent) {
+      setMergedYaml('');
+      setPromptText('');
+      setLookName(undefined);
+      setIsYamlValid(true);
+      return;
+    }
+
+    let cancelled = false;
+
+    (async () => {
+      try {
+        // 参照ファイル用のキャッシュ（メイン状態とは別管理）
+        const tempCache: FileData = { ...filesRef.current };
+        const merged = await resolveAndMergeAsync(selectedFile, tempCache, readFileForMerge);
+
+        if (cancelled) return;
+
+        // 空オブジェクトが返ってきた場合はパースエラーの可能性
+        const isEmpty = Object.keys(merged).length === 0 && currentContent.trim() !== '';
+        if (isEmpty) {
+          setMergedYaml('');
+          setPromptText('');
+          setLookName(undefined);
+          setIsYamlValid(false);
+          return;
+        }
+        const yamlStr = objectToYaml(merged);
+        const prompt = generatePromptText(merged);
+        const look = (merged.look as { name?: string })?.name;
+        setMergedYaml(yamlStr);
+        setPromptText(prompt);
+        setLookName(look);
+        setIsYamlValid(true);
+      } catch {
+        if (cancelled) return;
+        setMergedYaml('');
+        setPromptText('');
+        setLookName(undefined);
+        setIsYamlValid(false);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [selectedFile, currentContent, readFileForMerge]);
+
+  // ファイル選択ハンドラ
+  const handleFileSelect = useCallback(async (path: string) => {
+    // 既にキャッシュにあればそれを使う
+    if (!files[path]) {
+      try {
+        const content = await fileAPI.readFile(path);
+        setFiles((prev) => ({ ...prev, [path]: content }));
+      } catch (error) {
+        console.error('Failed to read file:', error);
+        return;
+      }
+    }
+    setSelectedFile(path);
+    setIsDirty(false);
+    // 選択したファイルを保存
+    if (initialized.current) {
+      saveState({ selectedFile: path });
+    }
+  }, [files]);
+
+  // フォルダ開閉ハンドラ
+  const handleToggleFolder = useCallback((path: string) => {
+    setExpandedFolders((prev) => {
+      const next = new Set(prev);
+      if (next.has(path)) {
+        next.delete(path);
+      } else {
+        next.add(path);
+      }
+      // 保存
+      if (initialized.current) {
+        saveState({ expandedFolders: Array.from(next) });
+      }
+      return next;
+    });
+  }, []);
+
+  // ファイル作成ハンドラ
+  const handleCreateFile = useCallback(async (path: string) => {
+    try {
+      const defaultContent = `# ${path.split('/').pop()?.replace('.yaml', '')}\n\n`;
+      await fileAPI.createFile(path, defaultContent);
+      // ファイルツリーを再読み込み
+      const tree = await fileAPI.listFiles();
+      setFileTree(tree);
+      // 新しいファイルを選択
+      setFiles((prev) => ({ ...prev, [path]: defaultContent }));
+      setSelectedFile(path);
+      setIsDirty(false);
+      if (initialized.current) {
+        saveState({ selectedFile: path });
+      }
+    } catch (error) {
+      console.error('Failed to create file:', error);
+      alert('Failed to create file');
+    }
+  }, []);
+
+  // フォルダ作成ハンドラ
+  const handleCreateFolder = useCallback(async (path: string) => {
+    try {
+      await fileAPI.createFolder(path);
+      // ファイルツリーを再読み込み
+      const tree = await fileAPI.listFiles();
+      setFileTree(tree);
+      // 新しいフォルダを展開状態に追加
+      setExpandedFolders((prev) => {
+        const next = new Set(prev);
+        next.add(path);
+        if (initialized.current) {
+          saveState({ expandedFolders: Array.from(next) });
+        }
+        return next;
+      });
+    } catch (error) {
+      console.error('Failed to create folder:', error);
+      alert('Failed to create folder');
+    }
+  }, []);
+
+  // ファイル削除ハンドラ
+  const handleDeleteFile = useCallback(async (path: string) => {
+    if (!confirm(`Delete "${path}"?`)) return;
+
+    try {
+      await fileAPI.deleteFile(path);
+      // ファイルツリーを再読み込み
+      const tree = await fileAPI.listFiles();
+      setFileTree(tree);
+      // 削除したファイルが選択中だった場合、別のファイルを選択
+      if (selectedFile === path) {
+        const firstFile = findFirstFile(tree, 'shots');
+        if (firstFile) {
+          const content = await fileAPI.readFile(firstFile);
+          setFiles((prev) => {
+            const next = { ...prev };
+            delete next[path];
+            next[firstFile] = content;
+            return next;
+          });
+          setSelectedFile(firstFile);
+        } else {
+          setSelectedFile('');
+          setFiles((prev) => {
+            const next = { ...prev };
+            delete next[path];
+            return next;
+          });
+        }
+      } else {
+        setFiles((prev) => {
+          const next = { ...prev };
+          delete next[path];
+          return next;
+        });
+      }
+      setIsDirty(false);
+    } catch (error) {
+      console.error('Failed to delete file:', error);
+      alert('Failed to delete file');
+    }
+  }, [selectedFile]);
+
+  // フォルダ削除ハンドラ
+  const handleDeleteFolder = useCallback(async (path: string) => {
+    if (!confirm(`Delete folder "${path}" and all its contents?`)) return;
+
+    try {
+      await fileAPI.deleteFolder(path);
+      // ファイルツリーを再読み込み
+      const tree = await fileAPI.listFiles();
+      setFileTree(tree);
+      // 削除したフォルダ内のファイルが選択中だった場合、別のファイルを選択
+      if (selectedFile.startsWith(path + '/')) {
+        const firstFile = findFirstFile(tree, 'shots');
+        if (firstFile) {
+          const content = await fileAPI.readFile(firstFile);
+          setFiles((prev) => {
+            // 削除したフォルダ内のファイルをキャッシュから削除
+            const next: Record<string, string> = {};
+            for (const [key, value] of Object.entries(prev)) {
+              if (!key.startsWith(path + '/')) {
+                next[key] = value;
+              }
+            }
+            next[firstFile] = content;
+            return next;
+          });
+          setSelectedFile(firstFile);
+        } else {
+          setSelectedFile('');
+          setFiles((prev) => {
+            const next: Record<string, string> = {};
+            for (const [key, value] of Object.entries(prev)) {
+              if (!key.startsWith(path + '/')) {
+                next[key] = value;
+              }
+            }
+            return next;
+          });
+        }
+      } else {
+        // 削除したフォルダ内のファイルをキャッシュから削除
+        setFiles((prev) => {
+          const next: Record<string, string> = {};
+          for (const [key, value] of Object.entries(prev)) {
+            if (!key.startsWith(path + '/')) {
+              next[key] = value;
+            }
+          }
+          return next;
+        });
+      }
+      // 展開状態から削除
+      setExpandedFolders((prev) => {
+        const next = new Set(prev);
+        next.delete(path);
+        // サブフォルダも削除
+        for (const p of prev) {
+          if (p.startsWith(path + '/')) {
+            next.delete(p);
+          }
+        }
+        if (initialized.current) {
+          saveState({ expandedFolders: Array.from(next) });
+        }
+        return next;
+      });
+      setIsDirty(false);
+    } catch (error) {
+      console.error('Failed to delete folder:', error);
+      alert('Failed to delete folder');
+    }
+  }, [selectedFile]);
+
+  // エディタ変更ハンドラ
+  const handleEditorChange = useCallback(
+    (value: string) => {
+      setFiles((prev) => ({
+        ...prev,
+        [selectedFile]: value,
+      }));
+      setIsDirty(true);
+    },
+    [selectedFile]
+  );
+
+  // ファイル保存ハンドラ
+  const handleSave = useCallback(async () => {
+    if (!selectedFile || !isDirty) return;
+
+    setIsSaving(true);
+    try {
+      await fileAPI.writeFile(selectedFile, files[selectedFile]);
+      setIsDirty(false);
+    } catch (error) {
+      console.error('Failed to save file:', error);
+    } finally {
+      setIsSaving(false);
+    }
+  }, [selectedFile, files, isDirty]);
+
+  // Ctrl+S で保存
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        handleSave();
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [handleSave]);
+
+  // スニペットクリックハンドラ
+  const handleSnippetClick = useCallback((snippet: Snippet) => {
+    if (yamlEditorRef.current) {
+      yamlEditorRef.current.insertSnippet(snippet.content, snippet.isBlock);
+    }
+  }, []);
+
+  // プレビューリサイズハンドラ
+  const handlePreviewResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizeType.current = 'preview';
+    startPos.current = e.clientY;
+    startSize.current = previewHeight;
+    document.body.style.cursor = 'ns-resize';
+    document.body.style.userSelect = 'none';
+  }, [previewHeight]);
+
+  // 左ペインリサイズハンドラ
+  const handleLeftResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizeType.current = 'left';
+    startPos.current = e.clientX;
+    startSize.current = leftPanelWidth;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+  }, [leftPanelWidth]);
+
+  // 右ペインリサイズハンドラ
+  const handleRightResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizeType.current = 'right';
+    startPos.current = e.clientX;
+    startSize.current = rightPanelWidth;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+  }, [rightPanelWidth]);
+
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (!resizeType.current) return;
+
+      if (resizeType.current === 'preview') {
+        const delta = startPos.current - e.clientY;
+        const newHeight = Math.max(100, Math.min(window.innerHeight * 0.6, startSize.current + delta));
+        setPreviewHeight(newHeight);
+      } else if (resizeType.current === 'left') {
+        const delta = e.clientX - startPos.current;
+        const newWidth = Math.max(150, Math.min(400, startSize.current + delta));
+        setLeftPanelWidth(newWidth);
+      } else if (resizeType.current === 'right') {
+        // 右ペインは左に動かすと広がる
+        const delta = startPos.current - e.clientX;
+        const newWidth = Math.max(200, Math.min(500, startSize.current + delta));
+        setRightPanelWidth(newWidth);
+      }
+    };
+
+    const handleMouseUp = () => {
+      resizeType.current = null;
+      document.body.style.cursor = '';
+      document.body.style.userSelect = '';
+    };
+
+    document.addEventListener('mousemove', handleMouseMove);
+    document.addEventListener('mouseup', handleMouseUp);
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+    };
+  }, []);
+
+  // サイズ変更を保存（デバウンス付き）
+  useEffect(() => {
+    if (!initialized.current) return;
+    const timer = setTimeout(() => {
+      saveState({ previewHeight, leftPanelWidth, rightPanelWidth });
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [previewHeight, leftPanelWidth, rightPanelWidth]);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-[#1e1e1e] text-[#d4d4d4]">
+        Loading...
+      </div>
+    );
+  }
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+    <div className="flex flex-col h-screen bg-[#1e1e1e] text-[#d4d4d4]">
+      {/* Header */}
+      <header className="h-10 flex-shrink-0 bg-[#2d2d2d] flex items-center px-4 gap-4 border-b border-[#333]">
+        <h1 className="text-sm font-medium text-white">Image Prompt Builder</h1>
+        <span className="text-xs text-[#888]">
+          Ctrl+S: 保存
+        </span>
+        {isDirty && (
+          <span className="text-xs text-amber-400">● 未保存</span>
+        )}
+        {isSaving && (
+          <span className="text-xs text-blue-400">保存中...</span>
+        )}
+      </header>
+
+      {/* Main Area */}
+      <div className="flex-1 flex min-h-0">
+        {/* File Tree */}
+        <div
+          className="flex-shrink-0 bg-[#252526] border-r border-[#333]"
+          style={{ width: leftPanelWidth }}
+        >
+          <FileTree
+            items={fileTree}
+            selectedFile={selectedFile}
+            onSelectFile={handleFileSelect}
+            expandedFolders={expandedFolders}
+            onToggleFolder={handleToggleFolder}
+            onCreateFile={handleCreateFile}
+            onCreateFolder={handleCreateFolder}
+            onDeleteFile={handleDeleteFile}
+            onDeleteFolder={handleDeleteFolder}
+          />
+        </div>
+
+        {/* Left Resize Handle */}
+        <div
+          className="w-1 flex-shrink-0 bg-[#333] cursor-ew-resize hover:bg-[#007acc]"
+          onMouseDown={handleLeftResizeStart}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+
+        {/* Editor */}
+        <div className="flex-1 min-w-0 bg-[#1e1e1e]">
+          <YamlEditor
+            ref={yamlEditorRef}
+            value={currentContent}
+            onChange={handleEditorChange}
+            fileList={allFilePaths}
+            snippets={snippets}
+            dictionaryCache={dictionaryCache}
+          />
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+
+        {/* Right Resize Handle */}
+        <div
+          className="w-1 flex-shrink-0 bg-[#333] cursor-ew-resize hover:bg-[#007acc]"
+          onMouseDown={handleRightResizeStart}
+        />
+
+        {/* Snippets Panel */}
+        <div
+          className="flex-shrink-0 bg-[#252526] border-l border-[#333]"
+          style={{ width: rightPanelWidth }}
+        >
+          <SnippetPanel
+            onInsertSnippet={handleSnippetClick}
+            onSnippetsChange={setSnippets}
+          />
         </div>
-      </main>
+      </div>
+
+      {/* Preview Resize Handle */}
+      <div
+        className="h-[6px] flex-shrink-0 bg-[#333] cursor-ns-resize flex items-center justify-center hover:bg-[#007acc] relative z-10"
+        onMouseDown={handlePreviewResizeStart}
+      >
+        <div className="w-10 h-0.5 bg-[#666] rounded-sm" />
+      </div>
+
+      {/* Preview Panel */}
+      <div
+        className="flex-shrink-0 relative"
+        style={{ height: previewHeight }}
+      >
+        <PreviewPanel
+          mergedYaml={mergedYaml}
+          promptText={promptText}
+          lookName={lookName}
+          isYamlValid={isYamlValid}
+        />
+      </div>
     </div>
   );
 }

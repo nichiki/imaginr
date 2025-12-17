@@ -1,0 +1,50 @@
+# ========================================
+# SHOT 08-05 - Lingerie #5
+# ========================================
+
+shot:
+  look_id: "08"
+  shot_number: 5
+  name: "Lingerie - Silk Loungewear"
+
+fashion:
+  color_scheme: cream, champagne
+  outfit:
+    - type: silk camisole and shorts
+      color: cream or champagne
+      material: luxurious silk
+      details: elegant, loungewear style, relaxed luxury
+  styling_notes: silk loungewear, luxurious and elegant
+
+pose:
+  base: sitting curled
+  body:
+    torso: relaxed
+    legs: knees up, casual
+    arms: wrapped around knees or relaxed
+  camera_relation: three-quarter
+  emphasis: intimate but not sexual, comfortable elegance
+
+expression:
+  type: neutral direct
+  eyes:
+    direction: at camera
+    quality: calm, present
+  mouth: soft, relaxed
+  overall: intimate, real moment
+
+composition:
+  shot: full body
+  angle: eye level
+  framing: intimate, casual
+  distance: medium
+
+environment:
+  background: soft neutral, warm tones
+  atmosphere: intimate, luxurious
+
+lighting:
+  type: soft warm light
+  direction: soft side light
+  quality: gentle, flattering
+  color: warm golden

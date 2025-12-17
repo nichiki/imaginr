@@ -1,0 +1,135 @@
+# ========================================
+# LOOK 07 - Swimwear (Secret)
+# 水着エディトリアル
+# ========================================
+
+look:
+  id: "07"
+  name: "Summer"
+  concept: 水着、ファッションエディトリアル、モード
+  keywords:
+    - swimwear
+    - fashion editorial
+    - high fashion
+    - elegant
+    - not gravure
+    - sophisticated
+
+mood:
+  tone: sophisticated, cool, editorial
+  atmosphere: high fashion, magazine quality
+  poetry: 水着でもファッションモデルとして
+
+lighting:
+  key: dramatic or soft natural
+  type: studio lighting or natural light
+  direction: side light or backlight
+  shadow:
+    quality: defined or soft depending on shot
+    depth: medium
+  color: neutral or warm
+
+environment:
+  setting: studio or abstract
+  background: simple, clean, not beach scenery
+  atmosphere: editorial, minimalist
+
+color_palette:
+  primary: black, white, navy
+  secondary: cream, sand, silver
+  accent: minimal
+  saturation: controlled, sophisticated
+
+appearance:
+  makeup:
+    style: clean, natural, editorial
+    lips: nude or soft color
+    eyes: clean, defined but not heavy
+    skin: healthy glow, natural
+    brows: defined
+
+fashion_options:
+  - id: 1
+    description: 黒のワンピース水着
+    items:
+      - black one-piece swimsuit
+      - simple, elegant design
+    texture: matte or subtle shine
+  - id: 2
+    description: 白のビキニ
+    items:
+      - white bikini
+      - clean, minimal design
+    texture: clean, simple
+  - id: 3
+    description: デザイン性のあるカットアウト水着
+    items:
+      - black or white cutout swimsuit
+      - geometric design
+    texture: modern, architectural
+  - id: 4
+    description: ハイネック水着
+    items:
+      - high neck one-piece
+      - sporty elegant
+    texture: sleek, athletic
+  - id: 5
+    description: ベルト付きビキニ
+    items:
+      - bikini with belt detail
+      - fashion-forward design
+    texture: structured, editorial
+
+pose_options:
+  - id: 1
+    description: 直立、強い目線
+    base: standing straight
+    body: confident posture
+    emphasis: strong presence, not sexy pose
+  - id: 2
+    description: 腕を組んでクール
+    base: standing
+    body: arms crossed or at sides
+    emphasis: editorial attitude
+  - id: 3
+    description: 歩いている途中
+    base: walking
+    body: natural stride
+    emphasis: movement, confidence
+  - id: 4
+    description: 座り、膝を抱える
+    base: sitting
+    body: knees up, arms around legs
+    emphasis: artistic, not provocative
+  - id: 5
+    description: 後ろ姿、振り返り
+    base: standing back to camera
+    body: looking over shoulder
+    emphasis: silhouette, elegant
+
+expression_options:
+  - id: 1
+    description: クールで強い目線
+    type: cool confident
+    eyes: direct, strong
+    intensity: powerful
+  - id: 2
+    description: 無表情、モード
+    type: blank editorial
+    eyes: neutral, distant
+    intensity: detached
+  - id: 3
+    description: 少しだけ微笑み
+    type: subtle smile
+    eyes: warm but controlled
+    intensity: gentle
+  - id: 4
+    description: 横顔、遠くを見る
+    type: profile gaze
+    eyes: looking away
+    intensity: thoughtful
+  - id: 5
+    description: 目を閉じて静か
+    type: eyes closed
+    eyes: closed, peaceful
+    intensity: serene

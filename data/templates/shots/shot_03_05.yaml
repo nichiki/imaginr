@@ -1,0 +1,50 @@
+# ========================================
+# SHOT 03-05 - Ethereal Form #5
+# ========================================
+
+shot:
+  look_id: "03"
+  shot_number: 5
+  name: "Ethereal Form - Hooded Dream"
+
+fashion:
+  color_scheme: white
+  outfit:
+    - type: hooded dress or oversized hoodie dress
+      color: white
+      material: soft cotton or cashmere blend
+      details: loose silhouette, hood up or down, cozy yet elegant
+  styling_notes: soft, cozy, ethereal comfort
+
+pose:
+  base: walking slowly
+  action: gentle forward movement, fabric floating
+  body:
+    torso: relaxed, natural
+    legs: mid-stride, slow movement
+    arms: natural swing or hands hidden in sleeves
+  camera_relation: three-quarter view
+  emphasis: floating movement, dreamy walk
+
+expression:
+  type: dreamy
+  eyes:
+    direction: looking away, unfocused
+    quality: distant, otherworldly
+  mouth: soft, relaxed
+  overall: lost in dream
+
+composition:
+  shot: full body
+  angle: eye level
+  framing: movement space, ethereal
+  distance: full
+
+environment:
+  background: white studio, soft
+  atmosphere: dreamlike, floating
+
+lighting:
+  type: soft diffused light
+  direction: soft from side and behind
+  quality: glowing, soft edges

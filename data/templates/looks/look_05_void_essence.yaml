@@ -1,0 +1,141 @@
+# ========================================
+# LOOK 05 - Void Essence
+# アート、抽象的構図、身体を形として扱う
+# ========================================
+
+look:
+  id: "05"
+  name: "Void Essence"
+  concept: アート、抽象的構図、ミニマルアート
+  keywords:
+    - abstract art
+    - sculptural
+    - geometric
+    - minimalist art
+    - body as form
+    - gallery aesthetic
+
+mood:
+  tone: artistic, contemplative, sculptural
+  atmosphere: gallery, museum, art installation
+  poetry: 身体は形、空間はキャンバス
+
+lighting:
+  key: hard directional
+  type: hard light with strong shadows
+  direction: strong side light
+  shadow:
+    quality: sharp, defined
+    depth: deep, sculptural
+  color: neutral white, clean
+  quality: dramatic, form-defining
+
+environment:
+  setting: art gallery
+  background: white gallery wall with large abstract painting
+  atmosphere: museum, contemplative, artistic
+  props: abstract art on wall matching outfit color
+
+color_palette:
+  primary: muted, nuanced tones
+  shot_colors:
+    - mauve (dusty purple-pink)
+    - slate blue (blue-gray)
+    - sage (muted green)
+    - burnt umber (deep brown)
+    - dusty rose (muted pink)
+  saturation: muted, sophisticated
+
+appearance:
+  makeup:
+    style: artistic, editorial, sculptural
+    lips: muted tone matching outfit or nude
+    eyes: clean, minimal, focus on shape
+    skin: flawless, matte
+    brows: sharp, architectural
+
+fashion_options:
+  - id: 1
+    description: 幾何学カットのトップス
+    items:
+      - geometric cut top
+      - minimal bottom
+    texture: structured, architectural
+  - id: 2
+    description: 単色のロングドレープ
+    items:
+      - long draped fabric dress
+      - flowing sculptural silhouette
+    texture: fluid, artistic
+  - id: 3
+    description: アート的な不規則形の服
+    items:
+      - asymmetric artistic garment
+      - irregular shapes
+    texture: avant-garde, sculptural
+  - id: 4
+    description: 体に沿うミニマルなシルエット
+    items:
+      - minimal fitted dress
+      - clean lines
+    texture: smooth, body-conscious
+  - id: 5
+    description: シルエットを壊すオーバーサイズ構造
+    items:
+      - oversized structured garment
+      - volume and shape
+    texture: architectural, dramatic
+
+pose_options:
+  - id: 1
+    description: 胴体をひねって抽象的なラインを作る
+    base: standing twisted
+    body: torso rotation, abstract lines
+    emphasis: body as sculpture
+  - id: 2
+    description: 腕で幾何学的シルエットを形成
+    base: standing
+    body: arms creating geometric shapes
+    emphasis: angular silhouette
+  - id: 3
+    description: 顔を隠し"形"として扱う
+    base: standing or sitting
+    body: face obscured by arm or fabric
+    emphasis: anonymity, form over identity
+  - id: 4
+    description: 椅子や台を使い立体構図
+    base: sitting or leaning on pedestal
+    body: architectural pose with prop
+    emphasis: three-dimensional composition
+  - id: 5
+    description: あえて不自然なバランスの姿勢
+    base: standing unbalanced
+    body: unconventional weight distribution
+    emphasis: tension, artistic imbalance
+
+expression_options:
+  - id: 1
+    description: 表情は消し"オブジェ"として存在
+    type: blank object
+    eyes: empty, unfocused
+    intensity: neutral, sculpture-like
+  - id: 2
+    description: 目線は下に落として匿名性
+    type: downcast anonymous
+    eyes: looking down
+    intensity: withdrawn
+  - id: 3
+    description: 顔をカメラ外へ向ける
+    type: averted gaze
+    eyes: looking away from camera
+    intensity: mysterious
+  - id: 4
+    description: 中性的で抽象的なmood
+    type: androgynous abstract
+    eyes: neutral, ambiguous
+    intensity: undefined
+  - id: 5
+    description: わずかに緊張感のあるblank face
+    type: tense blank
+    eyes: still but alert
+    intensity: subtle tension

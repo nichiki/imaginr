@@ -1,0 +1,53 @@
+# ========================================
+# SHOT 03-02 - Ethereal Form #2
+# ========================================
+
+shot:
+  look_id: "03"
+  shot_number: 2
+  name: "Ethereal Form - Cream Flow"
+
+fashion:
+  color_scheme: cream, white
+  outfit:
+    - type: wide-leg pants
+      color: cream
+      material: flowing fabric
+      details: high-waisted, very wide leg, fluid drape
+    - type: sheer top
+      color: white
+      material: organza or sheer silk
+      details: delicate, slightly transparent, elegant neckline
+  styling_notes: tonal cream and white, flowing silhouette
+
+pose:
+  base: standing
+  body:
+    torso: elegant posture
+    legs: wide pants creating soft shape
+    arms: hands gently at chest level, soft gesture
+  camera_relation: front-facing, slight angle
+  emphasis: soft hand gesture, fabric flow
+
+expression:
+  type: innocent
+  eyes:
+    direction: toward camera
+    quality: open, pure, gentle
+  mouth: slightly parted, soft
+  overall: calm innocence
+
+composition:
+  shot: three-quarter to full body
+  angle: eye level
+  framing: centered, soft
+  distance: medium-full
+
+environment:
+  background: white studio, soft
+  atmosphere: airy, pure
+
+lighting:
+  type: soft diffused light
+  direction: soft from side, wraparound
+  quality: even, glowing

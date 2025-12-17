@@ -1,0 +1,73 @@
+# ========================================
+# SHOT 02-05 - Urban Poetry #5
+# ========================================
+# モノトーン + オレンジ
+
+shot:
+  look_id: "02"
+  shot_number: 5
+  name: "Urban Poetry - Orange Accent"
+
+fashion:
+  color_scheme: monochrome with orange accent
+  outfit:
+    - type: sleeveless top
+      color: black
+      material: silk
+      details: elegant neckline, fitted
+    - type: wide-leg trousers
+      color: charcoal gray
+      material: wool blend
+      details: high-waisted, flowing
+    - type: statement earrings
+      color: bright orange
+      material: resin or enamel
+      details: bold geometric shape - KEY ACCENT COLOR
+    - type: heels
+      color: black
+      material: leather
+      details: strappy or simple pump
+  styling_notes: sleek dark tones, orange earrings as focal point
+
+accent_color:
+  color: bright orange
+  placement: statement earrings
+  effect: vibrant pop near face
+
+appearance:
+  makeup:
+    lips: orange-red or coral lip
+    eyes: defined, warm tones
+    skin: glowing, warm
+
+pose:
+  base: standing
+  direction: back to camera, looking over shoulder
+  body:
+    torso: slight twist, elegant back visible
+    legs: together, elongated
+    arms: relaxed at sides
+  camera_relation: back view with face in profile
+  emphasis: elegant back, earring visible
+
+expression:
+  type: subtle smile
+  eyes:
+    direction: toward camera over shoulder
+    quality: warm, inviting
+  mouth: soft smile
+  overall: approachable glamour
+
+composition:
+  shot: three-quarter to full body
+  angle: eye level
+  framing: elegant, back featured
+  distance: medium-full
+
+environment:
+  background: white or light gray studio
+
+lighting:
+  type: soft studio light
+  direction: side light to highlight silhouette
+  quality: warm, flattering

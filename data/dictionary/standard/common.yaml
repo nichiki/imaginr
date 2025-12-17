@@ -1,0 +1,85 @@
+# 汎用辞書 - どのコンテキストでも使える共通エントリ
+
+entries:
+  # color - 汎用色
+  - key: color
+    context: "*"
+    values:
+      - value: black
+        label: black (黒)
+      - value: white
+        label: white (白)
+      - value: red
+        label: red (赤)
+      - value: blue
+        label: blue (青)
+      - value: deep blue
+        label: deep blue (深い青)
+      - value: navy
+        label: navy (紺)
+      - value: green
+        label: green (緑)
+      - value: yellow
+        label: yellow (黄)
+      - value: orange
+        label: orange (オレンジ)
+      - value: purple
+        label: purple (紫)
+      - value: pink
+        label: pink (ピンク)
+      - value: brown
+        label: brown (茶)
+      - value: gray
+        label: gray (グレー)
+      - value: beige
+        label: beige (ベージュ)
+      - value: cream
+        label: cream (クリーム)
+      - value: gold
+        label: gold (ゴールド)
+      - value: silver
+        label: silver (シルバー)
+      - value: matte black
+        label: matte black (マットブラック)
+
+  # direction - 汎用方向
+  - key: direction
+    context: "*"
+    values:
+      - value: frontal
+        label: frontal (正面)
+      - value: profile
+        label: profile (横顔)
+      - value: three-quarter
+        label: three-quarter (斜め)
+      - value: back
+        label: back (後ろ)
+      - value: side
+        label: side (横)
+      - value: top
+        label: top (上から)
+      - value: low angle
+        label: low angle (下から)
+
+  # quality - 汎用品質表現
+  - key: quality
+    context: "*"
+    values:
+      - value: soft
+        label: soft (柔らかい)
+      - value: sharp
+        label: sharp (シャープ)
+      - value: smooth
+        label: smooth (滑らか)
+      - value: rough
+        label: rough (粗い)
+      - value: glossy
+        label: glossy (光沢)
+      - value: matte
+        label: matte (マット)
+      - value: subtle
+        label: subtle (控えめ)
+      - value: strong
+        label: strong (強い)
+      - value: minimal
+        label: minimal (最小限)

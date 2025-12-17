@@ -1,0 +1,50 @@
+# ========================================
+# SHOT 06-01 - Silent Echo #1
+# ========================================
+
+shot:
+  look_id: "06"
+  shot_number: 1
+  name: "Silent Echo - Gray Stillness"
+
+fashion:
+  color_scheme: white, beige
+  outfit:
+    - type: linen wide leg pants
+      color: natural beige
+      material: lightweight linen
+      details: high waisted, flowing, breathable
+    - type: simple tank top
+      color: white
+      material: fine cotton
+      details: minimal, clean neckline
+  styling_notes: spring summer linen, light and airy
+  footwear: barefoot
+
+pose:
+  base: standing still
+  body:
+    torso: relaxed, natural
+    legs: together, grounded
+    arms: hands gently clasped in front
+  camera_relation: front-facing
+  emphasis: quiet presence, stillness
+
+expression:
+  type: peaceful neutral
+  eyes:
+    direction: soft gaze to camera
+    quality: calm, gentle
+  mouth: relaxed, soft
+  overall: serene presence
+
+environment:
+  background: vast empty room, wood floor, white walls
+  space: very wide empty room, vast negative space, model small in frame
+  light_source: soft natural daylight
+
+lighting:
+  type: soft diffused natural light
+  direction: soft side light
+  quality: gentle, warm, peaceful
+  color: natural daylight, warm tone

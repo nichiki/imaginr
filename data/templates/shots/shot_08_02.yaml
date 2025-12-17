@@ -1,0 +1,50 @@
+# ========================================
+# SHOT 08-02 - Lingerie #2
+# ========================================
+
+shot:
+  look_id: "08"
+  shot_number: 2
+  name: "Lingerie - White Lace"
+
+fashion:
+  color_scheme: white
+  outfit:
+    - type: lace lingerie set
+      color: white
+      material: delicate lace, not see-through, lined
+      details: feminine, delicate, elegant, not revealing
+  styling_notes: white lace, bridal elegance, fully lined
+
+pose:
+  base: sitting
+  body:
+    torso: upright
+    legs: crossed elegantly
+    arms: hands on knee or relaxed
+  camera_relation: three-quarter
+  emphasis: elegant sitting pose, editorial
+
+expression:
+  type: introspective
+  eyes:
+    direction: looking down
+    quality: thoughtful, soft
+  mouth: relaxed
+  overall: intimate but not sexual, artistic
+
+composition:
+  shot: full body
+  angle: eye level or slightly above
+  framing: intimate, artistic
+  distance: medium
+
+environment:
+  background: bright, soft white or cream
+  atmosphere: soft, dreamy
+
+lighting:
+  type: soft natural style
+  direction: soft front-side
+  quality: gentle, flattering
+  color: warm white

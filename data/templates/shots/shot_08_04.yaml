@@ -1,0 +1,51 @@
+# ========================================
+# SHOT 08-04 - Lingerie #4
+# ========================================
+
+shot:
+  look_id: "08"
+  shot_number: 4
+  name: "Lingerie - Back View"
+
+fashion:
+  color_scheme: gray
+  outfit:
+    - type: lace lingerie set
+      color: gray, charcoal gray
+      material: delicate lace
+      details: lace bra and panties, elegant, feminine
+  styling_notes: gray lace lingerie, sophisticated and editorial
+
+pose:
+  base: back to camera
+  body:
+    torso: back visible
+    legs: natural stance
+    arms: relaxed
+    head: slight turn, profile visible
+  camera_relation: from behind
+  emphasis: back silhouette, elegant lines
+
+expression:
+  type: peaceful closed
+  eyes:
+    direction: closed or profile
+    quality: serene
+  mouth: relaxed
+  overall: peaceful, artistic
+
+composition:
+  shot: full body or three-quarter
+  angle: from behind
+  framing: back as subject
+  distance: medium-full
+
+environment:
+  background: dark studio
+  atmosphere: intimate, dramatic
+
+lighting:
+  type: dramatic backlight
+  direction: light from front, defining back edges
+  quality: rim light on silhouette
+  color: neutral

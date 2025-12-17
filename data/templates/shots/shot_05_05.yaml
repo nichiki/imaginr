@@ -1,0 +1,52 @@
+# ========================================
+# SHOT 05-05 - Void Essence #5
+# ========================================
+
+shot:
+  look_id: "05"
+  shot_number: 5
+  name: "Void Essence - Dusty Rose Volume"
+
+fashion:
+  color_scheme: dusty rose, muted pink
+  outfit:
+    - type: oversized structured coat or jacket
+      color: dusty rose
+      material: wool or felt, stiff
+      details: dramatic volume, cocoon shape, architectural shoulders
+    - type: simple base layer
+      color: dusty rose or nude
+      material: minimal
+      details: hidden under volume
+    - type: pointed toe boots
+      color: dusty rose or nude
+      material: leather
+      details: sleek, ankle height
+  styling_notes: monochromatic dusty rose, volume and shape as statement
+
+pose:
+  base: standing
+  body:
+    torso: wrapped in volume, shape dominant
+    legs: planted, grounded
+    arms: hidden in coat or creating shape with fabric
+  camera_relation: front-facing
+  emphasis: silhouette, architectural volume, shape over body
+
+expression:
+  type: androgynous abstract
+  eyes:
+    direction: direct to camera
+    quality: neutral, ambiguous, unreadable
+  mouth: closed, soft
+  overall: ambiguous presence, form dominant
+
+environment:
+  background: white gallery wall with large dusty rose abstract painting
+  props: soft pink color field or minimalist abstract art
+
+lighting:
+  type: hard directional
+  direction: strong side light
+  quality: dramatic shadow from volume of coat
+  color: neutral white, slightly warm

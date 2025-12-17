@@ -1,0 +1,63 @@
+# background関連の辞書
+
+entries:
+  # background.type - 背景タイプ
+  - key: type
+    context: background
+    values:
+      - value: studio
+        label: studio (スタジオ)
+      - value: outdoor
+        label: outdoor (屋外)
+      - value: indoor
+        label: indoor (屋内)
+      - value: abstract
+        label: abstract (抽象)
+      - value: gradient
+        label: gradient (グラデーション)
+      - value: solid
+        label: solid (単色)
+      - value: textured
+        label: textured (テクスチャ)
+      - value: environmental
+        label: environmental (環境)
+      - value: seamless
+        label: seamless (シームレス)
+
+  # background.style - 背景スタイル
+  - key: style
+    context: background
+    values:
+      - value: minimal
+        label: minimal (ミニマル)
+      - value: detailed
+        label: detailed (詳細)
+      - value: blurred
+        label: blurred (ぼかし)
+      - value: sharp
+        label: sharp (シャープ)
+      - value: dark
+        label: dark (暗い)
+      - value: bright
+        label: bright (明るい)
+      - value: moody
+        label: moody (ムーディー)
+      - value: clean
+        label: clean (クリーン)
+
+  # background.elements - 背景要素
+  - key: elements
+    context: background
+    values:
+      - value: none
+        label: none (なし)
+      - value: subtle patterns
+        label: subtle patterns (控えめなパターン)
+      - value: architectural
+        label: architectural (建築的)
+      - value: natural
+        label: natural (自然)
+      - value: urban
+        label: urban (都市)
+      - value: industrial
+        label: industrial (インダストリアル)

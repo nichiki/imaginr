@@ -1,0 +1,105 @@
+# ========================================
+# HERO IMAGE - Music Page
+# スタジオ収録、ムーディ
+# ========================================
+
+meta:
+  style: realistic
+  genre: music studio portrait
+  aesthetic:
+    - recording artist
+    - studio session
+    - moody atmospheric
+
+subject:
+  type: human
+  role: recording artist, singer
+  sex: female
+  age: young adult
+  ethnicity: japanese
+
+appearance:
+  face:
+    eyes:
+      color: brown
+      shape: natural
+  hair:
+    style: straight
+    length: long
+    color: chestnut brown
+    texture: silky, natural flow
+  body:
+    build: slim
+  skin:
+    texture: natural, soft
+    tone: fair, warm undertone
+  makeup:
+    style: natural, subtle
+    lips: natural
+    eyes: minimal
+    skin: natural glow
+
+fashion:
+  color_scheme: dark, muted
+  outfit:
+    - type: casual studio wear
+      color: black or dark gray
+      material: comfortable fabric
+      details: simple, artist vibe
+  accessories:
+    - type: studio headphones
+      color: black or silver
+      details: over-ear, professional style
+  styling_notes: recording artist in studio session
+
+pose:
+  base: standing or sitting at microphone
+  body:
+    torso: slightly leaning forward, engaged
+    arms: natural, possibly touching headphones
+  camera_relation: profile or three-quarter
+  emphasis: concentration, musical moment
+
+expression:
+  type: focused concentration
+  eyes:
+    direction: closed or looking slightly upward, feeling the music
+    quality: concentrated, emotional, inspired
+  mouth: slightly open as if singing
+  chin: slightly lifted upward
+  overall: lost in music, passionate, feeling the high note
+
+composition:
+  shot: upper body or portrait
+  angle: side profile or diagonal
+  framing: cinematic, moody
+  distance: medium close
+
+environment:
+  background: dark recording studio
+  atmosphere: moody, professional studio
+  elements:
+    - studio condenser microphone on mic stand with boom arm
+    - pop filter attached to mic stand with gooseneck arm
+    - recording equipment blurred in background
+    - dim ambient studio lights
+
+lighting:
+  type: moody studio lighting
+  direction: side light, dramatic
+  quality: low key, high contrast
+  color: warm accent with cool shadows
+
+quality:
+  rendering: photorealistic
+  details:
+    - cinematic quality
+    - moody atmosphere
+    - high contrast
+    - monochrome or desaturated
+
+effects:
+  color_grade:
+    style: black and white or high contrast monochrome
+    contrast: high
+    saturation: desaturated or monochrome

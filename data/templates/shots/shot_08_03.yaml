@@ -1,0 +1,50 @@
+# ========================================
+# SHOT 08-03 - Lingerie #3
+# ========================================
+
+shot:
+  look_id: "08"
+  shot_number: 3
+  name: "Lingerie - Nude Bodysuit"
+
+fashion:
+  color_scheme: black or nude
+  outfit:
+    - type: bustier or corset
+      color: black or nude
+      material: structured fabric, satin or lace
+      details: boned structure, elegant, vintage-inspired, with matching shorts or briefs
+  styling_notes: structured bustier, elegant lingerie editorial
+
+pose:
+  base: standing
+  body:
+    torso: slight twist
+    legs: elegant stance
+    arms: artistic position, framing body
+  camera_relation: three-quarter
+  emphasis: body as art, sculptural
+
+expression:
+  type: distant gaze
+  eyes:
+    direction: looking away, far
+    quality: dreamy, otherworldly
+  mouth: slightly parted, relaxed
+  overall: artistic, ethereal
+
+composition:
+  shot: full body
+  angle: eye level
+  framing: sculptural, body as form
+  distance: full
+
+environment:
+  background: neutral studio, warm gray or beige
+  atmosphere: artistic, minimal
+
+lighting:
+  type: sculptural studio
+  direction: side light, defining form
+  quality: shadows defining body contours
+  color: warm neutral

@@ -1,0 +1,46 @@
+# ========================================
+# SHOT 06-05 - Silent Echo #5
+# ========================================
+
+shot:
+  look_id: "06"
+  shot_number: 5
+  name: "Silent Echo - Cream Silence"
+
+fashion:
+  color_scheme: baby blue, pale blue
+  outfit:
+    - type: simple linen dress
+      color: baby blue, pale sky blue
+      material: lightweight linen
+      details: sleeveless, A-line, knee length, minimal, clean
+  styling_notes: soft blue like sky, calm and peaceful
+  footwear: barefoot
+
+pose:
+  base: standing, eyes closed
+  body:
+    torso: still, breathing
+    legs: together, stable
+    arms: relaxed at sides
+  camera_relation: front or slight angle
+  emphasis: frozen moment, timeless stillness
+
+expression:
+  type: frozen moment
+  eyes:
+    direction: closed
+    quality: peaceful, inner world
+  mouth: soft, gentle
+  overall: complete stillness, moment suspended
+
+environment:
+  background: vast empty room, wood floor, white walls
+  space: vast empty room flooded with soft light, model distant in space
+  light_source: large soft light source, window
+
+lighting:
+  type: soft bright natural light
+  direction: front-side, enveloping
+  quality: high key, soft, dreamy
+  color: warm white, golden hour feel

@@ -1,0 +1,73 @@
+# ========================================
+# SHOT 02-02 - Urban Poetry #2
+# ========================================
+# モノトーン + 青
+
+shot:
+  look_id: "02"
+  shot_number: 2
+  name: "Urban Poetry - Blue Accent"
+
+fashion:
+  color_scheme: monochrome with blue accent
+  outfit:
+    - type: oversized coat
+      color: charcoal gray
+      material: wool
+      details: long, minimalist cut
+    - type: turtleneck
+      color: black
+      material: cashmere
+      details: fitted
+    - type: wide trousers
+      color: black
+      material: wool blend
+      details: high-waisted, flowing
+    - type: scarf
+      color: cobalt blue
+      material: silk
+      details: draped elegantly - KEY ACCENT COLOR
+  styling_notes: layered monochrome, blue scarf as focal point
+
+accent_color:
+  color: cobalt blue
+  placement: silk scarf
+  effect: elegant color pop against dark tones
+
+appearance:
+  makeup:
+    lips: nude or soft berry
+    eyes: defined, cool tones
+    skin: flawless, natural
+
+pose:
+  base: sitting on chair
+  body:
+    torso: elegant, slight lean back
+    legs: crossed elegantly
+    arms: one hand adjusting scarf
+  camera_relation: three-quarter view
+  emphasis: seated sophistication, scarf visible
+
+expression:
+  type: mysterious
+  eyes:
+    direction: slightly off camera
+    quality: knowing, intriguing
+  mouth: closed, subtle
+  overall: quiet intrigue
+
+composition:
+  shot: three-quarter to full
+  angle: eye level
+  framing: chair and figure
+  distance: medium-full
+
+environment:
+  background: minimal interior, gray wall or white studio
+  props: simple modern chair
+
+lighting:
+  type: soft studio light
+  direction: side light, soft shadows
+  quality: moody but clean

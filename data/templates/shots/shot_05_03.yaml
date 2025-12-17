@@ -1,0 +1,52 @@
+# ========================================
+# SHOT 05-03 - Void Essence #3
+# ========================================
+
+shot:
+  look_id: "05"
+  shot_number: 3
+  name: "Void Essence - Sage Structure"
+
+fashion:
+  color_scheme: sage, muted green
+  outfit:
+    - type: avant-garde asymmetric top
+      color: sage green
+      material: structured cotton or wool
+      details: irregular shape, one shoulder, artistic cut
+    - type: sculptural skirt
+      color: sage green, matching
+      material: stiff fabric
+      details: architectural volume, A-line or bubble shape
+    - type: ankle boots
+      color: sage or olive
+      material: suede or leather
+      details: minimal, chunky heel
+  styling_notes: monochromatic sage, architectural silhouette
+
+pose:
+  base: sitting on white pedestal or cube
+  body:
+    torso: upright, angular
+    legs: one extended, one bent
+    arms: face partially hidden by hand or arm
+  camera_relation: three-quarter
+  emphasis: form over identity, sculptural composition
+
+expression:
+  type: averted gaze
+  eyes:
+    direction: looking away from camera
+    quality: mysterious, distant
+  mouth: neutral
+  overall: anonymous, face partially obscured
+
+environment:
+  background: white gallery wall with large sage green abstract painting
+  props: minimalist color field painting in muted green tones, white pedestal
+
+lighting:
+  type: hard directional
+  direction: overhead with side fill
+  quality: sculptural, defined shadows
+  color: neutral white

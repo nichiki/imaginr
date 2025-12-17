@@ -1,0 +1,57 @@
+# ========================================
+# SHOT 01-03 - Midnight Silhouette #3
+# ========================================
+# 服装3 × ポーズ3 × 表情3
+
+shot:
+  look_id: "01"
+  shot_number: 3
+  name: "Midnight Silhouette - Looking Back"
+
+# 服装選択: LBD (Little Black Dress)
+fashion:
+  color_scheme: black monochrome
+  outfit:
+    - type: little black dress
+      color: black
+      material: elegant matte crepe
+      details: sleeveless, fitted bodice, knee-length or slightly above, classic silhouette
+    - type: heels
+      color: black
+      material: leather
+      details: simple pumps
+  styling_notes: timeless LBD elegance, minimal accessories
+
+# ポーズ選択: パターン3
+pose:
+  base: standing
+  direction: back turned to camera
+  action: looking over shoulder
+  body:
+    torso: back facing camera, slight twist at waist
+    legs: natural stance, one foot slightly ahead
+    arms: relaxed at sides
+  camera_relation: back view with face in profile
+  emphasis: back silhouette, partial face reveal
+
+# 表情選択: パターン3
+expression:
+  type: thoughtful
+  eyes:
+    direction: looking over shoulder toward camera
+    quality: focused but soft, calm intensity
+  mouth: closed, neutral
+  overall: introspective mystery
+
+# 構図（このショット固有）
+composition:
+  shot: three-quarter to full body
+  angle: slightly low angle
+  framing: centered, symmetrical negative space
+  distance: medium
+
+# ライティング微調整
+lighting:
+  direction: from camera-left front
+  rim_light: strong on back and shoulder edge
+  face: side-lit from the turn, dramatic

@@ -1,0 +1,144 @@
+# ========================================
+# LOOK 06 - Silent Echo
+# ニュートラル、静寂、和モダン
+# ========================================
+
+look:
+  id: "06"
+  name: "Silent Echo"
+  concept: 静寂、余白の美、和モダン
+  keywords:
+    - silence
+    - stillness
+    - japanese modern
+    - minimalism
+    - poetic presence
+    - ma (negative space)
+
+mood:
+  tone: quiet, contemplative, serene
+  atmosphere: japanese modern, zen, meditative
+  poetry: 静けさだけが響く空間
+
+lighting:
+  key: soft natural
+  type: soft diffused natural light
+  direction: side light, gentle
+  shadow:
+    quality: soft, delicate
+    depth: subtle
+  color: warm natural, soft daylight
+  quality: gentle, peaceful
+
+environment:
+  setting: minimal empty space
+  background: simple wood floor, white walls, vast empty room
+  atmosphere: zen, minimalist, quiet
+  elements:
+    - natural wood floor
+    - white walls
+    - vast negative space
+    - nothing else
+
+color_palette:
+  primary: pastels and neutrals
+  colors:
+    - white
+    - beige
+    - lavender
+    - mint green
+    - pale yellow
+    - baby blue
+  saturation: soft pastels, spring summer
+
+appearance:
+  makeup:
+    style: natural, barely there
+    lips: nude, natural
+    eyes: minimal, soft
+    skin: natural glow, dewy
+    brows: natural, soft
+
+fashion_options:
+  - id: 1
+    description: 白タンク + ベージュリネンパンツ
+    items:
+      - white tank top
+      - beige linen wide pants
+    texture: lightweight linen, summer
+  - id: 2
+    description: ラベンダーシルクスリップドレス
+    items:
+      - lavender silk slip dress
+    texture: lightweight silk, summer
+  - id: 3
+    description: ミントグリーンシャツ + 白ショーパン
+    items:
+      - mint green oversized linen shirt
+      - white linen shorts
+    texture: lightweight linen, summer
+  - id: 4
+    description: ペールイエローマキシスカート + 白キャミ
+    items:
+      - pale yellow linen maxi skirt
+      - white camisole
+    texture: lightweight linen, summer
+  - id: 5
+    description: ベビーブルーリネンワンピ
+    items:
+      - baby blue linen dress
+    texture: lightweight linen, summer
+
+pose_options:
+  - id: 1
+    description: 手を静かに組み、佇む
+    base: standing still
+    body: hands gently clasped
+    emphasis: quiet presence
+  - id: 2
+    description: 少しだけ上を向き祈りのように
+    base: standing
+    body: chin slightly up
+    emphasis: contemplative, prayer-like
+  - id: 3
+    description: 背筋は伸ばすが緊張しない立ち方
+    base: standing relaxed
+    body: good posture, no tension
+    emphasis: natural elegance
+  - id: 4
+    description: 床に座り柔らかい重心
+    base: sitting on floor
+    body: relaxed, grounded
+    emphasis: connection to space
+  - id: 5
+    description: 目を閉じ静かに呼吸しているような
+    base: standing or sitting
+    body: still, meditative
+    emphasis: inner peace
+
+expression_options:
+  - id: 1
+    description: 穏やかな無表情
+    type: peaceful neutral
+    eyes: calm, soft
+    intensity: gentle
+  - id: 2
+    description: わずかな安堵の気配
+    type: subtle relief
+    eyes: relaxed
+    intensity: tender
+  - id: 3
+    description: 呼吸だけが聞こえるような柔らかさ
+    type: breathing stillness
+    eyes: soft, present
+    intensity: meditative
+  - id: 4
+    description: まぶたを半分だけ落とした静けさ
+    type: half-lidded calm
+    eyes: slightly closed
+    intensity: dreamy
+  - id: 5
+    description: 瞬間が止まったようなneutral calm
+    type: frozen moment
+    eyes: still, timeless
+    intensity: eternal

@@ -1,0 +1,78 @@
+# expression関連の辞書
+
+entries:
+  # expression.type - 表情タイプ
+  - key: type
+    context: expression
+    values:
+      - value: neutral
+        label: neutral (無表情)
+      - value: neutral cool
+        label: neutral cool (クールな無表情)
+      - value: thoughtful
+        label: thoughtful (思索的)
+      - value: confident
+        label: confident (自信)
+      - value: mysterious
+        label: mysterious (ミステリアス)
+      - value: serene
+        label: serene (穏やか)
+      - value: intense
+        label: intense (強烈)
+      - value: subtle smile
+        label: subtle smile (微笑)
+      - value: contemplative
+        label: contemplative (瞑想的)
+      - value: determined
+        label: determined (決意)
+
+  # eyes.direction - 目の方向
+  - key: direction
+    context: eyes
+    values:
+      - value: forward
+        label: forward (正面)
+      - value: camera
+        label: camera (カメラ目線)
+      - value: slightly averted
+        label: slightly averted (少し逸らす)
+      - value: downward
+        label: downward (下向き)
+      - value: upward
+        label: upward (上向き)
+      - value: distant
+        label: distant (遠くを見る)
+      - value: closed
+        label: closed (閉じた)
+
+  # eyes.quality - 目の質感
+  - key: quality
+    context: eyes
+    values:
+      - value: calm, distant
+        label: calm, distant (穏やか、遠い)
+      - value: focused but soft
+        label: focused but soft (集中、ソフト)
+      - value: sharp
+        label: sharp (鋭い)
+      - value: dreamy
+        label: dreamy (夢見がち)
+      - value: piercing
+        label: piercing (射抜く)
+      - value: warm
+        label: warm (温かい)
+
+  # mouth - 口
+  - key: mouth
+    context: expression
+    values:
+      - value: closed, relaxed
+        label: closed, relaxed (閉じてリラックス)
+      - value: slightly parted
+        label: slightly parted (少し開いた)
+      - value: subtle smile
+        label: subtle smile (微笑)
+      - value: pursed
+        label: pursed (すぼめた)
+      - value: open
+        label: open (開いた)

@@ -1,0 +1,89 @@
+# lighting関連の辞書
+
+entries:
+  # lighting.key - キーライト
+  - key: key
+    context: lighting
+    values:
+      - value: low-key
+        label: low-key (暗め)
+      - value: high-key
+        label: high-key (明るめ)
+      - value: natural
+        label: natural (自然光)
+      - value: dramatic
+        label: dramatic (ドラマチック)
+      - value: soft
+        label: soft (ソフト)
+      - value: harsh
+        label: harsh (ハード)
+
+  # lighting.type - ライトタイプ
+  - key: type
+    context: lighting
+    values:
+      - value: soft diffused light
+        label: soft diffused light (ソフト拡散光)
+      - value: directional diffused soft light
+        label: directional diffused soft light (指向性ソフト光)
+      - value: hard directional light
+        label: hard directional light (ハード指向性光)
+      - value: rim light
+        label: rim light (リムライト)
+      - value: backlight
+        label: backlight (バックライト)
+      - value: ambient light
+        label: ambient light (環境光)
+      - value: spotlight
+        label: spotlight (スポットライト)
+      - value: natural daylight
+        label: natural daylight (自然光)
+      - value: golden hour
+        label: golden hour (ゴールデンアワー)
+      - value: blue hour
+        label: blue hour (ブルーアワー)
+
+  # lighting.color - ライト色
+  - key: color
+    context: lighting
+    values:
+      - value: warm white
+        label: warm white (暖白色)
+      - value: cool white
+        label: cool white (冷白色)
+      - value: neutral
+        label: neutral (ニュートラル)
+      - value: golden
+        label: golden (ゴールデン)
+      - value: amber
+        label: amber (アンバー)
+      - value: cyan
+        label: cyan (シアン)
+      - value: magenta
+        label: magenta (マゼンタ)
+
+  # shadow.quality - 影の品質
+  - key: quality
+    context: shadow
+    values:
+      - value: soft, present
+        label: soft, present (ソフト、存在感あり)
+      - value: hard, defined
+        label: hard, defined (ハード、明確)
+      - value: minimal
+        label: minimal (最小限)
+      - value: deep
+        label: deep (深い)
+      - value: subtle
+        label: subtle (控えめ)
+
+  # shadow.depth - 影の深さ
+  - key: depth
+    context: shadow
+    values:
+      - value: deep
+        label: deep (深い)
+      - value: shallow
+        label: shallow (浅い)
+      - value: moderate
+        label: moderate (中程度)
