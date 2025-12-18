@@ -134,23 +134,24 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
     onInsertSnippet(snippet);
   };
 
-  // 新規作成
-  const handleCreate = () => {
-    // デフォルトカテゴリを設定（既存があれば最初のもの、なければcustom）
-    const defaultCategory = existingCategories.length > 0 ? existingCategories[0] : 'custom';
+  // 新規作成（カテゴリ指定可能）
+  const handleCreate = useCallback((presetCategory?: string) => {
+    // プリセットカテゴリがあればそれを使用、なければデフォルト
+    const category = presetCategory || (existingCategories.length > 0 ? existingCategories[0] : 'custom');
     setEditingSnippet({
       id: '',
-      category: defaultCategory,
+      category,
       key: 'custom',
       label: '',
       description: '',
       content: '',
     });
     setIsCreating(true);
-    setIsNewCategory(existingCategories.length === 0);
-    setNewCategoryName(existingCategories.length === 0 ? 'custom' : '');
+    // プリセットがある場合は新規カテゴリモードにしない
+    setIsNewCategory(!presetCategory && existingCategories.length === 0);
+    setNewCategoryName(!presetCategory && existingCategories.length === 0 ? 'custom' : '');
     setEditDialogOpen(true);
-  };
+  }, [existingCategories]);
 
   // カテゴリ選択ハンドラ
   const handleCategoryChange = (value: string) => {
@@ -216,7 +217,7 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
       <div className="px-4 py-2 text-xs uppercase text-[#888] font-medium flex items-center justify-between">
         <span>Snippets</span>
         <button
-          onClick={handleCreate}
+          onClick={() => handleCreate()}
           className="p-0.5 hover:bg-[#3c3c3c] rounded"
           title="New Snippet"
         >
@@ -254,6 +255,7 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
                 onSnippetClick={handleClick}
                 onSnippetDoubleClick={handleDoubleClick}
                 onSnippetDelete={handleDelete}
+                onCreateInCategory={handleCreate}
               />
             ))
           )}
@@ -396,6 +398,7 @@ interface CategoryNodeViewProps {
   onSnippetClick: (snippet: Snippet) => void;
   onSnippetDoubleClick: (snippet: Snippet) => void;
   onSnippetDelete: (snippet: Snippet) => void;
+  onCreateInCategory: (category: string) => void;
 }
 
 function CategoryNodeView({
@@ -407,6 +410,7 @@ function CategoryNodeView({
   onSnippetClick,
   onSnippetDoubleClick,
   onSnippetDelete,
+  onCreateInCategory,
 }: CategoryNodeViewProps) {
   const isExpanded = expandedCategories.has(node.path);
   const paddingLeft = depth * 12 + 8;
@@ -440,19 +444,32 @@ function CategoryNodeView({
 
   return (
     <div className="mb-1">
-      <div
-        className="flex items-center gap-1 py-1 px-2 text-sm text-[#cccccc] cursor-pointer hover:bg-[#2a2d2e] rounded-sm"
-        style={{ paddingLeft }}
-        onClick={() => toggleCategory(node.path)}
-      >
-        <ChevronRight
-          className={cn(
-            'h-3.5 w-3.5 transition-transform',
-            isExpanded && 'rotate-90'
-          )}
-        />
-        {node.name}
-      </div>
+      <ContextMenu>
+        <ContextMenuTrigger>
+          <div
+            className="flex items-center gap-1 py-1 px-2 text-sm text-[#cccccc] cursor-pointer hover:bg-[#2a2d2e] rounded-sm"
+            style={{ paddingLeft }}
+            onClick={() => toggleCategory(node.path)}
+          >
+            <ChevronRight
+              className={cn(
+                'h-3.5 w-3.5 transition-transform',
+                isExpanded && 'rotate-90'
+              )}
+            />
+            {node.name}
+          </div>
+        </ContextMenuTrigger>
+        <ContextMenuContent className="bg-[#252526] border-[#333]">
+          <ContextMenuItem
+            onClick={() => onCreateInCategory(node.path)}
+            className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            New Snippet
+          </ContextMenuItem>
+        </ContextMenuContent>
+      </ContextMenu>
       {isExpanded && (
         <>
           {/* スニペット */}
@@ -509,6 +526,7 @@ function CategoryNodeView({
               onSnippetClick={onSnippetClick}
               onSnippetDoubleClick={onSnippetDoubleClick}
               onSnippetDelete={onSnippetDelete}
+              onCreateInCategory={onCreateInCategory}
             />
           ))}
         </>
