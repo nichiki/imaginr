@@ -26,9 +26,12 @@ src/
 │   ├── file-tree.tsx         # ファイルツリー（左ペイン）
 │   ├── snippet-panel.tsx     # スニペット管理（右ペイン）
 │   ├── preview-panel.tsx     # プレビュー（下ペイン）
+│   ├── variable-form.tsx     # 変数入力フォーム + プリセット管理
 │   └── ui/                   # shadcn/uiコンポーネント
 └── lib/
     ├── yaml-utils.ts         # YAMLマージ・プロンプト生成
+    ├── variable-utils.ts     # 変数抽出・置換
+    ├── storage.ts            # UI状態の永続化
     ├── file-api.ts           # ファイルAPI
     ├── snippet-api.ts        # スニペットAPI
     └── dictionary-api.ts     # 辞書API
@@ -53,6 +56,14 @@ data/
 
 ### プロンプト生成
 `yaml-utils.ts`の`generatePromptText()`が構造化YAMLからテキストプロンプトを生成。
+
+### 変数システム
+- **構文**: `${varName}` または `${varName|defaultValue}`
+- **処理**: `variable-utils.ts`で変数抽出・置換
+- **プリセット管理**: 変数セットを名前付きで保存/読み込み
+  - localStorageに変数名セットごとにキー付けして永続化
+  - 「No preset」選択でフォームクリア
+  - 💾ボタン: プリセット選択中は上書き、未選択時は新規保存ダイアログ
 
 ### オートコンプリート
 - コンテキスト認識（親キーを遡行して辞書検索）
@@ -81,12 +92,14 @@ npm run lint     # ESLint実行
 ├──────────┬──────────────────────┬───────────┤
 │ FileTree │     YamlEditor       │ Snippets  │
 │          │     (Monaco)         │  Panel    │
-├──────────┴──────────────────────┴───────────┤
-│ PreviewPanel (Merged YAML / Prompt Text)    │
-└─────────────────────────────────────────────┘
+├──────────┼──────────────────────┴───────────┤
+│ Variables│    PreviewPanel                  │
+│  Form    │ (Merged YAML / Prompt Text)      │
+└──────────┴──────────────────────────────────┘
 ```
 
-3ペインすべてリサイズ可能。状態はlocalStorageに永続化。
+4ペインすべてリサイズ可能。状態はlocalStorageに永続化。
+変数パネルはテンプレートに変数がある場合のみ表示。
 
 ## 注意事項
 

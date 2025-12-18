@@ -6,6 +6,7 @@ export interface AppState {
   leftPanelWidth: number;
   rightPanelWidth: number;
   previewHeight: number;
+  variablePanelWidth: number;
   expandedFolders: string[] | null; // nullは未保存を示す
   selectedFile: string;
 }
@@ -14,6 +15,7 @@ const defaultState: AppState = {
   leftPanelWidth: 280,
   rightPanelWidth: 280,
   previewHeight: 280,
+  variablePanelWidth: 280, // leftPanelWidthと同じ
   expandedFolders: null, // 初回は全て開く
   selectedFile: '',
 };

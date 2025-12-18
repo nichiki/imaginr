@@ -19,6 +19,13 @@ import {
   DictionaryEntry,
 } from '@/lib/dictionary-api';
 import { loadState, saveState } from '@/lib/storage';
+import {
+  extractVariables,
+  resolveVariables,
+  VariableDefinition,
+  VariableValues,
+} from '@/lib/variable-utils';
+import { VariableForm } from '@/components/variable-form';
 
 export default function Home() {
   // ファイルツリー
@@ -40,6 +47,10 @@ export default function Home() {
   // 辞書キャッシュ（補完用）
   const [dictionaryCache, setDictionaryCache] = useState<Map<string, DictionaryEntry[]>>(new Map());
 
+  // 変数関連
+  const [variables, setVariables] = useState<VariableDefinition[]>([]);
+  const [variableValues, setVariableValues] = useState<VariableValues>({});
+
   // マージ結果
   const [mergedYaml, setMergedYaml] = useState('');
   const [promptText, setPromptText] = useState('');
@@ -52,6 +63,8 @@ export default function Home() {
   const [leftPanelWidth, setLeftPanelWidth] = useState(280);
   // 右ペインの幅
   const [rightPanelWidth, setRightPanelWidth] = useState(280);
+  // 変数パネルの幅
+  const [variablePanelWidth, setVariablePanelWidth] = useState(280);
 
   // 初期化済みフラグ
   const initialized = useRef(false);
@@ -59,7 +72,7 @@ export default function Home() {
   const yamlEditorRef = useRef<YamlEditorRef>(null);
 
   // リサイズ用のref
-  const resizeType = useRef<'preview' | 'left' | 'right' | null>(null);
+  const resizeType = useRef<'preview' | 'left' | 'right' | 'variable' | null>(null);
   const startPos = useRef(0);
   const startSize = useRef(0);
 
@@ -97,6 +110,7 @@ export default function Home() {
         setPreviewHeight(savedState.previewHeight);
         setLeftPanelWidth(savedState.leftPanelWidth);
         setRightPanelWidth(savedState.rightPanelWidth);
+        setVariablePanelWidth(savedState.variablePanelWidth);
 
         const tree = await fileAPI.listFiles();
         setFileTree(tree);
@@ -181,6 +195,35 @@ export default function Home() {
     [files, selectedFile]
   );
 
+  // 変数を抽出
+  useEffect(() => {
+    const vars = extractVariables(currentContent);
+    setVariables(vars);
+    // 新しい変数があればデフォルト値で初期化
+    setVariableValues((prev) => {
+      const next = { ...prev };
+      for (const v of vars) {
+        if (!(v.name in next)) {
+          next[v.name] = v.defaultValue ?? '';
+        }
+      }
+      // 不要な変数を削除
+      const varNames = new Set(vars.map((v) => v.name));
+      for (const key of Object.keys(next)) {
+        if (!varNames.has(key)) {
+          delete next[key];
+        }
+      }
+      return next;
+    });
+  }, [currentContent]);
+
+  // 変数解決済みのコンテンツ
+  const resolvedContent = useMemo(
+    () => resolveVariables(currentContent, variableValues),
+    [currentContent, variableValues]
+  );
+
   // ファイルパス一覧（補完用）
   const allFilePaths = useMemo(() => {
     const collectFiles = (items: FileTreeItem[]): string[] => {
@@ -213,9 +256,9 @@ export default function Home() {
   }, [files]);
 
   // マージ結果とプロンプトテキスト（非同期で計算）
-  // 依存配列からfilesを外し、currentContentの変更で発火
+  // 依存配列からfilesを外し、resolvedContentの変更で発火
   useEffect(() => {
-    if (!selectedFile || !currentContent) {
+    if (!selectedFile || !resolvedContent) {
       setMergedYaml('');
       setPromptText('');
       setLookName(undefined);
@@ -228,13 +271,14 @@ export default function Home() {
     (async () => {
       try {
         // 参照ファイル用のキャッシュ（メイン状態とは別管理）
-        const tempCache: FileData = { ...filesRef.current };
+        // 現在のファイルは変数解決済みコンテンツを使用
+        const tempCache: FileData = { ...filesRef.current, [selectedFile]: resolvedContent };
         const merged = await resolveAndMergeAsync(selectedFile, tempCache, readFileForMerge);
 
         if (cancelled) return;
 
         // 空オブジェクトが返ってきた場合はパースエラーの可能性
-        const isEmpty = Object.keys(merged).length === 0 && currentContent.trim() !== '';
+        const isEmpty = Object.keys(merged).length === 0 && resolvedContent.trim() !== '';
         if (isEmpty) {
           setMergedYaml('');
           setPromptText('');
@@ -261,7 +305,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [selectedFile, currentContent, readFileForMerge]);
+  }, [selectedFile, resolvedContent, readFileForMerge]);
 
   // ファイル選択ハンドラ
   const handleFileSelect = useCallback(async (path: string) => {
@@ -684,6 +728,16 @@ export default function Home() {
     document.body.style.userSelect = 'none';
   }, [rightPanelWidth]);
 
+  // 変数パネルリサイズハンドラ
+  const handleVariableResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizeType.current = 'variable';
+    startPos.current = e.clientX;
+    startSize.current = variablePanelWidth;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+  }, [variablePanelWidth]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!resizeType.current) return;
@@ -701,6 +755,10 @@ export default function Home() {
         const delta = startPos.current - e.clientX;
         const newWidth = Math.max(200, Math.min(500, startSize.current + delta));
         setRightPanelWidth(newWidth);
+      } else if (resizeType.current === 'variable') {
+        const delta = e.clientX - startPos.current;
+        const newWidth = Math.max(150, Math.min(400, startSize.current + delta));
+        setVariablePanelWidth(newWidth);
       }
     };
 
@@ -723,10 +781,10 @@ export default function Home() {
   useEffect(() => {
     if (!initialized.current) return;
     const timer = setTimeout(() => {
-      saveState({ previewHeight, leftPanelWidth, rightPanelWidth });
+      saveState({ previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth });
     }, 500);
     return () => clearTimeout(timer);
-  }, [previewHeight, leftPanelWidth, rightPanelWidth]);
+  }, [previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth]);
 
   if (isLoading) {
     return (
@@ -814,23 +872,44 @@ export default function Home() {
 
       {/* Preview Resize Handle */}
       <div
-        className="h-[6px] flex-shrink-0 bg-[#333] cursor-ns-resize flex items-center justify-center hover:bg-[#007acc] relative z-10"
+        className="h-1 flex-shrink-0 bg-[#333] cursor-ns-resize hover:bg-[#007acc]"
         onMouseDown={handlePreviewResizeStart}
-      >
-        <div className="w-10 h-0.5 bg-[#666] rounded-sm" />
-      </div>
+      />
 
-      {/* Preview Panel */}
+      {/* Preview Panel with Variables */}
       <div
-        className="flex-shrink-0 relative"
+        className="flex-shrink-0 relative flex"
         style={{ height: previewHeight }}
       >
-        <PreviewPanel
-          mergedYaml={mergedYaml}
-          promptText={promptText}
-          lookName={lookName}
-          isYamlValid={isYamlValid}
-        />
+        {/* Variable Form - only show when variables exist */}
+        {variables.length > 0 && (
+          <>
+            <div
+              className="flex-shrink-0 overflow-y-auto"
+              style={{ width: variablePanelWidth }}
+            >
+              <VariableForm
+                variables={variables}
+                values={variableValues}
+                onChange={setVariableValues}
+              />
+            </div>
+            {/* Variable Panel Resize Handle */}
+            <div
+              className="w-1 flex-shrink-0 bg-[#333] cursor-ew-resize hover:bg-[#007acc]"
+              onMouseDown={handleVariableResizeStart}
+            />
+          </>
+        )}
+        {/* Preview */}
+        <div className="flex-1 min-w-0">
+          <PreviewPanel
+            mergedYaml={mergedYaml}
+            promptText={promptText}
+            lookName={lookName}
+            isYamlValid={isYamlValid}
+          />
+        </div>
       </div>
     </div>
   );
