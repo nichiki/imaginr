@@ -2,13 +2,12 @@
 # クリック: 編集, ダブルクリック: 挿入, 右クリック: メニュー
 
 snippets:
-  # Pose - Block snippets
+  # Pose
   - id: pose_standing
     category: pose
     key: pose
-    label: standing (基本)
+    label: standing
     description: 基本の立ちポーズ
-    isBlock: true
     content: |
       base: standing
       direction: frontal
@@ -20,9 +19,8 @@ snippets:
   - id: pose_sitting
     category: pose
     key: pose
-    label: sitting (座り)
+    label: sitting
     description: 座りポーズ
-    isBlock: true
     content: |
       base: sitting
       body:
@@ -33,9 +31,8 @@ snippets:
   - id: pose_walking
     category: pose
     key: pose
-    label: walking (歩行)
+    label: walking
     description: 歩行中のポーズ
-    isBlock: true
     content: |
       base: walking
       direction: three-quarter
@@ -44,13 +41,12 @@ snippets:
         arms: swinging naturally
         legs: mid-stride
 
-  # Lighting - Block snippets
+  # Lighting
   - id: lighting_lowkey
     category: lighting
     key: lighting
-    label: low-key (暗め)
+    label: low-key
     description: 暗めのドラマチック照明
-    isBlock: true
     content: |
       key: low-key
       type: directional diffused soft light
@@ -63,9 +59,8 @@ snippets:
   - id: lighting_highkey
     category: lighting
     key: lighting
-    label: high-key (明るめ)
+    label: high-key
     description: 明るいフラット照明
-    isBlock: true
     content: |
       key: high-key
       type: soft diffused light
@@ -75,13 +70,12 @@ snippets:
         depth: shallow
       color: warm white
 
-  # Expression - Block snippets
+  # Expression
   - id: expr_neutral
     category: expression
     key: expression
     label: neutral cool
     description: 無表情でクール
-    isBlock: true
     content: |
       type: neutral cool
       eyes:
@@ -92,9 +86,8 @@ snippets:
   - id: expr_thoughtful
     category: expression
     key: expression
-    label: thoughtful (思索的)
+    label: thoughtful
     description: 思索的な表情
-    isBlock: true
     content: |
       type: thoughtful
       eyes:

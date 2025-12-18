@@ -613,6 +613,7 @@ export default function Home() {
         {/* Editor */}
         <div className="flex-1 min-w-0 bg-[#1e1e1e]">
           <YamlEditor
+            key={selectedFile}
             ref={yamlEditorRef}
             value={currentContent}
             onChange={handleEditorChange}

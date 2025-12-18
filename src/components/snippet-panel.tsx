@@ -134,7 +134,6 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
       label: '',
       description: '',
       content: '',
-      isBlock: true,
     });
     setIsCreating(true);
     setIsNewCategory(existingCategories.length === 0);
@@ -259,22 +258,14 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
                         <ContextMenu key={snippet.id}>
                           <ContextMenuTrigger>
                             <div
-                              className="py-1.5 px-2 text-xs cursor-pointer rounded-sm hover:bg-[#2a2d2e] text-[#9cdcfe]"
+                              className="py-1.5 px-2 text-xs cursor-pointer rounded-sm hover:bg-[#2a2d2e] text-[#9cdcfe] truncate"
                               onClick={() => handleClick(snippet)}
                               onDoubleClick={() => handleDoubleClick(snippet)}
+                              title={snippet.description ? `${snippet.label}（${snippet.description}）` : snippet.label}
                             >
-                              <div className="flex items-center gap-1">
-                                {snippet.isBlock ? (
-                                  <span className="text-[#569cd6]">▣</span>
-                                ) : (
-                                  <span className="text-[#b5cea8]">▪</span>
-                                )}
-                                {snippet.label}
-                              </div>
+                              {snippet.label}
                               {snippet.description && (
-                                <div className="text-[10px] text-[#888] mt-0.5 ml-4">
-                                  {snippet.description}
-                                </div>
+                                <span className="text-[#888]">（{snippet.description}）</span>
                               )}
                             </div>
                           </ContextMenuTrigger>
@@ -404,39 +395,15 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
                 />
               </div>
               <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <Label className="text-[#888]">Content</Label>
-                  <label className="flex items-center gap-2 text-xs text-[#888]">
-                    <input
-                      type="checkbox"
-                      checked={editingSnippet.isBlock}
-                      onChange={(e) =>
-                        setEditingSnippet({ ...editingSnippet, isBlock: e.target.checked })
-                      }
-                      className="rounded bg-[#3c3c3c] border-[#555]"
-                    />
-                    Block snippet (multiple lines)
-                  </label>
-                </div>
-                {editingSnippet.isBlock ? (
-                  <Textarea
-                    value={editingSnippet.content}
-                    onChange={(e) =>
-                      setEditingSnippet({ ...editingSnippet, content: e.target.value })
-                    }
-                    className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] font-mono text-xs min-h-[150px]"
-                    placeholder="base: standing&#10;direction: frontal"
-                  />
-                ) : (
-                  <Input
-                    value={editingSnippet.content}
-                    onChange={(e) =>
-                      setEditingSnippet({ ...editingSnippet, content: e.target.value })
-                    }
-                    className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] font-mono text-xs"
-                    placeholder="frontal"
-                  />
-                )}
+                <Label className="text-[#888]">Content</Label>
+                <Textarea
+                  value={editingSnippet.content}
+                  onChange={(e) =>
+                    setEditingSnippet({ ...editingSnippet, content: e.target.value })
+                  }
+                  className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] font-mono text-xs min-h-[150px]"
+                  placeholder="base: standing&#10;direction: frontal"
+                />
               </div>
             </div>
           )}

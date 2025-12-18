@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback, useImperativeHandle, forwardRef, useEffect } from 'react';
+import { useRef, useCallback, useImperativeHandle, forwardRef, useEffect, useState } from 'react';
 import Editor, { OnMount, OnChange } from '@monaco-editor/react';
 import type { editor, languages, Position, IDisposable } from 'monaco-editor';
 import type { Snippet } from '@/lib/snippet-api';
@@ -29,6 +29,10 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
   const fileListRef = useRef<string[]>(fileList);
   const snippetsRef = useRef<Snippet[]>(snippets);
   const dictionaryCacheRef = useRef<Map<string, DictionaryEntry[]> | undefined>(dictionaryCache);
+
+  // IME composition状態を追跡
+  const isComposingRef = useRef(false);
+  const pendingValueRef = useRef<string | null>(null);
 
   // fileListが変更されたらrefを更新
   useEffect(() => {
@@ -146,9 +150,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
 
           if (matchingSnippets.length > 0) {
             return {
-              suggestions: matchingSnippets
-                .filter((s) => s.isBlock)
-                .map((snippet) => ({
+              suggestions: matchingSnippets.map((snippet) => ({
                   label: `${snippet.key}: ${snippet.label}`,
                   kind: monaco.languages.CompletionItemKind.Snippet,
                   insertText: `${snippet.key}:\n  ${snippet.content.replace(/\n/g, '\n  ')}`,
@@ -274,40 +276,55 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
 
     disposablesRef.current.push(completionProvider);
 
-    // Ctrl+Spaceでスニペットパネルを開く
-    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Space, () => {
-      if (!onSnippetRequest) return;
-
-      const position = editor.getPosition();
-      if (!position) return;
-
-      const lineContent = editor.getModel()?.getLineContent(position.lineNumber) || '';
-      const keyMatch = lineContent.match(/^\s*(\w+):/);
-      const context = keyMatch ? keyMatch[1] : '';
-
-      // カーソル位置をピクセル座標に変換
-      const coords = editor.getScrolledVisiblePosition(position);
-      const editorDom = editor.getDomNode();
-      if (coords && editorDom) {
-        const rect = editorDom.getBoundingClientRect();
-        onSnippetRequest(
-          {
-            x: rect.left + coords.left,
-            y: rect.top + coords.top + 20,
-          },
-          context
-        );
-      }
+    // Cmd+J (Mac) / Ctrl+J (Windows) で補完トリガー
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyJ, () => {
+      editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+    });
+    // Ctrl+Space (Windows/Linux用、MacでもIME設定次第で使える)
+    editor.addCommand(monaco.KeyMod.WinCtrl | monaco.KeyCode.Space, () => {
+      editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
     });
 
     // エディタのフォーカス
     editor.focus();
-  }, [onSnippetRequest, getContextPath, lookupDictionary]);
+
+    // IME compositionイベントを監視
+    const domNode = editor.getDomNode();
+    if (domNode) {
+      const handleCompositionStart = () => {
+        isComposingRef.current = true;
+      };
+      const handleCompositionEnd = () => {
+        isComposingRef.current = false;
+        // composition終了時に保留中の値があれば反映
+        if (pendingValueRef.current !== null) {
+          onChange(pendingValueRef.current);
+          pendingValueRef.current = null;
+        }
+      };
+
+      domNode.addEventListener('compositionstart', handleCompositionStart);
+      domNode.addEventListener('compositionend', handleCompositionEnd);
+
+      // クリーンアップ用にdisposableを追加
+      disposablesRef.current.push({
+        dispose: () => {
+          domNode.removeEventListener('compositionstart', handleCompositionStart);
+          domNode.removeEventListener('compositionend', handleCompositionEnd);
+        },
+      });
+    }
+  }, [onSnippetRequest, getContextPath, lookupDictionary, onChange]);
 
   const handleChange: OnChange = useCallback(
     (newValue) => {
       if (newValue !== undefined) {
-        onChange(newValue);
+        if (isComposingRef.current) {
+          // IME composition中は保留
+          pendingValueRef.current = newValue;
+        } else {
+          onChange(newValue);
+        }
       }
     },
     [onChange]
@@ -377,7 +394,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         height="100%"
         defaultLanguage="yaml"
         theme="vs-dark"
-        value={value}
+        defaultValue={value}
         onChange={handleChange}
         onMount={handleEditorDidMount}
         options={{
@@ -400,6 +417,9 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
           acceptSuggestionOnEnter: 'on',
           padding: { top: 8 },
           wordBasedSuggestions: 'off',
+          suggest: {
+            showStatusBar: false,
+          },
         }}
       />
     </div>

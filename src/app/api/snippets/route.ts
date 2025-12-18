@@ -13,7 +13,6 @@ export interface Snippet {
   label: string;
   description?: string;
   content: string;
-  isBlock: boolean;
 }
 
 interface SnippetsFile {
