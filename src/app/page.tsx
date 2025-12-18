@@ -368,6 +368,72 @@ export default function Home() {
     }
   }, [selectedFile]);
 
+  // ファイル/フォルダ移動ハンドラ
+  const handleMoveFile = useCallback(async (from: string, to: string) => {
+    try {
+      const newPath = await fileAPI.moveFile(from, to);
+      // ファイルツリーを再読み込み
+      const tree = await fileAPI.listFiles();
+      setFileTree(tree);
+
+      // キャッシュを更新（移動元を削除し、移動先を追加）
+      setFiles((prev) => {
+        const next: Record<string, string> = {};
+        for (const [key, value] of Object.entries(prev)) {
+          if (key === from) {
+            // 移動したファイルは新しいパスで追加
+            next[newPath] = value;
+          } else if (key.startsWith(from + '/')) {
+            // 移動したフォルダ内のファイルも更新
+            const relativePath = key.substring(from.length);
+            next[newPath + relativePath] = value;
+          } else {
+            next[key] = value;
+          }
+        }
+        return next;
+      });
+
+      // 選択中のファイルが移動対象だった場合、新しいパスを選択
+      if (selectedFile === from) {
+        setSelectedFile(newPath);
+        if (initialized.current) {
+          saveState({ selectedFile: newPath });
+        }
+      } else if (selectedFile.startsWith(from + '/')) {
+        // 移動したフォルダ内のファイルを選択中だった場合
+        const relativePath = selectedFile.substring(from.length);
+        const newSelectedPath = newPath + relativePath;
+        setSelectedFile(newSelectedPath);
+        if (initialized.current) {
+          saveState({ selectedFile: newSelectedPath });
+        }
+      }
+
+      // 展開状態を更新（フォルダの場合）
+      setExpandedFolders((prev) => {
+        const next = new Set<string>();
+        for (const p of prev) {
+          if (p === from) {
+            next.add(newPath);
+          } else if (p.startsWith(from + '/')) {
+            const relativePath = p.substring(from.length);
+            next.add(newPath + relativePath);
+          } else {
+            next.add(p);
+          }
+        }
+        if (initialized.current) {
+          saveState({ expandedFolders: Array.from(next) });
+        }
+        return next;
+      });
+    } catch (error) {
+      console.error('Failed to move file:', error);
+      alert(error instanceof Error ? error.message : 'Failed to move file');
+    }
+  }, [selectedFile]);
+
   // フォルダ削除ハンドラ
   const handleDeleteFolder = useCallback(async (path: string) => {
     if (!confirm(`Delete folder "${path}" and all its contents?`)) return;
@@ -601,6 +667,7 @@ export default function Home() {
             onCreateFolder={handleCreateFolder}
             onDeleteFile={handleDeleteFile}
             onDeleteFolder={handleDeleteFolder}
+            onMoveFile={handleMoveFile}
           />
         </div>
 

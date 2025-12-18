@@ -16,6 +16,7 @@ export interface FileAPI {
   createFolder(path: string): Promise<void>;
   deleteFile(path: string): Promise<void>;
   deleteFolder(path: string): Promise<void>;
+  moveFile(from: string, to: string): Promise<string>; // returns new path
 }
 
 // Web版の実装（Next.js API Routes経由）
@@ -72,6 +73,20 @@ class WebFileAPI implements FileAPI {
       method: 'DELETE',
     });
     if (!res.ok) throw new Error(`Failed to delete folder: ${path}`);
+  }
+
+  async moveFile(from: string, to: string): Promise<string> {
+    const res = await fetch(`${this.baseUrl}/move`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ from, to }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || `Failed to move: ${from}`);
+    }
+    const data = await res.json();
+    return data.newPath;
   }
 }
 
