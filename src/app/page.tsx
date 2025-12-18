@@ -5,7 +5,7 @@ import { FileTree } from '@/components/file-tree';
 import { SnippetPanel } from '@/components/snippet-panel';
 import { PreviewPanel } from '@/components/preview-panel';
 import { YamlEditor, YamlEditorRef } from '@/components/yaml-editor';
-import { fileAPI, FileTreeItem } from '@/lib/file-api';
+import { fileAPI, FileTreeItem, RenameResult } from '@/lib/file-api';
 import {
   resolveAndMergeAsync,
   objectToYaml,
@@ -524,6 +524,90 @@ export default function Home() {
     }
   }, [selectedFile]);
 
+  // 参照検索ハンドラ
+  const handleFindReferences = useCallback(async (path: string): Promise<string[]> => {
+    return await fileAPI.findReferences(path);
+  }, []);
+
+  // リネームハンドラ
+  const handleRenameFile = useCallback(async (
+    path: string,
+    newName: string,
+    updateReferences: boolean
+  ): Promise<RenameResult> => {
+    const result = await fileAPI.renameFile(path, newName, updateReferences);
+
+    // ファイルツリーを再読み込み
+    const tree = await fileAPI.listFiles();
+    setFileTree(tree);
+
+    // キャッシュを更新
+    setFiles((prev) => {
+      const next: Record<string, string> = {};
+      for (const [key, value] of Object.entries(prev)) {
+        if (key === path) {
+          // リネームしたファイルは新しいパスで追加
+          next[result.newPath] = value;
+        } else if (key.startsWith(path + '/')) {
+          // リネームしたフォルダ内のファイルも更新
+          const relativePath = key.substring(path.length);
+          next[result.newPath + relativePath] = value;
+        } else if (result.updatedFiles.includes(key)) {
+          // 参照が更新されたファイルはキャッシュから削除（次回選択時に再読み込み）
+          // next に追加しないことで削除
+        } else {
+          next[key] = value;
+        }
+      }
+      return next;
+    });
+
+    // 選択中のファイルがリネーム対象だった場合、新しいパスを選択
+    if (selectedFile === path) {
+      setSelectedFile(result.newPath);
+      if (initialized.current) {
+        saveState({ selectedFile: result.newPath });
+      }
+    } else if (selectedFile.startsWith(path + '/')) {
+      // リネームしたフォルダ内のファイルを選択中だった場合
+      const relativePath = selectedFile.substring(path.length);
+      const newSelectedPath = result.newPath + relativePath;
+      setSelectedFile(newSelectedPath);
+      if (initialized.current) {
+        saveState({ selectedFile: newSelectedPath });
+      }
+    } else if (result.updatedFiles.includes(selectedFile)) {
+      // 選択中のファイルの参照が更新された場合、再読み込み
+      try {
+        const updatedContent = await fileAPI.readFile(selectedFile);
+        setFiles((prev) => ({ ...prev, [selectedFile]: updatedContent }));
+      } catch (e) {
+        console.error('Failed to reload updated file:', e);
+      }
+    }
+
+    // 展開状態を更新（フォルダの場合）
+    setExpandedFolders((prev) => {
+      const next = new Set<string>();
+      for (const p of prev) {
+        if (p === path) {
+          next.add(result.newPath);
+        } else if (p.startsWith(path + '/')) {
+          const relativePath = p.substring(path.length);
+          next.add(result.newPath + relativePath);
+        } else {
+          next.add(p);
+        }
+      }
+      if (initialized.current) {
+        saveState({ expandedFolders: Array.from(next) });
+      }
+      return next;
+    });
+
+    return result;
+  }, [selectedFile]);
+
   // エディタ変更ハンドラ
   const handleEditorChange = useCallback(
     (value: string) => {
@@ -686,6 +770,8 @@ export default function Home() {
             onDeleteFile={handleDeleteFile}
             onDeleteFolder={handleDeleteFolder}
             onMoveFile={handleMoveFile}
+            onRenameFile={handleRenameFile}
+            onFindReferences={handleFindReferences}
           />
         </div>
 

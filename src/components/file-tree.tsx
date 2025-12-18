@@ -1,9 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { FileTreeItem } from '@/lib/file-api';
+import { FileTreeItem, RenameResult } from '@/lib/file-api';
 import { cn } from '@/lib/utils';
-import { ChevronRight, FileIcon, FolderIcon, FolderPlus, Plus, Trash2 } from 'lucide-react';
+import { ChevronRight, FileIcon, FolderIcon, FolderPlus, Plus, Trash2, Pencil } from 'lucide-react';
 import {
   DndContext,
   DragEndEvent,
@@ -42,6 +42,8 @@ interface FileTreeProps {
   onDeleteFile: (path: string) => void;
   onDeleteFolder: (path: string) => void;
   onMoveFile?: (from: string, to: string) => void;
+  onRenameFile?: (path: string, newName: string, updateReferences: boolean) => Promise<RenameResult>;
+  onFindReferences?: (path: string) => Promise<string[]>;
 }
 
 export function FileTree({
@@ -55,6 +57,8 @@ export function FileTree({
   onDeleteFile,
   onDeleteFolder,
   onMoveFile,
+  onRenameFile,
+  onFindReferences,
 }: FileTreeProps) {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isFolderDialogOpen, setIsFolderDialogOpen] = useState(false);
@@ -62,6 +66,15 @@ export function FileTree({
   const [newFolderName, setNewFolderName] = useState('');
   const [createInFolder, setCreateInFolder] = useState('');
   const [draggedItem, setDraggedItem] = useState<FileTreeItem | null>(null);
+
+  // Rename dialog state
+  const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
+  const [renameTarget, setRenameTarget] = useState<{ path: string; name: string; type: 'file' | 'folder' } | null>(null);
+  const [newRenameName, setNewRenameName] = useState('');
+  const [references, setReferences] = useState<string[]>([]);
+  const [isCheckingReferences, setIsCheckingReferences] = useState(false);
+  const [showReferenceWarning, setShowReferenceWarning] = useState(false);
+  const [isRenaming, setIsRenaming] = useState(false);
 
   // PointerSensorにdistanceを設定してクリックとドラッグを区別
   const sensors = useSensors(
@@ -101,6 +114,57 @@ export function FileTree({
     setCreateInFolder(folder);
     setNewFolderName('');
     setIsFolderDialogOpen(true);
+  };
+
+  const openRenameDialog = (path: string, name: string, type: 'file' | 'folder') => {
+    setRenameTarget({ path, name, type });
+    setNewRenameName(name);
+    setReferences([]);
+    setShowReferenceWarning(false);
+    setIsRenameDialogOpen(true);
+  };
+
+  const handleRenameSubmit = async () => {
+    if (!renameTarget || !newRenameName.trim() || !onRenameFile) return;
+    if (newRenameName === renameTarget.name) {
+      setIsRenameDialogOpen(false);
+      return;
+    }
+
+    // ファイルの場合のみ参照チェック
+    if (renameTarget.type === 'file' && onFindReferences && !showReferenceWarning) {
+      setIsCheckingReferences(true);
+      try {
+        const refs = await onFindReferences(renameTarget.path);
+        if (refs.length > 0) {
+          setReferences(refs);
+          setShowReferenceWarning(true);
+          setIsCheckingReferences(false);
+          return;
+        }
+      } catch {
+        // 参照チェック失敗してもリネームは続行
+      }
+      setIsCheckingReferences(false);
+    }
+
+    // リネーム実行（参照更新なし）
+    await executeRename(false);
+  };
+
+  const executeRename = async (updateReferences: boolean) => {
+    if (!renameTarget || !newRenameName.trim() || !onRenameFile) return;
+
+    setIsRenaming(true);
+    try {
+      await onRenameFile(renameTarget.path, newRenameName, updateReferences);
+      setIsRenameDialogOpen(false);
+      setShowReferenceWarning(false);
+    } catch (error) {
+      alert(error instanceof Error ? error.message : 'Rename failed');
+    } finally {
+      setIsRenaming(false);
+    }
   };
 
   const handleDragStart = (event: DragStartEvent) => {
@@ -181,6 +245,7 @@ export function FileTree({
                 onCreateFolder={openFolderDialog}
                 onDeleteFile={onDeleteFile}
                 onDeleteFolder={onDeleteFolder}
+                onRename={openRenameDialog}
                 depth={0}
               />
             ))}
@@ -264,6 +329,101 @@ export function FileTree({
             </DialogFooter>
           </DialogContent>
         </Dialog>
+
+        {/* Rename Dialog */}
+        <Dialog open={isRenameDialogOpen} onOpenChange={(open) => {
+          if (!open) {
+            setShowReferenceWarning(false);
+          }
+          setIsRenameDialogOpen(open);
+        }}>
+          <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4]">
+            <DialogHeader>
+              <DialogTitle className="text-white">
+                {showReferenceWarning ? 'References Found' : `Rename ${renameTarget?.type === 'folder' ? 'Folder' : 'File'}`}
+              </DialogTitle>
+            </DialogHeader>
+            <div className="py-4">
+              {!showReferenceWarning ? (
+                <Input
+                  placeholder={renameTarget?.type === 'folder' ? 'folder name' : 'filename.yaml'}
+                  value={newRenameName}
+                  onChange={(e) => setNewRenameName(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()}
+                  className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
+                  autoFocus
+                  disabled={isCheckingReferences || isRenaming}
+                />
+              ) : (
+                <div className="space-y-3">
+                  <p className="text-sm text-yellow-400">
+                    This file is referenced by {references.length} file(s):
+                  </p>
+                  <ul className="text-xs text-[#888] max-h-32 overflow-y-auto space-y-1 bg-[#1e1e1e] p-2 rounded">
+                    {references.map((ref) => (
+                      <li key={ref}>{ref}</li>
+                    ))}
+                  </ul>
+                  <p className="text-sm text-[#d4d4d4]">
+                    Do you want to update these references automatically?
+                  </p>
+                </div>
+              )}
+              {renameTarget && (
+                <p className="text-xs text-[#888] mt-2">
+                  {renameTarget.path}
+                </p>
+              )}
+            </div>
+            <DialogFooter>
+              {!showReferenceWarning ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsRenameDialogOpen(false)}
+                    className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
+                    disabled={isCheckingReferences || isRenaming}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleRenameSubmit}
+                    className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
+                    disabled={isCheckingReferences || isRenaming || !newRenameName.trim()}
+                  >
+                    {isCheckingReferences ? 'Checking...' : isRenaming ? 'Renaming...' : 'Rename'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => setIsRenameDialogOpen(false)}
+                    className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
+                    disabled={isRenaming}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    variant="outline"
+                    onClick={() => executeRename(false)}
+                    className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
+                    disabled={isRenaming}
+                  >
+                    {isRenaming ? 'Renaming...' : 'Rename Only'}
+                  </Button>
+                  <Button
+                    onClick={() => executeRename(true)}
+                    className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
+                    disabled={isRenaming}
+                  >
+                    {isRenaming ? 'Updating...' : 'Update References'}
+                  </Button>
+                </>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* ドラッグ中のオーバーレイ */}
@@ -310,6 +470,7 @@ interface FileTreeNodeProps {
   onCreateFolder: (folder: string) => void;
   onDeleteFile: (path: string) => void;
   onDeleteFolder: (path: string) => void;
+  onRename: (path: string, name: string, type: 'file' | 'folder') => void;
   depth: number;
 }
 
@@ -323,6 +484,7 @@ function FileTreeNode({
   onCreateFolder,
   onDeleteFile,
   onDeleteFolder,
+  onRename,
   depth,
 }: FileTreeNodeProps) {
   const isSelected = item.path === selectedFile;
@@ -340,6 +502,7 @@ function FileTreeNode({
         onCreateFolder={onCreateFolder}
         onDeleteFile={onDeleteFile}
         onDeleteFolder={onDeleteFolder}
+        onRename={onRename}
         depth={depth}
         paddingLeft={paddingLeft}
       />
@@ -352,6 +515,7 @@ function FileTreeNode({
       isSelected={isSelected}
       onSelectFile={onSelectFile}
       onDeleteFile={onDeleteFile}
+      onRename={onRename}
       paddingLeft={paddingLeft}
     />
   );
@@ -367,6 +531,7 @@ interface FolderNodeProps {
   onCreateFolder: (folder: string) => void;
   onDeleteFile: (path: string) => void;
   onDeleteFolder: (path: string) => void;
+  onRename: (path: string, name: string, type: 'file' | 'folder') => void;
   depth: number;
   paddingLeft: number;
 }
@@ -381,6 +546,7 @@ function FolderNode({
   onCreateFolder,
   onDeleteFile,
   onDeleteFolder,
+  onRename,
   depth,
   paddingLeft,
 }: FolderNodeProps) {
@@ -458,6 +624,13 @@ function FolderNode({
             New Folder
           </ContextMenuItem>
           <ContextMenuItem
+            onClick={() => onRename(item.path, item.name, 'folder')}
+            className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+          >
+            <Pencil className="h-4 w-4 mr-2" />
+            Rename
+          </ContextMenuItem>
+          <ContextMenuItem
             onClick={() => onDeleteFolder(item.path)}
             className="text-red-400 focus:bg-red-900 focus:text-red-200"
           >
@@ -478,6 +651,7 @@ function FolderNode({
           onCreateFolder={onCreateFolder}
           onDeleteFile={onDeleteFile}
           onDeleteFolder={onDeleteFolder}
+          onRename={onRename}
           depth={depth + 1}
         />
       ))}
@@ -490,6 +664,7 @@ interface FileNodeProps {
   isSelected: boolean;
   onSelectFile: (path: string) => void;
   onDeleteFile: (path: string) => void;
+  onRename: (path: string, name: string, type: 'file' | 'folder') => void;
   paddingLeft: number;
 }
 
@@ -498,6 +673,7 @@ function FileNode({
   isSelected,
   onSelectFile,
   onDeleteFile,
+  onRename,
   paddingLeft,
 }: FileNodeProps) {
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
@@ -526,6 +702,13 @@ function FileNode({
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent className="bg-[#252526] border-[#333]">
+          <ContextMenuItem
+            onClick={() => onRename(item.path, item.name, 'file')}
+            className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+          >
+            <Pencil className="h-4 w-4 mr-2" />
+            Rename
+          </ContextMenuItem>
           <ContextMenuItem
             onClick={() => onDeleteFile(item.path)}
             className="text-red-400 focus:bg-red-900 focus:text-red-200"

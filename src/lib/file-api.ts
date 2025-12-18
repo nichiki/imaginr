@@ -8,6 +8,11 @@ export interface FileTreeItem {
   children?: FileTreeItem[];
 }
 
+export interface RenameResult {
+  newPath: string;
+  updatedFiles: string[];
+}
+
 export interface FileAPI {
   listFiles(): Promise<FileTreeItem[]>;
   readFile(path: string): Promise<string>;
@@ -17,6 +22,8 @@ export interface FileAPI {
   deleteFile(path: string): Promise<void>;
   deleteFolder(path: string): Promise<void>;
   moveFile(from: string, to: string): Promise<string>; // returns new path
+  findReferences(path: string): Promise<string[]>; // find files that reference this path
+  renameFile(path: string, newName: string, updateReferences?: boolean): Promise<RenameResult>;
 }
 
 // Web版の実装（Next.js API Routes経由）
@@ -87,6 +94,26 @@ class WebFileAPI implements FileAPI {
     }
     const data = await res.json();
     return data.newPath;
+  }
+
+  async findReferences(path: string): Promise<string[]> {
+    const res = await fetch(`${this.baseUrl}/rename?path=${encodeURIComponent(path)}`);
+    if (!res.ok) throw new Error(`Failed to find references: ${path}`);
+    const data = await res.json();
+    return data.references;
+  }
+
+  async renameFile(path: string, newName: string, updateReferences = false): Promise<RenameResult> {
+    const res = await fetch(`${this.baseUrl}/rename`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ path, newName, updateReferences }),
+    });
+    if (!res.ok) {
+      const data = await res.json();
+      throw new Error(data.error || `Failed to rename: ${path}`);
+    }
+    return res.json();
   }
 }
 

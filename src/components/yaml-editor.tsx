@@ -49,6 +49,16 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
     dictionaryCacheRef.current = dictionaryCache;
   }, [dictionaryCache]);
 
+  // クリーンアップ: コンポーネントアンマウント時にdisposablesを解放
+  useEffect(() => {
+    return () => {
+      for (const disposable of disposablesRef.current) {
+        disposable.dispose();
+      }
+      disposablesRef.current = [];
+    };
+  }, []);
+
   // カーソル位置から親キーのコンテキストパスを取得
   // 配列要素内の場合も親の配列キーを含める
   const getContextPath = useCallback((model: editor.ITextModel, lineNumber: number): string[] => {

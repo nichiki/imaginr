@@ -65,7 +65,7 @@ export function resolveAndMerge(
     return {};
   }
 
-  if (!parsed) return {};
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
 
   // _base があれば読み込んでマージのベースにする
   let result: Record<string, unknown> = {};
@@ -112,7 +112,7 @@ export async function resolveAndMergeAsync(
     return {};
   }
 
-  if (!parsed) return {};
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return {};
 
   // _base があれば読み込んでマージのベースにする
   let result: Record<string, unknown> = {};
