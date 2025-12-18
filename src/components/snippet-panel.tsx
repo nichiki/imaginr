@@ -25,11 +25,12 @@ import {
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Snippet, snippetAPI, getSnippetsByCategory } from '@/lib/snippet-api';
+import { Snippet, snippetAPI, buildCategoryTree, CategoryNode } from '@/lib/snippet-api';
 import { cn } from '@/lib/utils';
 import { ChevronRight, Search, Plus, Pencil, Trash2, FileInput } from 'lucide-react';
 
 const NEW_CATEGORY_VALUE = '__new__';
+const EXPANDED_CATEGORIES_KEY = 'snippet-expanded-categories';
 
 interface SnippetPanelProps {
   onInsertSnippet: (snippet: Snippet) => void;
@@ -39,9 +40,20 @@ interface SnippetPanelProps {
 export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanelProps) {
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
-  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(
-    new Set(['pose', 'lighting', 'expression'])
-  );
+  const [expandedCategories, setExpandedCategories] = useState<Set<string>>(() => {
+    // localStorageから復元
+    if (typeof window !== 'undefined') {
+      try {
+        const saved = localStorage.getItem(EXPANDED_CATEGORIES_KEY);
+        if (saved) {
+          return new Set(JSON.parse(saved));
+        }
+      } catch {
+        // 無視
+      }
+    }
+    return new Set(['pose', 'lighting', 'expression']);
+  });
   const [isLoading, setIsLoading] = useState(true);
 
   // 編集ダイアログ用の状態
@@ -76,28 +88,27 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
     loadSnippets();
   }, [loadSnippets]);
 
-  const snippetsByCategory = getSnippetsByCategory(snippets);
+  // カテゴリツリーを構築
+  const categoryTree = useMemo(() => buildCategoryTree(snippets), [snippets]);
 
-  const toggleCategory = (category: string) => {
-    const newExpanded = new Set(expandedCategories);
-    if (newExpanded.has(category)) {
-      newExpanded.delete(category);
-    } else {
-      newExpanded.add(category);
-    }
-    setExpandedCategories(newExpanded);
-  };
+  const toggleCategory = useCallback((categoryPath: string) => {
+    setExpandedCategories((prev) => {
+      const newExpanded = new Set(prev);
+      if (newExpanded.has(categoryPath)) {
+        newExpanded.delete(categoryPath);
+      } else {
+        newExpanded.add(categoryPath);
+      }
+      // localStorageに保存
+      try {
+        localStorage.setItem(EXPANDED_CATEGORIES_KEY, JSON.stringify([...newExpanded]));
+      } catch {
+        // 無視
+      }
+      return newExpanded;
+    });
+  }, []);
 
-  const filteredSnippets = (snippetList: Snippet[]) => {
-    if (!searchQuery) return snippetList;
-    const query = searchQuery.toLowerCase();
-    return snippetList.filter(
-      (s) =>
-        s.label.toLowerCase().includes(query) ||
-        s.description?.toLowerCase().includes(query) ||
-        s.category.toLowerCase().includes(query)
-    );
-  };
 
   // クリック: 遅延後に編集ダイアログを開く（ダブルクリックでキャンセル）
   const handleClick = (snippet: Snippet) => {
@@ -232,73 +243,19 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
               Click + to create one.
             </div>
           ) : (
-            Array.from(snippetsByCategory.entries()).map(([category, categorySnippets]) => {
-              const filtered = filteredSnippets(categorySnippets);
-              if (filtered.length === 0) return null;
-
-              const isExpanded = expandedCategories.has(category);
-
-              return (
-                <div key={category} className="mb-2">
-                  <div
-                    className="flex items-center gap-1 py-1 px-2 text-sm text-[#cccccc] cursor-pointer hover:bg-[#2a2d2e] rounded-sm"
-                    onClick={() => toggleCategory(category)}
-                  >
-                    <ChevronRight
-                      className={cn(
-                        'h-3.5 w-3.5 transition-transform',
-                        isExpanded && 'rotate-90'
-                      )}
-                    />
-                    {category}
-                  </div>
-                  {isExpanded && (
-                    <div className="ml-4">
-                      {filtered.map((snippet) => (
-                        <ContextMenu key={snippet.id}>
-                          <ContextMenuTrigger>
-                            <div
-                              className="py-1.5 px-2 text-xs cursor-pointer rounded-sm hover:bg-[#2a2d2e] text-[#9cdcfe] truncate"
-                              onClick={() => handleClick(snippet)}
-                              onDoubleClick={() => handleDoubleClick(snippet)}
-                              title={snippet.description ? `${snippet.label}（${snippet.description}）` : snippet.label}
-                            >
-                              {snippet.label}
-                              {snippet.description && (
-                                <span className="text-[#888]">（{snippet.description}）</span>
-                              )}
-                            </div>
-                          </ContextMenuTrigger>
-                          <ContextMenuContent className="bg-[#252526] border-[#333]">
-                            <ContextMenuItem
-                              onClick={() => handleDoubleClick(snippet)}
-                              className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
-                            >
-                              <FileInput className="h-4 w-4 mr-2" />
-                              Insert
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              onClick={() => handleClick(snippet)}
-                              className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
-                            >
-                              <Pencil className="h-4 w-4 mr-2" />
-                              Edit
-                            </ContextMenuItem>
-                            <ContextMenuItem
-                              onClick={() => handleDelete(snippet)}
-                              className="text-red-400 focus:bg-red-900 focus:text-red-200"
-                            >
-                              <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
-                            </ContextMenuItem>
-                          </ContextMenuContent>
-                        </ContextMenu>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              );
-            })
+            categoryTree.map((node) => (
+              <CategoryNodeView
+                key={node.path}
+                node={node}
+                depth={0}
+                expandedCategories={expandedCategories}
+                toggleCategory={toggleCategory}
+                searchQuery={searchQuery}
+                onSnippetClick={handleClick}
+                onSnippetDoubleClick={handleDoubleClick}
+                onSnippetDelete={handleDelete}
+              />
+            ))
           )}
         </div>
       </div>
@@ -425,6 +382,137 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
           </DialogFooter>
         </DialogContent>
       </Dialog>
+    </div>
+  );
+}
+
+// カテゴリノード表示コンポーネント（再帰的）
+interface CategoryNodeViewProps {
+  node: CategoryNode;
+  depth: number;
+  expandedCategories: Set<string>;
+  toggleCategory: (path: string) => void;
+  searchQuery: string;
+  onSnippetClick: (snippet: Snippet) => void;
+  onSnippetDoubleClick: (snippet: Snippet) => void;
+  onSnippetDelete: (snippet: Snippet) => void;
+}
+
+function CategoryNodeView({
+  node,
+  depth,
+  expandedCategories,
+  toggleCategory,
+  searchQuery,
+  onSnippetClick,
+  onSnippetDoubleClick,
+  onSnippetDelete,
+}: CategoryNodeViewProps) {
+  const isExpanded = expandedCategories.has(node.path);
+  const paddingLeft = depth * 12 + 8;
+
+  // 検索フィルタ
+  const filteredSnippets = searchQuery
+    ? node.snippets.filter(
+        (s) =>
+          s.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          s.category.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : node.snippets;
+
+  // 子ノードも検索に含まれるかチェック
+  const hasMatchingDescendants = (n: CategoryNode): boolean => {
+    const hasMatchingSnippets = n.snippets.some(
+      (s) =>
+        s.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        s.category.toLowerCase().includes(searchQuery.toLowerCase())
+    );
+    if (hasMatchingSnippets) return true;
+    return n.children.some(hasMatchingDescendants);
+  };
+
+  // 検索時にマッチしない場合は非表示
+  if (searchQuery && filteredSnippets.length === 0 && !node.children.some(hasMatchingDescendants)) {
+    return null;
+  }
+
+  return (
+    <div className="mb-1">
+      <div
+        className="flex items-center gap-1 py-1 px-2 text-sm text-[#cccccc] cursor-pointer hover:bg-[#2a2d2e] rounded-sm"
+        style={{ paddingLeft }}
+        onClick={() => toggleCategory(node.path)}
+      >
+        <ChevronRight
+          className={cn(
+            'h-3.5 w-3.5 transition-transform',
+            isExpanded && 'rotate-90'
+          )}
+        />
+        {node.name}
+      </div>
+      {isExpanded && (
+        <>
+          {/* スニペット */}
+          {filteredSnippets.map((snippet) => (
+            <ContextMenu key={snippet.id}>
+              <ContextMenuTrigger>
+                <div
+                  className="py-1.5 px-2 text-xs cursor-pointer rounded-sm hover:bg-[#2a2d2e] text-[#9cdcfe] truncate"
+                  style={{ paddingLeft: paddingLeft + 20 }}
+                  onClick={() => onSnippetClick(snippet)}
+                  onDoubleClick={() => onSnippetDoubleClick(snippet)}
+                  title={snippet.description ? `${snippet.label}（${snippet.description}）` : snippet.label}
+                >
+                  {snippet.label}
+                  {snippet.description && (
+                    <span className="text-[#888]">（{snippet.description}）</span>
+                  )}
+                </div>
+              </ContextMenuTrigger>
+              <ContextMenuContent className="bg-[#252526] border-[#333]">
+                <ContextMenuItem
+                  onClick={() => onSnippetDoubleClick(snippet)}
+                  className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+                >
+                  <FileInput className="h-4 w-4 mr-2" />
+                  Insert
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onClick={() => onSnippetClick(snippet)}
+                  className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+                >
+                  <Pencil className="h-4 w-4 mr-2" />
+                  Edit
+                </ContextMenuItem>
+                <ContextMenuItem
+                  onClick={() => onSnippetDelete(snippet)}
+                  className="text-red-400 focus:bg-red-900 focus:text-red-200"
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />
+                  Delete
+                </ContextMenuItem>
+              </ContextMenuContent>
+            </ContextMenu>
+          ))}
+          {/* 子カテゴリ */}
+          {node.children.map((child) => (
+            <CategoryNodeView
+              key={child.path}
+              node={child}
+              depth={depth + 1}
+              expandedCategories={expandedCategories}
+              toggleCategory={toggleCategory}
+              searchQuery={searchQuery}
+              onSnippetClick={onSnippetClick}
+              onSnippetDoubleClick={onSnippetDoubleClick}
+              onSnippetDelete={onSnippetDelete}
+            />
+          ))}
+        </>
+      )}
     </div>
   );
 }

@@ -482,7 +482,7 @@ export default function Home() {
   // スニペットクリックハンドラ
   const handleSnippetClick = useCallback((snippet: Snippet) => {
     if (yamlEditorRef.current) {
-      yamlEditorRef.current.insertSnippet(snippet.content, snippet.isBlock);
+      yamlEditorRef.current.insertSnippet(snippet.content, true); // 全スニペットはブロック形式
     }
   }, []);
 
