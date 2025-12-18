@@ -1,6 +1,6 @@
-# Attire Schema: Separates (トップ+ボトム分離型)
+# Outfit Schema: Separates (トップ+ボトム分離型)
 
-attire:
+outfit:
   type: separates
   top:
     item: ${top_item|shirt}

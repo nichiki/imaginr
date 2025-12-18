@@ -1,6 +1,6 @@
-# Attire Schema: Dress (ワンピース/ドレス型)
+# Outfit Schema: Dress (ワンピース/ドレス型)
 
-attire:
+outfit:
   type: dress
   dress:
     style: ${dress_style|evening gown}

@@ -3,13 +3,13 @@
 
 _base: 02_domains/person/portrait.yaml
 
-# ドレスを着せたい場合は attire スキーマを切り替え
+# ドレスを着せたい場合は outfit スキーマを切り替え
 _layers:
-  - 03_parts/attire/dress.yaml
+  - 03_parts/outfit/dress.yaml
 
-# attire は separates(top/bottom) とマージせず完全置換
+# outfit は separates(top/bottom) とマージせず完全置換
 _replace:
-  - attire
+  - outfit
 
 # 人物属性の上書き
 demographics:
@@ -24,7 +24,7 @@ appearance:
     style: straight, flowing
 
 # ドレスの具体的な指定
-attire:
+outfit:
   dress:
     style: summer dress
     color: white

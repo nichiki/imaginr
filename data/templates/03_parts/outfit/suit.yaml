@@ -1,6 +1,6 @@
-# Attire Schema: Suit (スーツ型)
+# Outfit Schema: Suit (スーツ型)
 
-attire:
+outfit:
   type: suit
   jacket:
     style: ${jacket_style|single-breasted}

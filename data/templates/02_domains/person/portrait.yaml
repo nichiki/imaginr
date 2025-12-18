@@ -7,7 +7,7 @@ _layers:
   - 03_parts/lighting/natural.yaml
   - 03_parts/pose/standing.yaml
   - 03_parts/expression/base.yaml
-  - 03_parts/attire/separates.yaml
+  - 03_parts/outfit/separates.yaml
 
 # 被写体
 subject:
