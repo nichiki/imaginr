@@ -1,0 +1,13 @@
+# Pose Schema: Standing
+
+pose:
+  type: standing
+  body:
+    stance: ${stance|relaxed}
+    weight: ${weight_distribution|natural}
+  direction: ${body_direction|three-quarter view}
+  head:
+    tilt: ${head_tilt|slight}
+    turn: ${head_turn|toward camera}
+  arms: ${arm_position|relaxed at sides}
+  hands: ${hand_position|}

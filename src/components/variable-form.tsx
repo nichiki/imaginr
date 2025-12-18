@@ -154,7 +154,25 @@ export function VariableForm({ variables, values, onChange }: VariableFormProps)
       }
       const preset = presets.find((p) => p.name === presetName);
       if (preset) {
-        onChange(preset.values);
+        // 現在の変数リストに存在するキーのみ適用（古いキーは除外）
+        const validVarNames = new Set(variables.map((v) => v.name));
+        const filteredValues: VariableValues = {};
+
+        // プリセットの値のうち、現在の変数に存在するものだけ適用
+        for (const [key, value] of Object.entries(preset.values)) {
+          if (validVarNames.has(key)) {
+            filteredValues[key] = value;
+          }
+        }
+
+        // 現在の変数で、プリセットにないものは空文字で初期化
+        for (const v of variables) {
+          if (!(v.name in filteredValues)) {
+            filteredValues[v.name] = '';
+          }
+        }
+
+        onChange(filteredValues);
         setSelectedPreset(presetName);
       }
     },

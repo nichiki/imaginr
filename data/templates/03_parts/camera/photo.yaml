@@ -1,0 +1,12 @@
+# Camera Schema: Photography
+
+camera:
+  type: photography
+  sensor: ${sensor|35mm full frame}
+  lens:
+    focal_length: ${focal_length|85mm}
+    type: ${lens_type|portrait lens}
+  aperture: ${aperture|f/2.8}
+  depth_of_field: ${dof|shallow}
+  angle: ${camera_angle|eye level}
+  shot: ${shot_type|medium shot}

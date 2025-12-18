@@ -1,0 +1,17 @@
+# Core Base - 全ての生成に共通する品質設定
+
+quality:
+  rendering: ${rendering|photorealistic}
+  resolution: ${resolution|8K UHD}
+  details:
+    - highly detailed
+    - sharp focus
+    - professional
+
+negative:
+  - blurry
+  - low quality
+  - distorted
+  - deformed
+  - watermark
+  - signature

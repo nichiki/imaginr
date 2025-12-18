@@ -1,0 +1,37 @@
+# Portrait Photography Domain
+# ポートレート撮影の標準セット
+
+_base: 01_core/base.yaml
+_layers:
+  - 03_parts/camera/photo.yaml
+  - 03_parts/lighting/natural.yaml
+  - 03_parts/pose/standing.yaml
+  - 03_parts/expression/base.yaml
+  - 03_parts/attire/separates.yaml
+
+# 被写体
+subject:
+  type: person
+  framing: ${framing|portrait}
+
+# デモグラフィクス
+demographics:
+  age: ${age|young adult}
+  gender: ${gender|}
+  ethnicity: ${ethnicity|}
+  body_type: ${body_type|}
+
+# 外見
+appearance:
+  skin: ${skin|natural skin texture}
+  hair:
+    length: ${hair_length|}
+    color: ${hair_color|}
+    style: ${hair_style|}
+  eyes:
+    color: ${eye_color|}
+
+# 環境
+environment:
+  setting: ${setting|outdoor}
+  background: ${background|blurred, bokeh}

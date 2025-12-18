@@ -1,0 +1,10 @@
+# Expression Schema
+
+expression:
+  mood: ${mood|neutral}
+  eyes:
+    gaze: ${gaze|direct, at camera}
+    intensity: ${eye_intensity|}
+  mouth: ${mouth|relaxed, closed}
+  brows: ${brows|}
+  overall: ${overall_expression|calm}

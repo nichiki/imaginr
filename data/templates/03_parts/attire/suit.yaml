@@ -1,0 +1,18 @@
+# Attire Schema: Suit (スーツ型)
+
+attire:
+  type: suit
+  jacket:
+    style: ${jacket_style|single-breasted}
+    color: ${jacket_color|navy}
+    material: ${jacket_material|wool}
+  shirt:
+    color: ${shirt_color|white}
+    collar: ${shirt_collar|spread collar}
+  pants:
+    color: ${pants_color|navy}
+    style: ${pants_style|straight}
+  tie:
+    color: ${tie_color|}
+    pattern: ${tie_pattern|solid}
+  footwear: ${footwear|oxford shoes}

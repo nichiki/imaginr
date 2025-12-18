@@ -1,0 +1,14 @@
+# Attire Schema: Separates (トップ+ボトム分離型)
+
+attire:
+  type: separates
+  top:
+    item: ${top_item|shirt}
+    color: ${top_color|}
+    material: ${top_material|}
+  bottom:
+    item: ${bottom_item|pants}
+    color: ${bottom_color|}
+    material: ${bottom_material|}
+  footwear: ${footwear|}
+  accessories: ${accessories|}

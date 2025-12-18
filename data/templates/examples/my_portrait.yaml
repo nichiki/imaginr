@@ -1,0 +1,38 @@
+# My Portrait - 個別の調整例
+# 02_domains/person/portrait.yaml をベースに、必要な部分だけ上書き
+
+_base: 02_domains/person/portrait.yaml
+
+# ドレスを着せたい場合は attire スキーマを切り替え
+_layers:
+  - 03_parts/attire/dress.yaml
+
+# attire は separates(top/bottom) とマージせず完全置換
+_replace:
+  - attire
+
+# 人物属性の上書き
+demographics:
+  age: late 20s
+  gender: female
+  ethnicity: East Asian
+
+appearance:
+  hair:
+    length: long
+    color: black
+    style: straight, flowing
+
+# ドレスの具体的な指定
+attire:
+  dress:
+    style: summer dress
+    color: white
+    material: cotton
+    length: knee-length
+  footwear: sandals
+
+# 環境の変更
+environment:
+  setting: beach
+  background: sunset over ocean, golden light

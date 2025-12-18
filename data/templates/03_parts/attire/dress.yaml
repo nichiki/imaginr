@@ -1,0 +1,12 @@
+# Attire Schema: Dress (ワンピース/ドレス型)
+
+attire:
+  type: dress
+  dress:
+    style: ${dress_style|evening gown}
+    color: ${dress_color|}
+    material: ${dress_material|}
+    length: ${dress_length|floor-length}
+    details: ${dress_details|}
+  footwear: ${footwear|heels}
+  accessories: ${accessories|}

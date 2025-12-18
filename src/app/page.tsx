@@ -10,6 +10,7 @@ import {
   resolveAndMergeAsync,
   objectToYaml,
   generatePromptText,
+  cleanYamlString,
   FileData,
 } from '@/lib/yaml-utils';
 import { Snippet, snippetAPI } from '@/lib/snippet-api';
@@ -51,9 +52,9 @@ export default function Home() {
   const [variables, setVariables] = useState<VariableDefinition[]>([]);
   const [variableValues, setVariableValues] = useState<VariableValues>({});
 
-  // マージ結果
-  const [mergedYaml, setMergedYaml] = useState('');
-  const [promptText, setPromptText] = useState('');
+  // マージ結果（変数解決前）
+  const [mergedYamlRaw, setMergedYamlRaw] = useState('');
+  const [promptTextRaw, setPromptTextRaw] = useState('');
   const [lookName, setLookName] = useState<string | undefined>(undefined);
   const [isYamlValid, setIsYamlValid] = useState(true);
 
@@ -195,33 +196,22 @@ export default function Home() {
     [files, selectedFile]
   );
 
-  // 変数を抽出
+  // filesのrefを保持（useEffect内で最新値を参照するため）
+  const filesRef = useRef(files);
   useEffect(() => {
-    const vars = extractVariables(currentContent);
-    setVariables(vars);
-    // 新しい変数があればデフォルト値で初期化
-    setVariableValues((prev) => {
-      const next = { ...prev };
-      for (const v of vars) {
-        if (!(v.name in next)) {
-          next[v.name] = v.defaultValue ?? '';
-        }
-      }
-      // 不要な変数を削除
-      const varNames = new Set(vars.map((v) => v.name));
-      for (const key of Object.keys(next)) {
-        if (!varNames.has(key)) {
-          delete next[key];
-        }
-      }
-      return next;
-    });
-  }, [currentContent]);
+    filesRef.current = files;
+  }, [files]);
 
-  // 変数解決済みのコンテンツ
-  const resolvedContent = useMemo(
-    () => resolveVariables(currentContent, variableValues),
-    [currentContent, variableValues]
+  // 変数解決済みのマージ結果（空の値を除去）
+  const mergedYaml = useMemo(
+    () => cleanYamlString(resolveVariables(mergedYamlRaw, variableValues)),
+    [mergedYamlRaw, variableValues]
+  );
+
+  // 変数解決済みのプロンプトテキスト
+  const promptText = useMemo(
+    () => resolveVariables(promptTextRaw, variableValues),
+    [promptTextRaw, variableValues]
   );
 
   // ファイルパス一覧（補完用）
@@ -249,20 +239,15 @@ export default function Home() {
     }
   }, []);
 
-  // filesのrefを保持（useEffect内で最新値を参照するため）
-  const filesRef = useRef(files);
-  useEffect(() => {
-    filesRef.current = files;
-  }, [files]);
-
   // マージ結果とプロンプトテキスト（非同期で計算）
-  // 依存配列からfilesを外し、resolvedContentの変更で発火
+  // マージ後のYAMLから変数を抽出
   useEffect(() => {
-    if (!selectedFile || !resolvedContent) {
-      setMergedYaml('');
-      setPromptText('');
+    if (!selectedFile || !currentContent) {
+      setMergedYamlRaw('');
+      setPromptTextRaw('');
       setLookName(undefined);
       setIsYamlValid(true);
+      setVariables([]);
       return;
     }
 
@@ -271,41 +256,67 @@ export default function Home() {
     (async () => {
       try {
         // 参照ファイル用のキャッシュ（メイン状態とは別管理）
-        // 現在のファイルは変数解決済みコンテンツを使用
-        const tempCache: FileData = { ...filesRef.current, [selectedFile]: resolvedContent };
+        // 現在のファイルは生のコンテンツを使用（変数解決前）
+        const tempCache: FileData = { ...filesRef.current, [selectedFile]: currentContent };
         const merged = await resolveAndMergeAsync(selectedFile, tempCache, readFileForMerge);
 
         if (cancelled) return;
 
         // 空オブジェクトが返ってきた場合はパースエラーの可能性
-        const isEmpty = Object.keys(merged).length === 0 && resolvedContent.trim() !== '';
+        const isEmpty = Object.keys(merged).length === 0 && currentContent.trim() !== '';
         if (isEmpty) {
-          setMergedYaml('');
-          setPromptText('');
+          setMergedYamlRaw('');
+          setPromptTextRaw('');
           setLookName(undefined);
           setIsYamlValid(false);
+          setVariables([]);
           return;
         }
+
         const yamlStr = objectToYaml(merged);
+
+        // マージ後のYAMLから変数を抽出
+        const vars = extractVariables(yamlStr);
+        setVariables(vars);
+
+        // 新しい変数があればデフォルト値で初期化
+        setVariableValues((prev) => {
+          const next = { ...prev };
+          for (const v of vars) {
+            if (!(v.name in next)) {
+              next[v.name] = v.defaultValue ?? '';
+            }
+          }
+          // 不要な変数を削除
+          const varNames = new Set(vars.map((v) => v.name));
+          for (const key of Object.keys(next)) {
+            if (!varNames.has(key)) {
+              delete next[key];
+            }
+          }
+          return next;
+        });
+
         const prompt = generatePromptText(merged);
         const look = (merged.look as { name?: string })?.name;
-        setMergedYaml(yamlStr);
-        setPromptText(prompt);
+        setMergedYamlRaw(yamlStr);
+        setPromptTextRaw(prompt);
         setLookName(look);
         setIsYamlValid(true);
       } catch {
         if (cancelled) return;
-        setMergedYaml('');
-        setPromptText('');
+        setMergedYamlRaw('');
+        setPromptTextRaw('');
         setLookName(undefined);
         setIsYamlValid(false);
+        setVariables([]);
       }
     })();
 
     return () => {
       cancelled = true;
     };
-  }, [selectedFile, resolvedContent, readFileForMerge]);
+  }, [selectedFile, currentContent, readFileForMerge]);
 
   // ファイル選択ハンドラ
   const handleFileSelect = useCallback(async (path: string) => {
