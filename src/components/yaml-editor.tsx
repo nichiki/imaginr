@@ -219,13 +219,13 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
             const needsSpace = spaceAfterColon.length === 0;
             const filteredEntries = dictEntries.filter((entry) =>
               entry.value.toLowerCase().includes(typedValue.toLowerCase()) ||
-              (entry.label && entry.label.toLowerCase().includes(typedValue.toLowerCase()))
+              (entry.description && entry.description.toLowerCase().includes(typedValue.toLowerCase()))
             );
 
             if (filteredEntries.length > 0) {
               return {
                 suggestions: filteredEntries.map((entry) => ({
-                  label: entry.label || entry.value,
+                  label: entry.description ? `${entry.value}（${entry.description}）` : entry.value,
                   kind: monaco.languages.CompletionItemKind.Value,
                   insertText: needsSpace ? ` ${entry.value}` : entry.value,
                   detail: `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`,

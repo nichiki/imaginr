@@ -8,7 +8,7 @@ const DICTIONARY_DIR = path.join(process.cwd(), 'data', 'dictionary');
 
 interface DictionaryValue {
   value: string;
-  label?: string;
+  description?: string;
 }
 
 interface DictionaryEntry {
@@ -25,7 +25,7 @@ interface FlatDictionaryEntry {
   key: string;
   context: string;
   value: string;
-  label?: string;
+  description?: string;
   source: 'standard' | 'user';
 }
 
@@ -53,7 +53,7 @@ async function loadDictionaryFiles(
                   key: entry.key,
                   context: entry.context,
                   value: val.value,
-                  label: val.label,
+                  description: val.description,
                   source,
                 });
               }

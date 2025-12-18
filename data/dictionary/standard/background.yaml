@@ -6,58 +6,58 @@ entries:
     context: background
     values:
       - value: studio
-        label: studio (スタジオ)
+        description: スタジオ
       - value: outdoor
-        label: outdoor (屋外)
+        description: 屋外
       - value: indoor
-        label: indoor (屋内)
+        description: 屋内
       - value: abstract
-        label: abstract (抽象)
+        description: 抽象
       - value: gradient
-        label: gradient (グラデーション)
+        description: グラデーション
       - value: solid
-        label: solid (単色)
+        description: 単色
       - value: textured
-        label: textured (テクスチャ)
+        description: テクスチャ
       - value: environmental
-        label: environmental (環境)
+        description: 環境
       - value: seamless
-        label: seamless (シームレス)
+        description: シームレス
 
   # background.style - 背景スタイル
   - key: style
     context: background
     values:
       - value: minimal
-        label: minimal (ミニマル)
+        description: ミニマル
       - value: detailed
-        label: detailed (詳細)
+        description: 詳細
       - value: blurred
-        label: blurred (ぼかし)
+        description: ぼかし
       - value: sharp
-        label: sharp (シャープ)
+        description: シャープ
       - value: dark
-        label: dark (暗い)
+        description: 暗い
       - value: bright
-        label: bright (明るい)
+        description: 明るい
       - value: moody
-        label: moody (ムーディー)
+        description: ムーディー
       - value: clean
-        label: clean (クリーン)
+        description: クリーン
 
   # background.elements - 背景要素
   - key: elements
     context: background
     values:
       - value: none
-        label: none (なし)
+        description: なし
       - value: subtle patterns
-        label: subtle patterns (控えめなパターン)
+        description: 控えめなパターン
       - value: architectural
-        label: architectural (建築的)
+        description: 建築的
       - value: natural
-        label: natural (自然)
+        description: 自然
       - value: urban
-        label: urban (都市)
+        description: 都市
       - value: industrial
-        label: industrial (インダストリアル)
+        description: インダストリアル

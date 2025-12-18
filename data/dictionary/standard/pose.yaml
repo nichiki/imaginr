@@ -6,86 +6,86 @@ entries:
     context: pose
     values:
       - value: standing
-        label: standing (立ち)
+        description: 立ち
       - value: sitting
-        label: sitting (座り)
+        description: 座り
       - value: walking
-        label: walking (歩行)
+        description: 歩行
       - value: lying
-        label: lying (横たわる)
+        description: 横たわる
       - value: kneeling
-        label: kneeling (膝立ち)
+        description: 膝立ち
       - value: crouching
-        label: crouching (しゃがむ)
+        description: しゃがむ
       - value: leaning
-        label: leaning (寄りかかる)
+        description: 寄りかかる
       - value: reclining
-        label: reclining (もたれる)
+        description: もたれる
 
   # pose.direction - ポーズ方向
   - key: direction
     context: pose
     values:
       - value: frontal
-        label: frontal (正面)
+        description: 正面
       - value: profile
-        label: profile (横向き)
+        description: 横向き
       - value: three-quarter
-        label: three-quarter (斜め45度)
+        description: 斜め45度
       - value: back turned
-        label: back turned (後ろ向き)
+        description: 後ろ向き
       - value: back turned, looking over shoulder
-        label: back turned, looking over shoulder (振り向き)
+        description: 振り向き
 
   # torso - 胴体
   - key: torso
     context: body
     values:
       - value: straight, relaxed
-        label: straight, relaxed (まっすぐ、リラックス)
+        description: まっすぐ、リラックス
       - value: slightly leaning
-        label: slightly leaning (少し傾く)
+        description: 少し傾く
       - value: natural motion
-        label: natural motion (自然な動き)
+        description: 自然な動き
       - value: twisted
-        label: twisted (ひねり)
+        description: ひねり
       - value: arched
-        label: arched (反り)
+        description: 反り
 
   # arms - 腕
   - key: arms
     context: body
     values:
       - value: at sides
-        label: at sides (両脇)
+        description: 両脇
       - value: crossed
-        label: crossed (組む)
+        description: 組む
       - value: hands on hips
-        label: hands on hips (腰に手)
+        description: 腰に手
       - value: hands on lap
-        label: hands on lap (膝の上)
+        description: 膝の上
       - value: raised
-        label: raised (上げる)
+        description: 上げる
       - value: swinging naturally
-        label: swinging naturally (自然に振る)
+        description: 自然に振る
       - value: one hand raised
-        label: one hand raised (片手を上げる)
+        description: 片手を上げる
       - value: behind back
-        label: behind back (背中の後ろ)
+        description: 背中の後ろ
 
   # legs - 脚
   - key: legs
     context: body
     values:
       - value: together
-        label: together (揃える)
+        description: 揃える
       - value: apart
-        label: apart (開く)
+        description: 開く
       - value: crossed
-        label: crossed (組む)
+        description: 組む
       - value: mid-stride
-        label: mid-stride (歩行中)
+        description: 歩行中
       - value: bent
-        label: bent (曲げる)
+        description: 曲げる
       - value: extended
-        label: extended (伸ばす)
+        description: 伸ばす

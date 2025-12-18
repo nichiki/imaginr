@@ -6,84 +6,84 @@ entries:
     context: lighting
     values:
       - value: low-key
-        label: low-key (暗め)
+        description: 暗め
       - value: high-key
-        label: high-key (明るめ)
+        description: 明るめ
       - value: natural
-        label: natural (自然光)
+        description: 自然光
       - value: dramatic
-        label: dramatic (ドラマチック)
+        description: ドラマチック
       - value: soft
-        label: soft (ソフト)
+        description: ソフト
       - value: harsh
-        label: harsh (ハード)
+        description: ハード
 
   # lighting.type - ライトタイプ
   - key: type
     context: lighting
     values:
       - value: soft diffused light
-        label: soft diffused light (ソフト拡散光)
+        description: ソフト拡散光
       - value: directional diffused soft light
-        label: directional diffused soft light (指向性ソフト光)
+        description: 指向性ソフト光
       - value: hard directional light
-        label: hard directional light (ハード指向性光)
+        description: ハード指向性光
       - value: rim light
-        label: rim light (リムライト)
+        description: リムライト
       - value: backlight
-        label: backlight (バックライト)
+        description: バックライト
       - value: ambient light
-        label: ambient light (環境光)
+        description: 環境光
       - value: spotlight
-        label: spotlight (スポットライト)
+        description: スポットライト
       - value: natural daylight
-        label: natural daylight (自然光)
+        description: 自然光
       - value: golden hour
-        label: golden hour (ゴールデンアワー)
+        description: ゴールデンアワー
       - value: blue hour
-        label: blue hour (ブルーアワー)
+        description: ブルーアワー
 
   # lighting.color - ライト色
   - key: color
     context: lighting
     values:
       - value: warm white
-        label: warm white (暖白色)
+        description: 暖白色
       - value: cool white
-        label: cool white (冷白色)
+        description: 冷白色
       - value: neutral
-        label: neutral (ニュートラル)
+        description: ニュートラル
       - value: golden
-        label: golden (ゴールデン)
+        description: ゴールデン
       - value: amber
-        label: amber (アンバー)
+        description: アンバー
       - value: cyan
-        label: cyan (シアン)
+        description: シアン
       - value: magenta
-        label: magenta (マゼンタ)
+        description: マゼンタ
 
   # shadow.quality - 影の品質
   - key: quality
     context: shadow
     values:
       - value: soft, present
-        label: soft, present (ソフト、存在感あり)
+        description: ソフト、存在感あり
       - value: hard, defined
-        label: hard, defined (ハード、明確)
+        description: ハード、明確
       - value: minimal
-        label: minimal (最小限)
+        description: 最小限
       - value: deep
-        label: deep (深い)
+        description: 深い
       - value: subtle
-        label: subtle (控えめ)
+        description: 控えめ
 
   # shadow.depth - 影の深さ
   - key: depth
     context: shadow
     values:
       - value: deep
-        label: deep (深い)
+        description: 深い
       - value: shallow
-        label: shallow (浅い)
+        description: 浅い
       - value: moderate
-        label: moderate (中程度)
+        description: 中程度

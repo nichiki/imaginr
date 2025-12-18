@@ -2,7 +2,7 @@
 
 export interface DictionaryEntry {
   value: string;
-  label?: string;  // 表示用ラベル（省略時はvalueを使用）
+  description?: string;  // 補足説明（省略可）
 }
 
 export interface DictionaryItem {
@@ -17,7 +17,7 @@ export interface FlatDictionaryEntry {
   key: string;
   context: string;
   value: string;
-  label?: string;
+  description?: string;
   source: 'standard' | 'user';
 }
 
@@ -44,7 +44,7 @@ export function buildDictionaryCache(
     }
     cache.get(cacheKey)!.push({
       value: entry.value,
-      label: entry.label,
+      description: entry.description,
     });
   }
 
