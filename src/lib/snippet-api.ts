@@ -48,12 +48,13 @@ export const snippetAPI = {
   },
 };
 
-// カテゴリでグループ化（フラット）
+// カテゴリでグループ化（フラット・カテゴリ名はそのまま使用）
 export function getSnippetsByCategory(snippets: Snippet[]): Map<string, Snippet[]> {
   const grouped = new Map<string, Snippet[]>();
 
   for (const snippet of snippets) {
-    const category = snippet.category.split('/')[0]; // トップレベルカテゴリ
+    // カテゴリ名をそのまま使用（/も含めてそのまま）
+    const category = snippet.category;
     if (!grouped.has(category)) {
       grouped.set(category, []);
     }
@@ -61,72 +62,4 @@ export function getSnippetsByCategory(snippets: Snippet[]): Map<string, Snippet[
   }
 
   return grouped;
-}
-
-// カテゴリツリーノード
-export interface CategoryNode {
-  name: string;
-  path: string;
-  snippets: Snippet[];
-  children: CategoryNode[];
-}
-
-// カテゴリツリーを構築（多段対応）
-export function buildCategoryTree(snippets: Snippet[]): CategoryNode[] {
-  const root: CategoryNode[] = [];
-  const nodeMap = new Map<string, CategoryNode>();
-
-  // まずすべてのカテゴリパスからノードを作成
-  for (const snippet of snippets) {
-    const parts = snippet.category.split('/');
-    let currentPath = '';
-
-    for (let i = 0; i < parts.length; i++) {
-      const part = parts[i];
-      const parentPath = currentPath;
-      currentPath = currentPath ? `${currentPath}/${part}` : part;
-
-      if (!nodeMap.has(currentPath)) {
-        const node: CategoryNode = {
-          name: part,
-          path: currentPath,
-          snippets: [],
-          children: [],
-        };
-        nodeMap.set(currentPath, node);
-
-        // 親に追加
-        if (parentPath) {
-          const parent = nodeMap.get(parentPath);
-          if (parent) {
-            parent.children.push(node);
-          }
-        } else {
-          root.push(node);
-        }
-      }
-    }
-
-    // スニペットを最終カテゴリに追加
-    const leafNode = nodeMap.get(snippet.category);
-    if (leafNode) {
-      leafNode.snippets.push(snippet);
-    }
-  }
-
-  // 子ノードをソート
-  const sortNodes = (nodes: CategoryNode[]) => {
-    nodes.sort((a, b) => a.name.localeCompare(b.name));
-    nodes.forEach((node) => sortNodes(node.children));
-  };
-  sortNodes(root);
-
-  return root;
-}
-
-// コンテキストに応じたスニペットを取得
-export function getSnippetsForContext(snippets: Snippet[], context: string): Snippet[] {
-  return snippets.filter(
-    (s) => s.key === context || s.category.startsWith(context)
-  );
 }
