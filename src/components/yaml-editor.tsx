@@ -278,6 +278,57 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
               })),
             };
           }
+
+          // 一般的な配列要素の辞書補完（_layers以外）
+          // 親キーを探して、そのキーで辞書を検索
+          const typedValue = layerItemMatch[1];
+          const currentLineIndent = textUntilPosition.match(/^(\s*)/)?.[1].length ?? 0;
+
+          // 親キーを探す（現在行より浅いインデントの key: を持つ行）
+          let parentKey: string | null = null;
+          for (let i = position.lineNumber - 1; i >= 1; i--) {
+            const prevLine = model.getLineContent(i);
+            const prevIndent = prevLine.match(/^(\s*)/)?.[1].length ?? 0;
+            const keyMatch = prevLine.match(/^(\s*)(\w+):\s*$/);
+
+            if (prevIndent < currentLineIndent && keyMatch) {
+              parentKey = keyMatch[2];
+              break;
+            }
+          }
+
+          if (parentKey) {
+            const contextPath = getContextPath(model, position.lineNumber);
+            // contextPathの最後の要素がparentKeyと同じなら、それを除く
+            const lookupContext = contextPath[contextPath.length - 1] === parentKey
+              ? contextPath.slice(0, -1)
+              : contextPath;
+            const dictEntries = lookupDictionary(lookupContext, parentKey);
+
+            if (dictEntries.length > 0) {
+              const filteredEntries = dictEntries.filter((entry) =>
+                entry.value.toLowerCase().includes(typedValue.toLowerCase()) ||
+                (entry.description && entry.description.toLowerCase().includes(typedValue.toLowerCase()))
+              );
+
+              if (filteredEntries.length > 0) {
+                return {
+                  suggestions: filteredEntries.map((entry) => ({
+                    label: entry.description ? `${entry.value}（${entry.description}）` : entry.value,
+                    kind: monaco.languages.CompletionItemKind.Value,
+                    insertText: entry.value,
+                    detail: `${lookupContext.length > 0 ? lookupContext.join('.') + '.' : ''}${parentKey}`,
+                    range: {
+                      startLineNumber: position.lineNumber,
+                      startColumn: position.column - typedValue.length,
+                      endLineNumber: position.lineNumber,
+                      endColumn: position.column,
+                    },
+                  })),
+                };
+              }
+            }
+          }
         }
 
         return { suggestions: [] };

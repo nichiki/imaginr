@@ -1,0 +1,49 @@
+# 構図・フレーミング
+entries:
+  - key: composition
+    context: "*"
+    values:
+      # 人物向け構図
+      - value: headshot
+        description: 顔のみ
+      - value: close up
+        description: 顔〜首
+      - value: bust shot
+        description: 胸上
+      - value: portrait
+        description: 頭〜上半身
+      - value: medium shot
+        description: 腰上
+      - value: cowboy shot
+        description: 腿上
+      - value: three quarter
+        description: 膝上
+      - value: full body
+        description: 全身
+      # 一般構図
+      - value: wide shot
+        description: 被写体＋周囲環境
+      - value: extreme wide shot
+        description: 風景主体
+      - value: overhead
+        description: 真上から
+      - value: birds eye view
+        description: 高所から斜め下
+      - value: worms eye view
+        description: 低所から見上げ
+      - value: dutch angle
+        description: 傾き構図
+      - value: low angle
+        description: アオリ（見上げ）
+      - value: high angle
+        description: フカン（見下ろし）
+      - value: eye level
+        description: 目線の高さ
+      - value: symmetrical
+        description: 左右対称
+      - value: rule of thirds
+        description: 三分割法
+      - value: centered
+        description: 中央配置
+      - value: diagonal
+        description: 対角線配置

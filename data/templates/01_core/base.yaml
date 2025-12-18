@@ -1,17 +1,66 @@
-# Core Base - 全ての生成に共通する品質設定
+# ========================================
+# ビジュアル
+# ========================================
 
+# 品質
 quality:
-  rendering: ${rendering|photorealistic}
-  resolution: ${resolution|8K UHD}
-  details:
-    - highly detailed
-    - sharp focus
-    - professional
+  - high resolution, 8K UHD
+  - sharp focus
+  - highly detailed
+  - absurdres
 
-negative:
-  - blurry
-  - low quality
-  - distorted
-  - deformed
-  - watermark
-  - signature
+# スタイル
+aesthetic: ${aesthetic}
+
+# ムード
+mood: ${mood}
+
+# ========================================
+# 技術
+# ========================================
+
+# カメラ
+camera:
+  type: ${camera_type}
+  lens: ${lens}
+  film: ${film}
+  effects: ${effects[]}
+
+# 構図
+composition: ${composition[]}
+
+# ライティング
+lighting:
+  style: ${lighting_style}
+  type: ${lighting_type}
+  color: ${lighting_color}
+  shadow: ${lighting_shadow}
+
+# ========================================
+# 被写体
+# ========================================
+
+# 主題
+subject: ${subject}
+
+# 属性
+demographics: ~
+
+# 外見
+appearance: ~
+
+# 表情
+expression: ~
+
+# ポーズ
+pose: ~
+
+# 服装
+outfit: ~
+
+# ========================================
+# 環境
+# ========================================
+
+# 環境
+environment: ~

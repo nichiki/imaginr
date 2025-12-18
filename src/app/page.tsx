@@ -21,7 +21,7 @@ import {
 } from '@/lib/dictionary-api';
 import { loadState, saveState } from '@/lib/storage';
 import {
-  extractVariables,
+  extractVariablesWithPath,
   resolveVariables,
   VariableDefinition,
   VariableValues,
@@ -275,8 +275,8 @@ export default function Home() {
 
         const yamlStr = objectToYaml(merged);
 
-        // マージ後のYAMLから変数を抽出
-        const vars = extractVariables(yamlStr);
+        // マージ後のYAMLオブジェクトから変数を抽出（パス情報付き）
+        const vars = extractVariablesWithPath(merged);
         setVariables(vars);
 
         // 新しい変数があればデフォルト値で初期化
@@ -284,7 +284,8 @@ export default function Home() {
           const next = { ...prev };
           for (const v of vars) {
             if (!(v.name in next)) {
-              next[v.name] = v.defaultValue ?? '';
+              // 配列変数は空配列、通常変数は空文字列で初期化
+              next[v.name] = v.isMulti ? [] : (v.defaultValue ?? '');
             }
           }
           // 不要な変数を削除
@@ -903,6 +904,7 @@ export default function Home() {
                 variables={variables}
                 values={variableValues}
                 onChange={setVariableValues}
+                dictionaryCache={dictionaryCache}
               />
             </div>
             {/* Variable Panel Resize Handle */}

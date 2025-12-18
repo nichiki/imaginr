@@ -52,28 +52,19 @@ export function buildDictionaryCache(
 }
 
 // コンテキストに応じた辞書エントリを検索
-// 直近の親コンテキストから汎用へフォールバック
-// 例: contextPath=["fashion", "outfit"], key="type" の場合
-// 1. outfit.type を検索（直近の親）
-// 2. fashion.outfit.type を検索（フルパス）
-// 3. *.type を検索（汎用）
+// 具体的なコンテキストから汎用へフォールバック
+// 例: contextPath=["outfit", "jacket"], key="style" の場合
+// 1. outfit.jacket.style を検索（フルパス - 最も具体的）
+// 2. jacket.style を検索（直近の親）
+// 3. outfit.style を検索（上位の親）
+// 4. *.style を検索（汎用）
 export function lookupDictionary(
   cache: Map<string, DictionaryEntry[]>,
-  contextPath: string[], // 親キーの配列 (例: ["fashion", "outfit"])
+  contextPath: string[], // 親キーの配列 (例: ["outfit", "jacket"])
   key: string
 ): DictionaryEntry[] {
-  // まず直近の親コンテキストで検索（最も一般的なケース）
+  // 1. フルパスで検索（最も具体的）
   if (contextPath.length > 0) {
-    const immediateParent = contextPath[contextPath.length - 1];
-    const immediateKey = `${immediateParent}.${key}`;
-    const entries = cache.get(immediateKey);
-    if (entries && entries.length > 0) {
-      return entries;
-    }
-  }
-
-  // 次にフルパスで検索（より具体的なコンテキスト）
-  if (contextPath.length > 1) {
     const fullPath = contextPath.join('.');
     const fullKey = `${fullPath}.${key}`;
     const entries = cache.get(fullKey);
@@ -82,7 +73,17 @@ export function lookupDictionary(
     }
   }
 
-  // 最後に汎用コンテキストを検索
+  // 2. 各親コンテキストを後ろから順に検索
+  // ["outfit", "jacket"] → "jacket.style", "outfit.style"
+  for (let i = contextPath.length - 1; i >= 0; i--) {
+    const contextKey = `${contextPath[i]}.${key}`;
+    const entries = cache.get(contextKey);
+    if (entries && entries.length > 0) {
+      return entries;
+    }
+  }
+
+  // 3. 最後に汎用コンテキストを検索
   const wildcardKey = `*.${key}`;
   return cache.get(wildcardKey) || [];
 }

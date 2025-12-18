@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo } from 'react';
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -20,6 +20,7 @@ import {
 } from '@/components/ui/dialog';
 import { Save, Trash2 } from 'lucide-react';
 import type { VariableDefinition, VariableValues } from '@/lib/variable-utils';
+import { DictionaryEntry, lookupDictionary } from '@/lib/dictionary-api';
 
 interface Preset {
   name: string;
@@ -30,6 +31,24 @@ interface VariableFormProps {
   variables: VariableDefinition[];
   values: VariableValues;
   onChange: (values: VariableValues) => void;
+  dictionaryCache: Map<string, DictionaryEntry[]>;
+}
+
+// YAMLパスから辞書を検索するためのキーを生成
+// 例: "outfit.jacket.style" → ["outfit.jacket", "jacket"] → "jacket.style", "*.style"
+function getDictionaryEntries(
+  yamlPath: string | undefined,
+  dictionaryCache: Map<string, DictionaryEntry[]>
+): DictionaryEntry[] {
+  if (!yamlPath) return [];
+
+  const parts = yamlPath.split('.');
+  if (parts.length === 0) return [];
+
+  const key = parts[parts.length - 1]; // 最後のキー (例: "style")
+  const contextPath = parts.slice(0, -1); // コンテキストパス (例: ["outfit", "jacket"])
+
+  return lookupDictionary(dictionaryCache, contextPath, key);
 }
 
 // プリセットのストレージキーを変数名から生成
@@ -58,15 +77,320 @@ function savePresetsToStorage(variables: VariableDefinition[], presets: Preset[]
   localStorage.setItem(key, JSON.stringify(presets));
 }
 
-// 値が一致するかチェック
+// 値が一致するかチェック（配列対応）
 function areValuesEqual(a: VariableValues, b: VariableValues): boolean {
   const keysA = Object.keys(a);
   const keysB = Object.keys(b);
   if (keysA.length !== keysB.length) return false;
-  return keysA.every((key) => a[key] === b[key]);
+  return keysA.every((key) => {
+    const valA = a[key];
+    const valB = b[key];
+    if (Array.isArray(valA) && Array.isArray(valB)) {
+      return valA.length === valB.length && valA.every((v, i) => v === valB[i]);
+    }
+    return valA === valB;
+  });
 }
 
-export function VariableForm({ variables, values, onChange }: VariableFormProps) {
+// オートコンプリート付きインプット
+function AutocompleteInput({
+  id,
+  value,
+  onChange,
+  placeholder,
+  suggestions,
+}: {
+  id: string;
+  value: string;
+  onChange: (value: string) => void;
+  placeholder: string;
+  suggestions: DictionaryEntry[];
+}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [filteredSuggestions, setFilteredSuggestions] = useState<DictionaryEntry[]>([]);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const [dropdownPosition, setDropdownPosition] = useState<'below' | 'above'>('below');
+  const inputRef = useRef<HTMLInputElement>(null);
+  const listRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // ドロップダウンの表示位置を計算
+  const calculateDropdownPosition = useCallback(() => {
+    if (!inputRef.current) return;
+
+    const inputRect = inputRef.current.getBoundingClientRect();
+    const viewportHeight = window.innerHeight;
+    const dropdownHeight = 160; // max-h-40 = 10rem = 160px
+
+    // 下に表示するスペースがあるか
+    const spaceBelow = viewportHeight - inputRect.bottom;
+    const spaceAbove = inputRect.top;
+
+    // 下にスペースがない場合は上に表示
+    if (spaceBelow < dropdownHeight && spaceAbove > spaceBelow) {
+      setDropdownPosition('above');
+    } else {
+      setDropdownPosition('below');
+    }
+  }, []);
+
+  // 入力値でフィルタ
+  useEffect(() => {
+    if (!value.trim()) {
+      setFilteredSuggestions(suggestions);
+    } else {
+      const lower = value.toLowerCase();
+      setFilteredSuggestions(
+        suggestions.filter(
+          (s) =>
+            s.value.toLowerCase().includes(lower) ||
+            s.description?.toLowerCase().includes(lower)
+        )
+      );
+    }
+    setSelectedIndex(-1);
+  }, [value, suggestions]);
+
+  // フォーカス時に位置を計算
+  const handleFocus = useCallback(() => {
+    calculateDropdownPosition();
+    setIsOpen(true);
+  }, [calculateDropdownPosition]);
+
+  const handleSelect = useCallback(
+    (entry: DictionaryEntry) => {
+      onChange(entry.value);
+      setIsOpen(false);
+      inputRef.current?.focus();
+    },
+    [onChange]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (!isOpen || filteredSuggestions.length === 0) return;
+
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault();
+          setSelectedIndex((prev) =>
+            prev < filteredSuggestions.length - 1 ? prev + 1 : 0
+          );
+          break;
+        case 'ArrowUp':
+          e.preventDefault();
+          setSelectedIndex((prev) =>
+            prev > 0 ? prev - 1 : filteredSuggestions.length - 1
+          );
+          break;
+        case 'Enter':
+          e.preventDefault();
+          if (selectedIndex >= 0 && selectedIndex < filteredSuggestions.length) {
+            handleSelect(filteredSuggestions[selectedIndex]);
+          }
+          break;
+        case 'Escape':
+          setIsOpen(false);
+          break;
+      }
+    },
+    [isOpen, filteredSuggestions, selectedIndex, handleSelect]
+  );
+
+  // 選択アイテムをスクロールで見える位置に
+  useEffect(() => {
+    if (selectedIndex >= 0 && listRef.current) {
+      const item = listRef.current.children[selectedIndex] as HTMLElement;
+      item?.scrollIntoView({ block: 'nearest' });
+    }
+  }, [selectedIndex]);
+
+  return (
+    <div ref={containerRef} className="relative">
+      <Input
+        ref={inputRef}
+        id={id}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onFocus={handleFocus}
+        onBlur={() => {
+          // 少し遅延させてクリックイベントが先に処理されるようにする
+          setTimeout(() => setIsOpen(false), 150);
+        }}
+        onKeyDown={handleKeyDown}
+        placeholder={placeholder}
+        className="h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
+        autoComplete="off"
+      />
+      {isOpen && filteredSuggestions.length > 0 && (
+        <div
+          ref={listRef}
+          className={`absolute z-50 w-full max-h-40 overflow-y-auto bg-[#252526] border border-[#454545] rounded shadow-lg ${
+            dropdownPosition === 'above' ? 'bottom-full mb-1' : 'top-full mt-1'
+          }`}
+        >
+          {filteredSuggestions.map((entry, index) => (
+            <div
+              key={entry.value}
+              className={`px-2 py-1 text-xs cursor-pointer ${
+                index === selectedIndex
+                  ? 'bg-[#094771] text-white'
+                  : 'text-[#d4d4d4] hover:bg-[#2a2d2e]'
+              }`}
+              onMouseDown={() => handleSelect(entry)}
+              onMouseEnter={() => setSelectedIndex(index)}
+            >
+              <span>{entry.value}</span>
+              {entry.description && (
+                <span className="text-[#888] ml-2">{entry.description}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// 複数選択チェックボックス（カスタム値追加対応）
+function MultiSelectCheckboxes({
+  id,
+  value,
+  onChange,
+  suggestions,
+}: {
+  id: string;
+  value: string[];
+  onChange: (value: string[]) => void;
+  suggestions: DictionaryEntry[];
+}) {
+  const [customInput, setCustomInput] = useState('');
+
+  // 辞書に含まれる値のセット
+  const suggestionValues = useMemo(
+    () => new Set(suggestions.map((s) => s.value)),
+    [suggestions]
+  );
+
+  // カスタム値（辞書にない値）
+  const customValues = useMemo(
+    () => value.filter((v) => !suggestionValues.has(v)),
+    [value, suggestionValues]
+  );
+
+  const handleToggle = useCallback(
+    (entryValue: string) => {
+      if (value.includes(entryValue)) {
+        onChange(value.filter((v) => v !== entryValue));
+      } else {
+        onChange([...value, entryValue]);
+      }
+    },
+    [value, onChange]
+  );
+
+  const handleAddCustom = useCallback(() => {
+    const trimmed = customInput.trim();
+    if (trimmed && !value.includes(trimmed)) {
+      onChange([...value, trimmed]);
+      setCustomInput('');
+    }
+  }, [customInput, value, onChange]);
+
+  const handleRemoveCustom = useCallback(
+    (customValue: string) => {
+      onChange(value.filter((v) => v !== customValue));
+    },
+    [value, onChange]
+  );
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if (e.key === 'Enter' && !e.nativeEvent.isComposing) {
+        e.preventDefault();
+        handleAddCustom();
+      }
+    },
+    [handleAddCustom]
+  );
+
+  return (
+    <div className="flex flex-col gap-2 border border-[#555] rounded p-2 bg-[#3c3c3c]">
+      {/* チェックボックス（辞書の値） */}
+      <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
+        {suggestions.map((entry) => {
+          const label = entry.description
+            ? `${entry.value}（${entry.description}）`
+            : entry.value;
+          return (
+            <label
+              key={entry.value}
+              className="flex items-center gap-2 text-xs text-[#d4d4d4] cursor-pointer hover:bg-[#4c4c4c] px-1 py-0.5 rounded min-w-0"
+              title={label}
+            >
+              <input
+                type="checkbox"
+                checked={value.includes(entry.value)}
+                onChange={() => handleToggle(entry.value)}
+                className="w-3 h-3 accent-[#0e639c] flex-shrink-0"
+              />
+              <span className="truncate">{label}</span>
+            </label>
+          );
+        })}
+        {suggestions.length === 0 && (
+          <span className="text-[#888] text-xs">No options available</span>
+        )}
+      </div>
+
+      {/* カスタム値の表示 */}
+      {customValues.length > 0 && (
+        <div className="flex flex-wrap gap-1 pt-1 border-t border-[#555]">
+          {customValues.map((cv) => (
+            <span
+              key={cv}
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 bg-[#4c4c4c] text-[#d4d4d4] text-xs rounded"
+            >
+              {cv}
+              <button
+                type="button"
+                onClick={() => handleRemoveCustom(cv)}
+                className="text-[#888] hover:text-red-400 font-bold leading-none"
+                title="Remove"
+              >
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {/* カスタム値追加入力 */}
+      <div className="flex gap-1 pt-1 border-t border-[#555]">
+        <Input
+          id={`${id}-custom`}
+          value={customInput}
+          onChange={(e) => setCustomInput(e.target.value)}
+          onKeyDown={handleKeyDown}
+          placeholder="Add custom value..."
+          className="h-6 text-xs bg-[#2d2d2d] border-[#555] text-[#d4d4d4] flex-1"
+        />
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={handleAddCustom}
+          disabled={!customInput.trim()}
+          className="h-6 px-2 text-xs text-[#888] hover:text-[#d4d4d4] hover:bg-[#4c4c4c] disabled:opacity-30"
+        >
+          +
+        </Button>
+      </div>
+    </div>
+  );
+}
+
+export function VariableForm({ variables, values, onChange, dictionaryCache }: VariableFormProps) {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
@@ -89,7 +413,7 @@ export function VariableForm({ variables, values, onChange }: VariableFormProps)
   }, [selectedPreset, presets, values]);
 
   const handleChange = useCallback(
-    (name: string, value: string) => {
+    (name: string, value: string | string[]) => {
       onChange({ ...values, [name]: value });
       // 選択状態は維持（クリアしない）
     },
@@ -280,28 +604,61 @@ export function VariableForm({ variables, values, onChange }: VariableFormProps)
       {/* Variable inputs */}
       <div className="flex-1 overflow-y-auto p-3">
         <div className="flex flex-col gap-3">
-          {variables.map((variable) => (
-            <div key={variable.name} className="flex flex-col gap-1">
-              <Label
-                htmlFor={`var-${variable.name}`}
-                className="text-xs text-[#9cdcfe]"
-              >
-                {variable.name}
-                {variable.defaultValue && (
-                  <span className="text-[#666] ml-1">
-                    (default: {variable.defaultValue})
+          {variables.map((variable) => {
+            const suggestions = getDictionaryEntries(variable.yamlPath, dictionaryCache);
+            const hasSuggestions = suggestions.length > 0;
+            const currentValue = values[variable.name];
+
+            return (
+              <div key={variable.name} className="flex flex-col gap-1">
+                <Label
+                  htmlFor={`var-${variable.name}`}
+                  className="text-xs text-[#9cdcfe]"
+                >
+                  {variable.name}
+                  {variable.isMulti && (
+                    <span className="text-[#888] ml-1">[]</span>
+                  )}
+                  {variable.defaultValue && (
+                    <span className="text-[#666] ml-1">
+                      (default: {variable.defaultValue})
+                    </span>
+                  )}
+                </Label>
+                {/* YAMLパスをヒントとして表示 */}
+                {variable.yamlPath && (
+                  <span className="text-[10px] text-[#666] -mt-0.5">
+                    {variable.yamlPath}
                   </span>
                 )}
-              </Label>
-              <Input
-                id={`var-${variable.name}`}
-                value={values[variable.name] ?? variable.defaultValue ?? ''}
-                onChange={(e) => handleChange(variable.name, e.target.value)}
-                placeholder={variable.defaultValue || `Enter ${variable.name}`}
-                className="h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
-              />
-            </div>
-          ))}
+                {/* 複数選択変数 */}
+                {variable.isMulti && hasSuggestions ? (
+                  <MultiSelectCheckboxes
+                    id={`var-${variable.name}`}
+                    value={Array.isArray(currentValue) ? currentValue : []}
+                    onChange={(value) => handleChange(variable.name, value)}
+                    suggestions={suggestions}
+                  />
+                ) : hasSuggestions ? (
+                  <AutocompleteInput
+                    id={`var-${variable.name}`}
+                    value={typeof currentValue === 'string' ? currentValue : (currentValue?.[0] ?? variable.defaultValue ?? '')}
+                    onChange={(value) => handleChange(variable.name, value)}
+                    placeholder={variable.defaultValue || `Enter ${variable.name}`}
+                    suggestions={suggestions}
+                  />
+                ) : (
+                  <Input
+                    id={`var-${variable.name}`}
+                    value={typeof currentValue === 'string' ? currentValue : (currentValue?.[0] ?? variable.defaultValue ?? '')}
+                    onChange={(e) => handleChange(variable.name, e.target.value)}
+                    placeholder={variable.defaultValue || `Enter ${variable.name}`}
+                    className="h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
+                  />
+                )}
+              </div>
+            );
+          })}
         </div>
       </div>
 

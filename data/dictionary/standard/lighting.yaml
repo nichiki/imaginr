@@ -1,22 +1,26 @@
 # lighting関連の辞書
 
 entries:
-  # lighting.key - キーライト
-  - key: key
+  # lighting.style - ライティングスタイル
+  - key: style
     context: lighting
     values:
       - value: low-key
-        description: 暗め
+        description: 暗め、コントラスト強
       - value: high-key
-        description: 明るめ
+        description: 明るめ、影少なめ
       - value: natural
-        description: 自然光
+        description: 自然光風
       - value: dramatic
         description: ドラマチック
       - value: soft
         description: ソフト
       - value: harsh
         description: ハード
+      - value: moody
+        description: ムーディー
+      - value: cinematic
+        description: 映画的
 
   # lighting.type - ライトタイプ
   - key: type
@@ -24,24 +28,32 @@ entries:
     values:
       - value: soft diffused light
         description: ソフト拡散光
-      - value: directional diffused soft light
-        description: 指向性ソフト光
+      - value: directional light
+        description: 指向性光
       - value: hard directional light
         description: ハード指向性光
       - value: rim light
-        description: リムライト
+        description: リムライト（輪郭光）
       - value: backlight
-        description: バックライト
+        description: バックライト（逆光）
       - value: ambient light
         description: 環境光
       - value: spotlight
         description: スポットライト
       - value: natural daylight
-        description: 自然光
+        description: 自然光（昼）
       - value: golden hour
         description: ゴールデンアワー
       - value: blue hour
         description: ブルーアワー
+      - value: overcast
+        description: 曇り空の光
+      - value: window light
+        description: 窓からの光
+      - value: neon light
+        description: ネオン光
+      - value: candlelight
+        description: キャンドルライト
 
   # lighting.color - ライト色
   - key: color
@@ -61,29 +73,22 @@ entries:
         description: シアン
       - value: magenta
         description: マゼンタ
+      - value: orange
+        description: オレンジ
+      - value: blue
+        description: ブルー
 
-  # shadow.quality - 影の品質
-  - key: quality
-    context: shadow
+  # lighting.shadow - 影の表現
+  - key: shadow
+    context: lighting
     values:
-      - value: soft, present
-        description: ソフト、存在感あり
-      - value: hard, defined
-        description: ハード、明確
-      - value: minimal
-        description: 最小限
-      - value: deep
-        description: 深い
-      - value: subtle
-        description: 控えめ
-
-  # shadow.depth - 影の深さ
-  - key: depth
-    context: shadow
-    values:
-      - value: deep
-        description: 深い
-      - value: shallow
-        description: 浅い
-      - value: moderate
-        description: 中程度
+      - value: soft shadows
+        description: ソフトな影
+      - value: hard shadows
+        description: ハードな影
+      - value: minimal shadows
+        description: 影最小限
+      - value: deep shadows
+        description: 深い影
+      - value: no shadows
+        description: 影なし

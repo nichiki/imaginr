@@ -15,7 +15,7 @@ _replace:
 demographics:
   age: late 20s
   gender: female
-  ethnicity: East Asian
+  ethnicity: Japanese
 
 appearance:
   hair:
@@ -25,6 +25,7 @@ appearance:
 
 # ドレスの具体的な指定
 outfit:
+  type: dress
   dress:
     style: summer dress
     color: white

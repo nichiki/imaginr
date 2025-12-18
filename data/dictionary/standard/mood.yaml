@@ -1,0 +1,52 @@
+# ムード・雰囲気
+entries:
+  - key: mood
+    context: "*"
+    values:
+      # ポジティブ
+      - value: serene
+        description: 穏やか
+      - value: peaceful
+        description: 平和
+      - value: joyful
+        description: 喜び
+      - value: hopeful
+        description: 希望
+      - value: playful
+        description: 遊び心
+      - value: whimsical
+        description: 気まぐれ
+      - value: romantic
+        description: ロマンチック
+      - value: warm
+        description: 暖かい
+      - value: energetic
+        description: エネルギッシュ
+      # ネガティブ/ダーク
+      - value: melancholic
+        description: 憂鬱
+      - value: somber
+        description: 陰鬱
+      - value: tense
+        description: 緊張
+      - value: eerie
+        description: 不気味
+      - value: dark
+        description: ダーク
+      - value: cold
+        description: 冷たい
+      # ニュートラル/その他
+      - value: mysterious
+        description: 神秘的
+      - value: dramatic
+        description: ドラマチック
+      - value: nostalgic
+        description: ノスタルジック
+      - value: contemplative
+        description: 沈思的
+      - value: intimate
+        description: 親密
+      - value: epic
+        description: 壮大
+      - value: surreal
+        description: シュール
