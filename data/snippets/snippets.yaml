@@ -82,9 +82,3 @@ snippets:
         direction: slightly averted
         quality: focused but soft
       mouth: slightly parted
-  - id: snippet_1766036136244
-    category: test1/test2
-    key: custom
-    label: aaaaaaa
-    description: bbbbbb
-    content: aaaaaaaaaaaaa

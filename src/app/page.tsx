@@ -77,6 +77,17 @@ export default function Home() {
     return folders;
   }
 
+  // ファイルがツリー内に存在するか確認
+  function fileExistsInTree(items: FileTreeItem[], path: string): boolean {
+    for (const item of items) {
+      if (item.path === path) return true;
+      if (item.type === 'folder' && item.children) {
+        if (fileExistsInTree(item.children, path)) return true;
+      }
+    }
+    return false;
+  }
+
   // 初期読み込み
   useEffect(() => {
     async function loadFiles() {
@@ -100,6 +111,13 @@ export default function Home() {
 
         // 保存されたファイルがあればそれを選択、なければ最初のshotファイル
         let fileToSelect = savedState.selectedFile;
+
+        // 保存されたファイルがツリー内に存在するか確認
+        if (fileToSelect && !fileExistsInTree(tree, fileToSelect)) {
+          console.warn(`Saved file not found: ${fileToSelect}, falling back to first file`);
+          fileToSelect = '';
+        }
+
         if (!fileToSelect) {
           fileToSelect = findFirstFile(tree, 'shots') || '';
         }
