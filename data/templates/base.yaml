@@ -1,17 +1,23 @@
 # ========================================
-# 被写体
+# SUBJECT
 # ========================================
-
-# 主題
 subject: ${subject}
 
-# 属性
 demographics:
   gender: ${gender}
   age: ${age}
   ethnicity: ${ethnicity}
 
-# 外見
+pose:
+  base: ${pose_base}
+  direction: ${pose_direction}
+  action: ${pose_action}
+
+expression:
+  type: ${expression_type}
+  eyes: ${expression_eyes}
+  mouth: ${expression_mouth}
+
 appearance:
   hair:
     length: ${hair_length}
@@ -28,19 +34,6 @@ appearance:
   makeup: ${makeup}
   extras: ${appearance_extras[]}
 
-# 表情
-expression:
-  type: ${expression_type}
-  eyes: ${expression_eyes}
-  mouth: ${expression_mouth}
-
-# ポーズ
-pose:
-  base: ${pose_base}
-  direction: ${pose_direction}
-  action: ${pose_action}
-
-# 服装
 outfit:
   style: ${outfit_style}
   top: ${outfit_top}
@@ -58,41 +51,8 @@ outfit:
   state: ${outfit_state}
 
 # ========================================
-# ビジュアル
+# ENVIRONMENT
 # ========================================
-
-# スタイル
-aesthetic: ${aesthetic}
-
-# ムード
-mood: ${mood}
-
-# ========================================
-# 技術
-# ========================================
-
-# 撮影技法
-photography:
-  shot_with: ${shot_with}
-  lens: ${lens}
-  film: ${film}
-  effects: ${effects[]}
-
-# 構図
-composition: ${composition[]}
-
-# ライティング
-lighting:
-  style: ${lighting_style}
-  type: ${lighting_type}
-  color: ${lighting_color}
-  shadow: ${lighting_shadow}
-
-# ========================================
-# 環境
-# ========================================
-
-# 環境
 environment:
   background: ${background}
   location: ${location}
@@ -103,10 +63,32 @@ environment:
   crowd: ${crowd}
 
 # ========================================
-# 品質
+# STYLE
 # ========================================
+aesthetic: ${aesthetic}
 
-# 品質
+mood: ${mood}
+
+# ========================================
+# VISUAL / TECH
+# ========================================
+lighting:
+  style: ${lighting_style}
+  type: ${lighting_type}
+  color: ${lighting_color}
+  shadow: ${lighting_shadow}
+
+composition: ${composition[]}
+
+photography:
+  shot_with: ${shot_with}
+  lens: ${lens}
+  film: ${film}
+  effects: ${effects[]}
+
+# ========================================
+# QUALITY
+# ========================================
 quality:
   - high resolution, 8K UHD
   - sharp focus
