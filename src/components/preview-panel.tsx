@@ -38,33 +38,38 @@ export function PreviewPanel({
     <div className="h-full bg-[#252526] flex flex-col">
       <Tabs value={activeTab} onValueChange={(v) => setActiveTab(v as 'merged' | 'prompt')} className="flex flex-col h-full">
         <div className="h-11 px-3 flex items-center justify-between border-b border-[#333] flex-shrink-0">
-          <span className="text-xs uppercase text-[#888] font-medium">
-            Preview
-          </span>
-          <div className="flex items-center gap-2">
-            <TabsList className="h-7 bg-[#3c3c3c]">
-              <TabsTrigger value="merged" className="text-xs h-5 px-2 text-[#d4d4d4] data-[state=active]:text-white data-[state=active]:bg-[#094771]">
-                Merged YAML
-              </TabsTrigger>
-              <TabsTrigger value="prompt" className="text-xs h-5 px-2 text-[#d4d4d4] data-[state=active]:text-white data-[state=active]:bg-[#094771]">
-                Prompt Text
-              </TabsTrigger>
-            </TabsList>
+          <div className="flex items-center gap-3">
+            <span className="text-xs uppercase text-[#888] font-medium">
+              Preview
+            </span>
             <Button
               variant="ghost"
               size="sm"
-              className="h-6 w-6 p-0 text-[#888] hover:text-[#d4d4d4] hover:bg-[#3c3c3c]"
+              className="h-7 px-2 text-[#d4d4d4] hover:text-white hover:bg-[#094771] disabled:opacity-50"
               onClick={copyToClipboard}
               disabled={!canCopy}
-              title="Copy to clipboard"
             >
               {copied ? (
-                <Check className="h-3.5 w-3.5 text-green-500" />
+                <>
+                  <Check className="h-3.5 w-3.5 mr-1.5 text-green-500" />
+                  <span className="text-xs">コピーしました</span>
+                </>
               ) : (
-                <Copy className="h-3.5 w-3.5" />
+                <>
+                  <Copy className="h-3.5 w-3.5 mr-1.5" />
+                  <span className="text-xs">コピー</span>
+                </>
               )}
             </Button>
           </div>
+          <TabsList className="h-7 bg-[#3c3c3c]">
+            <TabsTrigger value="merged" className="text-xs h-5 px-2 text-[#d4d4d4] data-[state=active]:text-white data-[state=active]:bg-[#094771]">
+              Merged YAML
+            </TabsTrigger>
+            <TabsTrigger value="prompt" className="text-xs h-5 px-2 text-[#d4d4d4] data-[state=active]:text-white data-[state=active]:bg-[#094771]">
+              Prompt Text
+            </TabsTrigger>
+          </TabsList>
         </div>
         <TabsContent value="merged" className="flex-1 m-0 overflow-auto">
           {!isYamlValid ? (
@@ -79,6 +84,9 @@ export function PreviewPanel({
           )}
         </TabsContent>
         <TabsContent value="prompt" className="flex-1 m-0 overflow-auto">
+          <div className="px-3 py-2 text-xs text-[#888] bg-[#2d2d2d] border-b border-[#333]">
+            未実装。LLMによるエンハンサーを導入予定。
+          </div>
           <pre className="p-3 text-xs font-mono text-[#d4d4d4] whitespace-pre-wrap">
             {promptText || '(プロンプトテキストがここに表示されます)'}
           </pre>

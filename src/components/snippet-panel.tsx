@@ -301,15 +301,15 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
                         <ContextMenu key={snippet.id}>
                           <ContextMenuTrigger>
                             <div
-                              className="py-1.5 px-2 text-xs cursor-pointer rounded-sm hover:bg-[#2a2d2e] text-[#9cdcfe] truncate"
+                              className="py-1.5 px-2 text-xs cursor-pointer rounded-sm hover:bg-[#2a2d2e] text-[#888] truncate"
                               style={{ paddingLeft: 28 }}
                               onClick={() => handleClick(snippet)}
                               onDoubleClick={() => handleDoubleClick(snippet)}
                               title={snippet.description ? `${snippet.label}（${snippet.description}）` : snippet.label}
                             >
-                              {snippet.label}
+                              <span className="text-[#9cdcfe]">{snippet.label}</span>
                               {snippet.description && (
-                                <span className="text-[#888]">（{snippet.description}）</span>
+                                <span>（{snippet.description}）</span>
                               )}
                             </div>
                           </ContextMenuTrigger>
