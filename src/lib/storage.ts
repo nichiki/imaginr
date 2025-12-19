@@ -54,6 +54,7 @@ export interface ComfyUISettings {
   url: string;
   workflowFile: string;  // data/comfyui/ 以下のファイル名
   promptNodeId: string;  // プロンプトを挿入するノードID
+  samplerNodeId: string; // シードをランダム化するサンプラーノードID
 }
 
 const defaultComfyUISettings: ComfyUISettings = {
@@ -61,6 +62,7 @@ const defaultComfyUISettings: ComfyUISettings = {
   url: 'http://localhost:8188',
   workflowFile: '',
   promptNodeId: '',
+  samplerNodeId: '',
 };
 
 export function loadComfyUISettings(): ComfyUISettings {

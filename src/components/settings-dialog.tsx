@@ -40,6 +40,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
     url: 'http://localhost:8188',
     workflowFile: '',
     promptNodeId: '',
+    samplerNodeId: '',
   });
   const [workflows, setWorkflows] = useState<WorkflowFile[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
@@ -171,7 +172,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
             {settings.enabled && (
               <>
                 <div className="space-y-2">
-                  <Label htmlFor="comfyui-url" className="text-xs text-[#888]">
+                  <Label htmlFor="comfyui-url" className="text-xs text-[#b0b0b0]">
                     ComfyUI URL
                   </Label>
                   <div className="flex gap-2">
@@ -180,14 +181,14 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                       value={settings.url}
                       onChange={(e) => updateSettings({ url: e.target.value })}
                       placeholder="http://localhost:8188"
-                      className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm"
+                      className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9"
                     />
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="default"
                       onClick={handleTestConnection}
                       disabled={connectionStatus === 'testing'}
-                      className="shrink-0"
+                      className="shrink-0 h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white"
                     >
                       {connectionStatus === 'testing' ? (
                         <Loader2 className="h-4 w-4 animate-spin" />
@@ -206,7 +207,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="workflow" className="text-xs text-[#888]">
+                  <Label htmlFor="workflow" className="text-xs text-[#b0b0b0]">
                     ワークフロー
                   </Label>
                   <div className="flex gap-2">
@@ -214,7 +215,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                       value={settings.workflowFile}
                       onValueChange={(value) => updateSettings({ workflowFile: value })}
                     >
-                      <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm flex-1">
+                      <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm flex-1 h-9">
                         <SelectValue placeholder="ワークフローを選択" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#252526] border-[#333]">
@@ -237,8 +238,8 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                     </Select>
                     <Button
                       variant="outline"
-                      size="sm"
-                      className="shrink-0 px-2"
+                      size="default"
+                      className="shrink-0 px-2 h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white"
                       disabled={isUploading}
                       onClick={() => document.getElementById('workflow-upload')?.click()}
                     >
@@ -251,8 +252,8 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                     {settings.workflowFile && (
                       <Button
                         variant="outline"
-                        size="sm"
-                        className="shrink-0 px-2 text-red-500 hover:text-red-400"
+                        size="default"
+                        className="shrink-0 px-2 h-9 bg-[#3c3c3c] border-[#555] text-red-400 hover:bg-[#4a4a4a] hover:text-red-300"
                         onClick={() => handleDeleteWorkflow(settings.workflowFile)}
                       >
                         <Trash2 className="h-4 w-4" />
@@ -266,13 +267,13 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                     className="hidden"
                     onChange={handleFileUpload}
                   />
-                  <p className="text-xs text-[#666]">
+                  <p className="text-xs text-[#888]">
                     ComfyUIからAPI形式でエクスポートしたJSONをアップロード
                   </p>
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="prompt-node" className="text-xs text-[#888]">
+                  <Label htmlFor="prompt-node" className="text-xs text-[#b0b0b0]">
                     プロンプトノードID
                   </Label>
                   <Input
@@ -280,10 +281,26 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                     value={settings.promptNodeId}
                     onChange={(e) => updateSettings({ promptNodeId: e.target.value })}
                     placeholder="例: 6"
-                    className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm"
+                    className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9"
                   />
-                  <p className="text-xs text-[#666]">
+                  <p className="text-xs text-[#888]">
                     プロンプトを挿入するCLIP Text EncodeノードのID
+                  </p>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sampler-node" className="text-xs text-[#b0b0b0]">
+                    サンプラーノードID
+                  </Label>
+                  <Input
+                    id="sampler-node"
+                    value={settings.samplerNodeId}
+                    onChange={(e) => updateSettings({ samplerNodeId: e.target.value })}
+                    placeholder="例: 3"
+                    className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9"
+                  />
+                  <p className="text-xs text-[#888]">
+                    シードをランダム化するサンプラーノードのID
                   </p>
                 </div>
               </>

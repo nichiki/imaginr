@@ -39,3 +39,9 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# generated images
+/data/images/
+
+# comfyui workflows
+/data/comfyui/
