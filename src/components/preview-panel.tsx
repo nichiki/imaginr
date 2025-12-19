@@ -400,56 +400,59 @@ export function PreviewPanel({
             <DialogTitle>画像プレビュー</DialogTitle>
           </VisuallyHidden>
           {selectedImage && (
-            <div className="relative">
-              <img
-                src={`/api/images/${selectedImage.filename}`}
-                alt={selectedImage.id}
-                className="w-full h-auto max-h-[85vh] object-contain"
-              />
-              {/* 閉じる・ダウンロードボタン */}
-              <div className="absolute top-2 right-2 flex gap-1">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 bg-black/50 hover:bg-[#555] text-white"
-                  onClick={() => handleDownloadImage(selectedImage)}
-                  title="ダウンロード"
-                >
-                  <Download className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="h-8 w-8 p-0 bg-black/50 hover:bg-[#555] text-white"
-                  onClick={() => setSelectedImage(null)}
-                  title="閉じる"
-                >
-                  <X className="h-4 w-4" />
-                </Button>
+            <div className="flex flex-col">
+              <div className="relative">
+                <img
+                  src={`/api/images/${selectedImage.filename}`}
+                  alt={selectedImage.id}
+                  className="w-full h-auto max-h-[85vh] object-contain"
+                />
+                {/* 閉じる・ダウンロードボタン */}
+                <div className="absolute top-2 right-2 flex gap-1">
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 bg-black/50 hover:bg-[#555] text-white"
+                    onClick={() => handleDownloadImage(selectedImage)}
+                    title="ダウンロード"
+                  >
+                    <Download className="h-4 w-4" />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 w-8 p-0 bg-black/50 hover:bg-[#555] text-white"
+                    onClick={() => setSelectedImage(null)}
+                    title="閉じる"
+                  >
+                    <X className="h-4 w-4" />
+                  </Button>
+                </div>
+                {/* 左右ナビゲーション */}
+                {images.length > 1 && (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 bg-black/50 hover:bg-[#555] text-white"
+                      onClick={() => navigateImage('prev')}
+                    >
+                      <ChevronLeft className="h-6 w-6" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 bg-black/50 hover:bg-[#555] text-white"
+                      onClick={() => navigateImage('next')}
+                    >
+                      <ChevronRight className="h-6 w-6" />
+                    </Button>
+                  </>
+                )}
               </div>
-              {/* 左右ナビゲーション */}
-              {images.length > 1 && (
-                <>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 bg-black/50 hover:bg-[#555] text-white"
-                    onClick={() => navigateImage('prev')}
-                  >
-                    <ChevronLeft className="h-6 w-6" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 bg-black/50 hover:bg-[#555] text-white"
-                    onClick={() => navigateImage('next')}
-                  >
-                    <ChevronRight className="h-6 w-6" />
-                  </Button>
-                </>
-              )}
+              {/* 日付表示 - 画像の下に配置 */}
               {selectedImage.createdAt && (
-                <div className="absolute bottom-0 left-0 right-0 p-2 bg-black/70 text-xs text-[#888]">
+                <div className="p-2 bg-[#1e1e1e] text-xs text-[#888] text-center border-t border-[#333]">
                   {new Date(selectedImage.createdAt).toLocaleString('ja-JP')}
                 </div>
               )}

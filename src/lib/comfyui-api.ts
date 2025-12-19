@@ -1,4 +1,5 @@
 // ComfyUI API Client - Simplified polling-based approach
+// Uses Next.js API proxy to avoid CORS issues
 
 export interface GenerationProgress {
   status: 'connecting' | 'queued' | 'generating' | 'completed' | 'error';
@@ -17,9 +18,32 @@ type ProgressCallback = (progress: GenerationProgress) => void;
 
 export class ComfyUIClient {
   private baseUrl: string;
+  private proxyUrl: string = '/api/comfyui/proxy';
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
+  }
+
+  // プロキシ経由でGETリクエスト
+  private async proxyGet(endpoint: string): Promise<Response> {
+    const params = new URLSearchParams({
+      baseUrl: this.baseUrl,
+      endpoint,
+    });
+    return fetch(`${this.proxyUrl}?${params}`);
+  }
+
+  // プロキシ経由でPOSTリクエスト
+  private async proxyPost(endpoint: string, body: unknown): Promise<Response> {
+    const params = new URLSearchParams({
+      baseUrl: this.baseUrl,
+      endpoint,
+    });
+    return fetch(`${this.proxyUrl}?${params}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
   }
 
   async generate(
@@ -85,16 +109,12 @@ export class ComfyUIClient {
 
   private async queuePrompt(workflow: Record<string, unknown>): Promise<string> {
     console.log('[ComfyUI] Queueing prompt...');
-    const response = await fetch(`${this.baseUrl}/prompt`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ prompt: workflow }),
-    });
+    const response = await this.proxyPost('/prompt', { prompt: workflow });
 
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('[ComfyUI] Queue failed:', response.status, errorText);
-      throw new Error(`Failed to queue prompt: ${response.status} - ${errorText}`);
+      const errorData = await response.json().catch(() => ({}));
+      console.error('[ComfyUI] Queue failed:', response.status, errorData);
+      throw new Error(`Failed to queue prompt: ${response.status} - ${errorData.error || 'Unknown error'}`);
     }
 
     const data = await response.json();
@@ -116,7 +136,7 @@ export class ComfyUIClient {
     while (Date.now() - startTime < timeout) {
       try {
         pollCount++;
-        const response = await fetch(`${this.baseUrl}/history/${promptId}`);
+        const response = await this.proxyGet(`/history/${promptId}`);
         if (!response.ok) {
           console.log(`[ComfyUI] Poll ${pollCount}: History not ready (${response.status})`);
           await this.sleep(pollInterval);
@@ -134,8 +154,12 @@ export class ComfyUIClient {
 
         // エラーチェック
         if (entry.status?.status_str === 'error') {
-          console.error('[ComfyUI] Generation error:', entry.status);
-          throw new Error(entry.status?.messages?.[0]?.[1] || 'Generation error');
+          console.error('[ComfyUI] Generation error:', JSON.stringify(entry.status, null, 2));
+          console.error('[ComfyUI] Full entry:', JSON.stringify(entry, null, 2));
+          const errorMsg = entry.status?.messages?.[0]?.[1]?.message ||
+                          entry.status?.messages?.[0]?.[1] ||
+                          'Generation error';
+          throw new Error(errorMsg);
         }
 
         // 出力をチェック
@@ -179,6 +203,7 @@ export class ComfyUIClient {
       if (nodeImages && Array.isArray(nodeImages)) {
         for (const img of nodeImages) {
           if (img.filename) {
+            // ComfyUIの直接URLを返す（画像保存時にサーバーサイドでフェッチされる）
             const imageUrl = `${this.baseUrl}/view?filename=${encodeURIComponent(img.filename)}&subfolder=${encodeURIComponent(img.subfolder || '')}&type=${encodeURIComponent(img.type || 'output')}`;
             images.push(imageUrl);
           }
@@ -195,7 +220,7 @@ export class ComfyUIClient {
 
   async testConnection(): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await fetch(`${this.baseUrl}/system_stats`);
+      const response = await this.proxyGet('/system_stats');
       if (response.ok) {
         return { success: true };
       }
