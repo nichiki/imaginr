@@ -19,8 +19,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, CheckCircle, XCircle, Upload, Trash2 } from 'lucide-react';
-import { loadComfyUISettings, saveComfyUISettings, type ComfyUISettings } from '@/lib/storage';
+import { Loader2, CheckCircle, XCircle, Upload, Trash2, Plus, Pencil } from 'lucide-react';
+import {
+  loadComfyUISettings,
+  saveComfyUISettings,
+  getActiveWorkflow,
+  createWorkflowConfig,
+  type ComfyUISettings,
+  type WorkflowConfig,
+  type NodeOverride,
+} from '@/lib/storage';
 import { ComfyUIClient } from '@/lib/comfyui-api';
 
 interface SettingsDialogProps {
@@ -38,29 +46,29 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
   const [settings, setSettings] = useState<ComfyUISettings>({
     enabled: false,
     url: 'http://localhost:8188',
-    workflowFile: '',
-    promptNodeId: '',
-    samplerNodeId: '',
+    activeWorkflowId: '',
+    workflows: [],
   });
-  const [workflows, setWorkflows] = useState<WorkflowFile[]>([]);
+  const [availableWorkflows, setAvailableWorkflows] = useState<WorkflowFile[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [editingWorkflow, setEditingWorkflow] = useState<WorkflowConfig | null>(null);
 
   // 設定とワークフロー一覧を読み込む
   useEffect(() => {
     if (open) {
       setSettings(loadComfyUISettings());
-      fetchWorkflows();
+      fetchAvailableWorkflows();
     }
   }, [open]);
 
-  const fetchWorkflows = async () => {
+  const fetchAvailableWorkflows = async () => {
     try {
       const response = await fetch('/api/comfyui');
       if (response.ok) {
         const data = await response.json();
-        setWorkflows(data.workflows || []);
+        setAvailableWorkflows(data.workflows || []);
       }
     } catch (error) {
       console.error('Failed to fetch workflows:', error);
@@ -116,8 +124,17 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
 
       if (response.ok) {
         const { fileName } = await response.json();
-        await fetchWorkflows();
-        updateSettings({ workflowFile: fileName });
+        await fetchAvailableWorkflows();
+
+        // 新しいワークフロー設定を作成して追加
+        const newWorkflow = createWorkflowConfig(fileName, name);
+        setSettings(prev => ({
+          ...prev,
+          workflows: [...prev.workflows, newWorkflow],
+          activeWorkflowId: newWorkflow.id,
+        }));
+        // 編集モードに入る
+        setEditingWorkflow(newWorkflow);
       } else {
         alert('アップロードに失敗しました');
       }
@@ -129,7 +146,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
     }
   }, []);
 
-  const handleDeleteWorkflow = useCallback(async (fileName: string) => {
+  const handleDeleteWorkflowFile = useCallback(async (fileName: string) => {
     if (!confirm(`"${fileName}" を削除しますか？`)) return;
 
     try {
@@ -138,19 +155,90 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
       });
 
       if (response.ok) {
-        await fetchWorkflows();
-        if (settings.workflowFile === fileName) {
-          updateSettings({ workflowFile: '' });
-        }
+        await fetchAvailableWorkflows();
+        // このファイルを使っているワークフロー設定も削除
+        setSettings(prev => {
+          const newWorkflows = prev.workflows.filter(w => w.file !== fileName);
+          const activeStillExists = newWorkflows.some(w => w.id === prev.activeWorkflowId);
+          return {
+            ...prev,
+            workflows: newWorkflows,
+            activeWorkflowId: activeStillExists ? prev.activeWorkflowId : (newWorkflows[0]?.id || ''),
+          };
+        });
       }
     } catch {
       alert('削除に失敗しました');
     }
-  }, [settings.workflowFile]);
+  }, []);
+
+  const handleAddWorkflow = useCallback((file: string) => {
+    const wf = availableWorkflows.find(w => w.name === file);
+    const newWorkflow = createWorkflowConfig(file, wf?.label || file.replace('.json', ''));
+    setSettings(prev => ({
+      ...prev,
+      workflows: [...prev.workflows, newWorkflow],
+      activeWorkflowId: newWorkflow.id,
+    }));
+    setEditingWorkflow(newWorkflow);
+  }, [availableWorkflows]);
+
+  const handleRemoveWorkflow = useCallback((id: string) => {
+    setSettings(prev => {
+      const newWorkflows = prev.workflows.filter(w => w.id !== id);
+      const activeStillExists = newWorkflows.some(w => w.id === prev.activeWorkflowId);
+      return {
+        ...prev,
+        workflows: newWorkflows,
+        activeWorkflowId: activeStillExists ? prev.activeWorkflowId : (newWorkflows[0]?.id || ''),
+      };
+    });
+    if (editingWorkflow?.id === id) {
+      setEditingWorkflow(null);
+    }
+  }, [editingWorkflow]);
+
+  const handleUpdateWorkflow = useCallback((updates: Partial<WorkflowConfig>) => {
+    if (!editingWorkflow) return;
+    const updated = { ...editingWorkflow, ...updates };
+    setEditingWorkflow(updated);
+    setSettings(prev => ({
+      ...prev,
+      workflows: prev.workflows.map(w => w.id === updated.id ? updated : w),
+    }));
+  }, [editingWorkflow]);
+
+  const handleAddOverride = useCallback(() => {
+    if (!editingWorkflow) return;
+    const newOverride: NodeOverride = { nodeId: '', property: '', value: '' };
+    handleUpdateWorkflow({
+      overrides: [...editingWorkflow.overrides, newOverride],
+    });
+  }, [editingWorkflow, handleUpdateWorkflow]);
+
+  const handleUpdateOverride = useCallback((index: number, updates: Partial<NodeOverride>) => {
+    if (!editingWorkflow) return;
+    const newOverrides = [...editingWorkflow.overrides];
+    newOverrides[index] = { ...newOverrides[index], ...updates };
+    handleUpdateWorkflow({ overrides: newOverrides });
+  }, [editingWorkflow, handleUpdateWorkflow]);
+
+  const handleRemoveOverride = useCallback((index: number) => {
+    if (!editingWorkflow) return;
+    const newOverrides = editingWorkflow.overrides.filter((_, i) => i !== index);
+    handleUpdateWorkflow({ overrides: newOverrides });
+  }, [editingWorkflow, handleUpdateWorkflow]);
+
+  const activeWorkflow = getActiveWorkflow(settings);
+
+  // 登録済みワークフローで使用されていないファイル
+  const unusedWorkflowFiles = availableWorkflows.filter(
+    wf => !settings.workflows.some(w => w.file === wf.name)
+  );
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4] max-w-md">
+      <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4] max-w-lg max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-[#d4d4d4]">設定</DialogTitle>
         </DialogHeader>
@@ -171,6 +259,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
 
             {settings.enabled && (
               <>
+                {/* URL設定 */}
                 <div className="space-y-2">
                   <Label htmlFor="comfyui-url" className="text-xs text-[#b0b0b0]">
                     ComfyUI URL
@@ -206,25 +295,74 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                   )}
                 </div>
 
+                {/* ワークフロー選択 */}
                 <div className="space-y-2">
-                  <Label htmlFor="workflow" className="text-xs text-[#b0b0b0]">
-                    ワークフロー
+                  <Label className="text-xs text-[#b0b0b0]">
+                    アクティブなワークフロー
                   </Label>
                   <div className="flex gap-2">
                     <Select
-                      value={settings.workflowFile}
-                      onValueChange={(value) => updateSettings({ workflowFile: value })}
+                      value={settings.activeWorkflowId}
+                      onValueChange={(value) => {
+                        updateSettings({ activeWorkflowId: value });
+                        const wf = settings.workflows.find(w => w.id === value);
+                        if (wf) setEditingWorkflow(wf);
+                      }}
                     >
                       <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm flex-1 h-9">
                         <SelectValue placeholder="ワークフローを選択" />
                       </SelectTrigger>
                       <SelectContent className="bg-[#252526] border-[#333]">
-                        {workflows.length === 0 ? (
+                        {settings.workflows.length === 0 ? (
                           <SelectItem value="_none" disabled className="text-[#888]">
-                            ワークフローがありません
+                            ワークフローを追加してください
                           </SelectItem>
                         ) : (
-                          workflows.map((wf) => (
+                          settings.workflows.map((wf) => (
+                            <SelectItem
+                              key={wf.id}
+                              value={wf.id}
+                              className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+                            >
+                              {wf.name}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    {activeWorkflow && (
+                      <Button
+                        variant="outline"
+                        size="default"
+                        className={`shrink-0 px-2 h-9 bg-[#3c3c3c] border-[#555] hover:bg-[#4a4a4a] hover:text-white ${editingWorkflow?.id === activeWorkflow.id ? 'text-white bg-[#094771]' : 'text-[#d4d4d4]'}`}
+                        onClick={() => setEditingWorkflow(editingWorkflow?.id === activeWorkflow.id ? null : activeWorkflow)}
+                      >
+                        <Pencil className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                </div>
+
+                {/* 新規ワークフロー追加 */}
+                <div className="space-y-2">
+                  <Label className="text-xs text-[#b0b0b0]">
+                    ワークフローを追加
+                  </Label>
+                  <div className="flex gap-2">
+                    <Select
+                      value=""
+                      onValueChange={(value) => handleAddWorkflow(value)}
+                    >
+                      <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm flex-1 h-9">
+                        <SelectValue placeholder="ファイルを選択..." />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#252526] border-[#333]">
+                        {unusedWorkflowFiles.length === 0 ? (
+                          <SelectItem value="_none" disabled className="text-[#888]">
+                            利用可能なファイルがありません
+                          </SelectItem>
+                        ) : (
+                          unusedWorkflowFiles.map((wf) => (
                             <SelectItem
                               key={wf.name}
                               value={wf.name}
@@ -249,16 +387,6 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                         <Upload className="h-4 w-4" />
                       )}
                     </Button>
-                    {settings.workflowFile && (
-                      <Button
-                        variant="outline"
-                        size="default"
-                        className="shrink-0 px-2 h-9 bg-[#3c3c3c] border-[#555] text-red-400 hover:bg-[#4a4a4a] hover:text-red-300"
-                        onClick={() => handleDeleteWorkflow(settings.workflowFile)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    )}
                   </div>
                   <input
                     id="workflow-upload"
@@ -272,37 +400,125 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="prompt-node" className="text-xs text-[#b0b0b0]">
-                    プロンプトノードID
-                  </Label>
-                  <Input
-                    id="prompt-node"
-                    value={settings.promptNodeId}
-                    onChange={(e) => updateSettings({ promptNodeId: e.target.value })}
-                    placeholder="例: 6"
-                    className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9"
-                  />
-                  <p className="text-xs text-[#888]">
-                    プロンプトを挿入するCLIP Text EncodeノードのID
-                  </p>
-                </div>
+                {/* ワークフロー編集 */}
+                {editingWorkflow && (
+                  <div className="space-y-3 p-3 bg-[#1e1e1e] rounded border border-[#444]">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">ワークフロー設定</Label>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-6 px-2 text-red-400 hover:text-red-300 hover:bg-[#3c3c3c]"
+                        onClick={() => handleRemoveWorkflow(editingWorkflow.id)}
+                      >
+                        <Trash2 className="h-3 w-3 mr-1" />
+                        削除
+                      </Button>
+                    </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="sampler-node" className="text-xs text-[#b0b0b0]">
-                    サンプラーノードID
-                  </Label>
-                  <Input
-                    id="sampler-node"
-                    value={settings.samplerNodeId}
-                    onChange={(e) => updateSettings({ samplerNodeId: e.target.value })}
-                    placeholder="例: 3"
-                    className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9"
-                  />
-                  <p className="text-xs text-[#888]">
-                    シードをランダム化するサンプラーノードのID
-                  </p>
-                </div>
+                    <div className="space-y-2">
+                      <Label className="text-xs text-[#b0b0b0]">表示名</Label>
+                      <Input
+                        value={editingWorkflow.name}
+                        onChange={(e) => handleUpdateWorkflow({ name: e.target.value })}
+                        className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-8"
+                      />
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label className="text-xs text-[#b0b0b0]">ファイル</Label>
+                      <Input
+                        value={editingWorkflow.file}
+                        disabled
+                        className="bg-[#2d2d2d] border-[#444] text-[#888] text-sm h-8"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-2">
+                      <div className="space-y-1">
+                        <Label className="text-xs text-[#b0b0b0]">プロンプトノードID</Label>
+                        <Input
+                          value={editingWorkflow.promptNodeId}
+                          onChange={(e) => handleUpdateWorkflow({ promptNodeId: e.target.value })}
+                          placeholder="例: 6"
+                          className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-8"
+                        />
+                      </div>
+                      <div className="space-y-1">
+                        <Label className="text-xs text-[#b0b0b0]">サンプラーノードID</Label>
+                        <Input
+                          value={editingWorkflow.samplerNodeId}
+                          onChange={(e) => handleUpdateWorkflow({ samplerNodeId: e.target.value })}
+                          placeholder="例: 3"
+                          className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-8"
+                        />
+                      </div>
+                    </div>
+
+                    {/* オーバーライド設定 */}
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs text-[#b0b0b0]">プロパティ上書き</Label>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="h-6 px-2 text-[#d4d4d4] hover:text-white hover:bg-[#3c3c3c]"
+                          onClick={handleAddOverride}
+                        >
+                          <Plus className="h-3 w-3 mr-1" />
+                          追加
+                        </Button>
+                      </div>
+                      {editingWorkflow.overrides.length === 0 ? (
+                        <p className="text-xs text-[#666]">
+                          ノードのプロパティを上書きする設定を追加できます
+                        </p>
+                      ) : (
+                        <div className="space-y-2">
+                          {editingWorkflow.overrides.map((override, index) => (
+                            <div key={index} className="flex gap-1 items-center">
+                              <Input
+                                value={override.nodeId}
+                                onChange={(e) => handleUpdateOverride(index, { nodeId: e.target.value })}
+                                placeholder="NodeID"
+                                className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-xs h-7 w-16"
+                              />
+                              <Input
+                                value={override.property}
+                                onChange={(e) => handleUpdateOverride(index, { property: e.target.value })}
+                                placeholder="property"
+                                className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-xs h-7 flex-1"
+                              />
+                              <Input
+                                value={String(override.value)}
+                                onChange={(e) => {
+                                  const val = e.target.value;
+                                  const numVal = Number(val);
+                                  handleUpdateOverride(index, {
+                                    value: !isNaN(numVal) && val !== '' ? numVal : val
+                                  });
+                                }}
+                                placeholder="value"
+                                className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-xs h-7 w-20"
+                              />
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-[#3c3c3c]"
+                                onClick={() => handleRemoveOverride(index)}
+                              >
+                                <Trash2 className="h-3 w-3" />
+                              </Button>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      <p className="text-xs text-[#666]">
+                        例: NodeID=5, property=width, value=1024
+                      </p>
+                    </div>
+                  </div>
+                )}
               </>
             )}
           </div>

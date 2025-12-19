@@ -10,7 +10,7 @@ import {
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Copy, Check, AlertCircle, Play, Loader2, Settings, Trash2, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { loadComfyUISettings, type ComfyUISettings } from '@/lib/storage';
+import { loadComfyUISettings, getActiveWorkflow, type ComfyUISettings } from '@/lib/storage';
 import { ComfyUIClient, type GenerationProgress } from '@/lib/comfyui-api';
 
 interface ImageInfo {
@@ -57,6 +57,26 @@ export function PreviewPanel({
     setSelectedImage(images[newIndex]);
   }, [selectedImage, images]);
 
+  // キーボードナビゲーション（拡大表示中のみ）
+  useEffect(() => {
+    if (!selectedImage) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'ArrowLeft') {
+        e.preventDefault();
+        navigateImage('prev');
+      } else if (e.key === 'ArrowRight') {
+        e.preventDefault();
+        navigateImage('next');
+      } else if (e.key === 'Escape') {
+        setSelectedImage(null);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [selectedImage, navigateImage]);
+
   // 設定を読み込む
   useEffect(() => {
     setComfySettings(loadComfyUISettings());
@@ -98,13 +118,19 @@ export function PreviewPanel({
   const handleGenerate = useCallback(async () => {
     if (!comfySettings?.enabled || !mergedYaml) return;
 
+    const activeWorkflow = getActiveWorkflow(comfySettings);
+    if (!activeWorkflow) {
+      setGenerationError('ワークフローが選択されていません');
+      return;
+    }
+
     setIsGenerating(true);
     setGenerationError(null);
     setActiveTab('image');
 
     try {
       // ワークフローを取得
-      const response = await fetch(`/api/comfyui?file=${encodeURIComponent(comfySettings.workflowFile)}`);
+      const response = await fetch(`/api/comfyui?file=${encodeURIComponent(activeWorkflow.file)}`);
       if (!response.ok) {
         throw new Error('Failed to load workflow');
       }
@@ -115,8 +141,9 @@ export function PreviewPanel({
       const result = await client.generate(
         workflow,
         mergedYaml,
-        comfySettings.promptNodeId,
-        comfySettings.samplerNodeId,
+        activeWorkflow.promptNodeId,
+        activeWorkflow.samplerNodeId,
+        activeWorkflow.overrides,
         (progress) => setGenerationProgress(progress)
       );
 
@@ -200,7 +227,8 @@ export function PreviewPanel({
   }, []);
 
   const canCopy = activeTab === 'merged' ? (isYamlValid && !!mergedYaml) : (activeTab === 'prompt' && !!promptText);
-  const canGenerate = comfySettings?.enabled && !!mergedYaml && !isGenerating;
+  const activeWorkflowForCheck = comfySettings ? getActiveWorkflow(comfySettings) : null;
+  const canGenerate = comfySettings?.enabled && !!activeWorkflowForCheck && !!mergedYaml && !isGenerating;
 
   return (
     <div className="h-full bg-[#252526] flex flex-col">
@@ -395,7 +423,7 @@ export function PreviewPanel({
 
       {/* 画像拡大ダイアログ */}
       <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-        <DialogContent className="max-w-4xl max-h-[90vh] p-0 bg-[#1e1e1e] border-[#333] overflow-hidden" showCloseButton={false}>
+        <DialogContent className="!w-auto !max-w-[90vw] max-h-[90vh] p-0 bg-[#1e1e1e] border-[#333] overflow-hidden" showCloseButton={false}>
           <VisuallyHidden>
             <DialogTitle>画像プレビュー</DialogTitle>
           </VisuallyHidden>
@@ -405,7 +433,7 @@ export function PreviewPanel({
                 <img
                   src={`/api/images/${selectedImage.filename}`}
                   alt={selectedImage.id}
-                  className="w-full h-auto max-h-[85vh] object-contain"
+                  className="max-w-[90vw] max-h-[calc(90vh-40px)] object-contain"
                 />
                 {/* 閉じる・ダウンロードボタン */}
                 <div className="absolute top-2 right-2 flex gap-1">

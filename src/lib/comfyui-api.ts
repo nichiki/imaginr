@@ -1,6 +1,8 @@
 // ComfyUI API Client - Simplified polling-based approach
 // Uses Next.js API proxy to avoid CORS issues
 
+import type { NodeOverride } from './storage';
+
 export interface GenerationProgress {
   status: 'connecting' | 'queued' | 'generating' | 'completed' | 'error';
   progress?: number;
@@ -51,13 +53,14 @@ export class ComfyUIClient {
     prompt: string,
     promptNodeId: string,
     samplerNodeId: string,
+    overrides: NodeOverride[] = [],
     onProgress?: ProgressCallback
   ): Promise<GenerationResult> {
     try {
       onProgress?.({ status: 'connecting' });
 
       // プロンプトとシードをワークフローに埋め込む
-      const preparedWorkflow = this.prepareWorkflow(workflow, prompt, promptNodeId, samplerNodeId);
+      const preparedWorkflow = this.prepareWorkflow(workflow, prompt, promptNodeId, samplerNodeId, overrides);
 
       // プロンプトをキュー
       onProgress?.({ status: 'queued' });
@@ -84,7 +87,8 @@ export class ComfyUIClient {
     workflow: Record<string, unknown>,
     prompt: string,
     promptNodeId: string,
-    samplerNodeId: string
+    samplerNodeId: string,
+    overrides: NodeOverride[] = []
   ): Record<string, unknown> {
     const copy = JSON.parse(JSON.stringify(workflow));
 
@@ -101,6 +105,35 @@ export class ComfyUIClient {
       const node = copy[samplerNodeId] as Record<string, unknown>;
       if (node.inputs && typeof node.inputs === 'object') {
         (node.inputs as Record<string, unknown>).seed = this.generateRandomSeed();
+      }
+    }
+
+    // overridesを適用
+    for (const override of overrides) {
+      if (!override.nodeId || !override.property) continue;
+
+      const node = copy[override.nodeId];
+      if (!node || typeof node !== 'object') continue;
+
+      const nodeObj = node as Record<string, unknown>;
+
+      // プロパティがドット記法の場合（例: "inputs.width"）
+      if (override.property.includes('.')) {
+        const parts = override.property.split('.');
+        let target: Record<string, unknown> = nodeObj;
+        for (let i = 0; i < parts.length - 1; i++) {
+          if (target[parts[i]] && typeof target[parts[i]] === 'object') {
+            target = target[parts[i]] as Record<string, unknown>;
+          } else {
+            break;
+          }
+        }
+        target[parts[parts.length - 1]] = override.value;
+      } else {
+        // 直接プロパティの場合、inputsの下に設定
+        if (nodeObj.inputs && typeof nodeObj.inputs === 'object') {
+          (nodeObj.inputs as Record<string, unknown>)[override.property] = override.value;
+        }
       }
     }
 

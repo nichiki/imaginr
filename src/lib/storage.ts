@@ -49,20 +49,37 @@ export function saveState(state: Partial<AppState>): void {
 }
 
 // ComfyUI設定
+export interface NodeOverride {
+  nodeId: string;         // ノードID
+  property: string;       // プロパティ名 (例: "width", "height", "steps")
+  value: number | string; // 値
+}
+
+export interface WorkflowConfig {
+  id: string;             // 一意のID
+  file: string;           // ファイル名 (data/comfyui/ 以下)
+  name: string;           // 表示名
+  promptNodeId: string;   // プロンプトを挿入するノードID
+  samplerNodeId: string;  // シードをランダム化するサンプラーノードID
+  overrides: NodeOverride[]; // ノードプロパティの上書き設定
+}
+
 export interface ComfyUISettings {
   enabled: boolean;
   url: string;
-  workflowFile: string;  // data/comfyui/ 以下のファイル名
-  promptNodeId: string;  // プロンプトを挿入するノードID
-  samplerNodeId: string; // シードをランダム化するサンプラーノードID
+  activeWorkflowId: string;  // 現在選択中のワークフローID
+  workflows: WorkflowConfig[];
+  // 後方互換性のため残す（マイグレーション用）
+  workflowFile?: string;
+  promptNodeId?: string;
+  samplerNodeId?: string;
 }
 
 const defaultComfyUISettings: ComfyUISettings = {
   enabled: false,
   url: 'http://localhost:8188',
-  workflowFile: '',
-  promptNodeId: '',
-  samplerNodeId: '',
+  activeWorkflowId: '',
+  workflows: [],
 };
 
 export function loadComfyUISettings(): ComfyUISettings {
@@ -72,6 +89,27 @@ export function loadComfyUISettings(): ComfyUISettings {
     const saved = localStorage.getItem(COMFYUI_SETTINGS_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
+
+      // 旧形式からのマイグレーション
+      if (parsed.workflowFile && !parsed.workflows?.length) {
+        const migratedWorkflow: WorkflowConfig = {
+          id: crypto.randomUUID(),
+          file: parsed.workflowFile,
+          name: parsed.workflowFile.replace(/\.json$/, ''),
+          promptNodeId: parsed.promptNodeId || '',
+          samplerNodeId: parsed.samplerNodeId || '',
+          overrides: [],
+        };
+        parsed.workflows = [migratedWorkflow];
+        parsed.activeWorkflowId = migratedWorkflow.id;
+        // 旧プロパティを削除
+        delete parsed.workflowFile;
+        delete parsed.promptNodeId;
+        delete parsed.samplerNodeId;
+        // マイグレーション結果を保存
+        localStorage.setItem(COMFYUI_SETTINGS_KEY, JSON.stringify(parsed));
+      }
+
       return { ...defaultComfyUISettings, ...parsed };
     }
   } catch (error) {
@@ -90,4 +128,25 @@ export function saveComfyUISettings(settings: Partial<ComfyUISettings>): void {
   } catch (error) {
     console.error('Failed to save ComfyUI settings:', error);
   }
+}
+
+// アクティブなワークフロー設定を取得
+export function getActiveWorkflow(settings: ComfyUISettings): WorkflowConfig | null {
+  if (!settings.activeWorkflowId) return null;
+  return settings.workflows.find(w => w.id === settings.activeWorkflowId) || null;
+}
+
+// 新しいワークフロー設定を生成
+export function createWorkflowConfig(
+  file: string,
+  name?: string
+): WorkflowConfig {
+  return {
+    id: crypto.randomUUID(),
+    file,
+    name: name || file.replace(/\.json$/, ''),
+    promptNodeId: '',
+    samplerNodeId: '',
+    overrides: [],
+  };
 }

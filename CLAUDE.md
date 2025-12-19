@@ -20,31 +20,38 @@ src/
 │   └── api/                  # APIルート
 │       ├── files/            # ファイルCRUD
 │       ├── snippets/         # スニペットCRUD
-│       └── dictionary/       # 辞書取得
+│       ├── dictionary/       # 辞書取得
+│       ├── comfyui/          # ComfyUIワークフロー・プロキシ
+│       ├── generate/         # 画像生成
+│       └── images/           # 画像CRUD
 ├── components/
 │   ├── yaml-editor.tsx       # Monacoエディタ + 補完機能
 │   ├── file-tree.tsx         # ファイルツリー（左ペイン）
 │   ├── snippet-panel.tsx     # スニペット管理（右ペイン）
-│   ├── preview-panel.tsx     # プレビュー（下ペイン）
+│   ├── preview-panel.tsx     # プレビュー + 画像ギャラリー（下ペイン）
 │   ├── variable-form.tsx     # 変数入力フォーム + プリセット管理
+│   ├── settings-dialog.tsx   # ComfyUI設定ダイアログ
 │   └── ui/                   # shadcn/uiコンポーネント
 └── lib/
     ├── yaml-utils.ts         # YAMLマージ・プロンプト生成
     ├── variable-utils.ts     # 変数抽出・置換
-    ├── storage.ts            # UI状態の永続化
+    ├── storage.ts            # UI状態・ComfyUI設定の永続化
+    ├── comfyui-api.ts        # ComfyUIクライアント
     ├── file-api.ts           # ファイルAPI
     ├── snippet-api.ts        # スニペットAPI
     └── dictionary-api.ts     # 辞書API
 
 data/
-├── templates/                # YAMLテンプレート（52ファイル）
+├── templates/                # YAMLテンプレート
 │   ├── global_base.yaml      # グローバル設定
-│   ├── looks/                # ルック定義（8ファイル）
-│   └── shots/                # ショット定義（40ファイル）
+│   ├── looks/                # ルック定義
+│   └── shots/                # ショット定義
 ├── dictionary/               # オートコンプリート辞書
 │   ├── standard/             # 標準辞書（6カテゴリ）
 │   └── user/                 # ユーザーカスタム
-└── snippets/                 # スニペット定義（ブロック形式のみ）
+├── snippets/                 # スニペット定義（ブロック形式のみ）
+├── comfyui/                  # ComfyUIワークフロー（API形式JSON）
+└── images/                   # 生成画像の保存先
 ```
 
 ## コア機能
@@ -94,7 +101,7 @@ npm run lint     # ESLint実行
 │          │     (Monaco)         │  Panel    │
 ├──────────┼──────────────────────┴───────────┤
 │ Variables│    PreviewPanel                  │
-│  Form    │ (Merged YAML / Prompt Text)      │
+│  Form    │ (Merged YAML / Prompt / Gallery) │
 └──────────┴──────────────────────────────────┘
 ```
 
@@ -104,20 +111,68 @@ npm run lint     # ESLint実行
 ## ComfyUI連携
 
 ### 実装済み機能
-- **設定ダイアログ**: APIエンドポイント、ワークフロー、ノードID設定
+- **設定ダイアログ**: APIエンドポイント設定、接続テスト
+- **ワークフロー管理**: 複数ワークフローの登録・切り替え
+  - 各ワークフローにプロンプトノードID、サンプラーノードIDを紐付け
+  - ノードプロパティのオーバーライド設定（画像サイズ、ステップ数など）
 - **画像生成**: ポーリングベースのAPI通信（WebSocket不使用でシンプル化）
-- **画像保存**: 生成画像を`data/images/`に永続化
-- **ギャラリー**: サムネイル一覧（6列グリッド）、拡大表示、左右ナビゲーション
+  - Next.js API Routeによるプロキシ（CORS回避）
+- **画像保存**: 生成画像を`data/images/`に永続化（メタデータJSON付き）
+- **ギャラリー**:
+  - サムネイル一覧（6列グリッド）
+  - 拡大表示（ビューポート90%サイズ）
+  - キーボードナビゲーション（←→で移動、Escで閉じる）
+  - 画像ダウンロード機能
 
 ### 関連ファイル
-- `src/lib/comfyui-api.ts` - ComfyUIクライアント
+- `src/lib/comfyui-api.ts` - ComfyUIクライアント（プロキシ経由）
+- `src/lib/storage.ts` - ワークフロー設定の型定義・永続化
+- `src/app/api/comfyui/proxy/` - ComfyUI APIプロキシ
 - `src/app/api/generate/route.ts` - 画像生成API
 - `src/app/api/images/` - 画像CRUD API
 - `src/components/preview-panel.tsx` - ギャラリーUI
+- `src/components/settings-dialog.tsx` - 設定ダイアログ
 
-## 今後の検討事項
+### ワークフロー設定の構造
+```typescript
+interface WorkflowConfig {
+  id: string;             // 一意のID
+  file: string;           // ファイル名 (data/comfyui/ 以下)
+  name: string;           // 表示名
+  promptNodeId: string;   // プロンプトを挿入するノードID
+  samplerNodeId: string;  // シードをランダム化するサンプラーノードID
+  overrides: NodeOverride[]; // ノードプロパティの上書き設定
+}
 
-### LLMエンハンサー（保留）
+interface NodeOverride {
+  nodeId: string;         // ノードID
+  property: string;       // プロパティ名 (例: "width", "height", "steps")
+  value: number | string; // 値
+}
+```
+
+## 今後のロードマップ
+
+### Phase 1: コンテンツ整備
+- [ ] 辞書編集機能（UI上での追加・編集・削除）
+- [ ] 辞書・テンプレート・スニペットのプリセット整備
+- [ ] マニュアル・ドキュメント作成
+
+### Phase 2: 画像管理の本格化
+- [ ] SQLiteによるメタデータ管理
+  - 生成日時、使用プロンプト、ワークフロー設定などを記録
+  - 画像の検索・フィルタリング
+  - プロンプトの抽出・再利用
+- [ ] 画像のタグ付け・分類機能
+
+### Phase 3: デスクトップアプリ化
+- [ ] Tauriによるネイティブアプリ化
+  - 軽量（Electronの10分の1以下のバンドルサイズ）
+  - Rustバックエンドでパフォーマンス向上
+  - tauri-plugin-sqlでSQLite統合
+- [ ] ブランディング検討
+
+### 保留: LLMエンハンサー
 
 構造化YAMLを自然言語プロンプトに変換するLLMレイヤーの検討。
 
