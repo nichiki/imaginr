@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Save, Trash2 } from 'lucide-react';
+import { Save, Trash2, X } from 'lucide-react';
 import type { VariableDefinition, VariableValues } from '@/lib/variable-utils';
 import { DictionaryEntry, lookupDictionary } from '@/lib/dictionary-api';
 
@@ -205,6 +205,11 @@ function AutocompleteInput({
     }
   }, [selectedIndex]);
 
+  const handleClear = useCallback(() => {
+    onChange('');
+    inputRef.current?.focus();
+  }, [onChange]);
+
   return (
     <div ref={containerRef} className="relative">
       <Input
@@ -219,9 +224,22 @@ function AutocompleteInput({
         }}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
-        className="h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
+        className="h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4] pr-7"
         autoComplete="off"
       />
+      {value && (
+        <button
+          type="button"
+          onMouseDown={(e) => {
+            e.preventDefault(); // onBlurより先に処理
+            handleClear();
+          }}
+          className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-[#888] hover:text-[#d4d4d4] rounded"
+          title="Clear"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      )}
       {isOpen && filteredSuggestions.length > 0 && (
         <div
           ref={listRef}

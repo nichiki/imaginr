@@ -1,0 +1,114 @@
+# ========================================
+# 被写体
+# ========================================
+
+# 主題
+subject: ${subject}
+
+# 属性
+demographics:
+  gender: ${gender}
+  age: ${age}
+  ethnicity: ${ethnicity}
+
+# 外見
+appearance:
+  hair:
+    length: ${hair_length}
+    style: ${hair_style}
+    color: ${hair_color}
+    bangs: ${hair_bangs}
+    extras: ${hair_extras[]}
+  eyes:
+    color: ${eyes_color}
+  skin: ${skin}
+  build: ${build}
+  face: ${face}
+  breast: ${breast}
+  makeup: ${makeup}
+  extras: ${appearance_extras[]}
+
+# 表情
+expression:
+  type: ${expression_type}
+  eyes: ${expression_eyes}
+  mouth: ${expression_mouth}
+
+# ポーズ
+pose:
+  base: ${pose_base}
+  direction: ${pose_direction}
+  action: ${pose_action}
+
+# 服装
+outfit:
+  style: ${outfit_style}
+  top: ${outfit_top}
+  bottom: ${outfit_bottom}
+  dress: ${outfit_dress}
+  outerwear: ${outfit_outerwear}
+  legwear: ${outfit_legwear}
+  footwear: ${outfit_footwear}
+  swimwear: ${outfit_swimwear}
+  underwear: ${outfit_underwear[]}
+  accessories: ${outfit_accessories[]}
+  color: ${outfit_color}
+  material: ${outfit_material}
+  fit: ${outfit_fit}
+  state: ${outfit_state}
+
+# ========================================
+# ビジュアル
+# ========================================
+
+# スタイル
+aesthetic: ${aesthetic}
+
+# ムード
+mood: ${mood}
+
+# ========================================
+# 技術
+# ========================================
+
+# カメラ
+camera:
+  type: ${camera_type}
+  lens: ${lens}
+  film: ${film}
+  effects: ${effects[]}
+
+# 構図
+composition: ${composition[]}
+
+# ライティング
+lighting:
+  style: ${lighting_style}
+  type: ${lighting_type}
+  color: ${lighting_color}
+  shadow: ${lighting_shadow}
+
+# ========================================
+# 環境
+# ========================================
+
+# 環境
+environment:
+  background: ${background}
+  location: ${location}
+  setting: ${setting}
+  time: ${time}
+  weather: ${weather}
+  season: ${season}
+  crowd: ${crowd}
+
+# ========================================
+# 品質
+# ========================================
+
+# 品質
+quality:
+  - high resolution, 8K UHD
+  - sharp focus
+  - highly detailed
+  - absurdres

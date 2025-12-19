@@ -1,0 +1,513 @@
+# appearance関連の辞書
+
+entries:
+  # ========================================
+  # hair.length - 髪の長さ
+  # ========================================
+  - key: length
+    context: hair
+    values:
+      - value: very short hair
+        description: ベリーショート
+      - value: short hair
+        description: ショート
+      - value: medium hair
+        description: ミディアム
+      - value: long hair
+        description: ロング
+      - value: very long hair
+        description: ベリーロング
+      - value: absurdly long hair
+        description: 超ロング、地面に届く
+      - value: big hair
+        description: ボリューム強調
+
+  # ========================================
+  # hair.style - ヘアスタイル
+  # ========================================
+  - key: style
+    context: hair
+    values:
+      # --- 結ばないスタイル ---
+      - value: straight hair
+        description: ストレート
+      - value: wavy hair
+        description: ウェーブ
+      - value: curly hair
+        description: カーリー
+      - value: messy hair
+        description: 無造作、ぼさぼさ
+      - value: bob cut
+        description: ボブ
+      - value: pixie cut
+        description: ピクシーカット
+      - value: hime cut
+        description: 姫カット
+      - value: bowl cut
+        description: おかっぱ
+      - value: buzz cut
+        description: 丸刈り
+      - value: crew cut
+        description: 軍人カット
+      - value: flattop
+        description: 角刈り
+      - value: undercut
+        description: ツーブロック
+      - value: mohawk
+        description: モヒカン
+      - value: afro
+        description: アフロ
+      - value: pompadour
+        description: ポンパドール
+      - value: mullet
+        description: マレット、襟足長め
+      - value: flipped hair
+        description: 外ハネ
+      - value: cornrows
+        description: コーンロウ
+      - value: dreadlocks
+        description: ドレッド
+      - value: spiked hair
+        description: つんつん髪
+      - value: slicked back
+        description: オールバック
+      - value: comb over
+        description: なでつけ髪
+      - value: hair down
+        description: 下ろした髪
+      - value: hair up
+        description: アップスタイル
+      - value: asymmetrical hair
+        description: 左右非対称
+      - value: sidecut
+        description: サイドカット
+      - value: blunt ends
+        description: 毛先揃え
+      - value: short hair with long locks
+        description: 横髪長め
+      # --- 結ぶスタイル ---
+      - value: ponytail
+        description: ポニーテール
+      - value: high ponytail
+        description: 高い位置のポニテ
+      - value: low ponytail
+        description: 低い位置のポニテ
+      - value: side ponytail
+        description: サイドポニテ
+      - value: short ponytail
+        description: 短いポニテ
+      - value: folded ponytail
+        description: 折り返しポニテ
+      - value: twintails
+        description: ツインテール
+      - value: low twintails
+        description: 低い位置のツインテ
+      - value: short twintails
+        description: 短いツインテ
+      - value: two side up
+        description: サイドアップ
+      - value: one side up
+        description: ワンサイドアップ
+      - value: braid
+        description: 三つ編み
+      - value: single braid
+        description: 一本三つ編み
+      - value: twin braids
+        description: 二本三つ編み
+      - value: side braid
+        description: サイド三つ編み
+      - value: french braid
+        description: フレンチブレイド
+      - value: crown braid
+        description: クラウンブレイド
+      - value: hair bun
+        description: お団子
+      - value: single hair bun
+        description: 一つお団子
+      - value: double bun
+        description: 二つお団子
+      - value: braided bun
+        description: 編み込みお団子
+      - value: half updo
+        description: ハーフアップ
+      - value: topknot
+        description: トップノット
+      - value: hair rings
+        description: 輪っか結び
+      - value: bow-shaped hair
+        description: リボン結び
+      # --- 髪質・テクスチャ ---
+      - value: drill hair
+        description: ドリルヘア
+      - value: twin drills
+        description: ツインドリル
+      - value: ringlets
+        description: 縦ロール
+      - value: pointy hair
+        description: 突き出した髪
+      - value: hair flaps
+        description: 猫耳風ハネ
+
+  # ========================================
+  # hair.color - 髪色
+  # ========================================
+  - key: color
+    context: hair
+    values:
+      # --- 基本色 ---
+      - value: black hair
+        description: 黒
+      - value: dark brown hair
+        description: ダークブラウン
+      - value: brown hair
+        description: ブラウン
+      - value: chestnut hair
+        description: 栗色
+      - value: light brown hair
+        description: ライトブラウン
+      - value: blonde hair
+        description: ブロンド
+      - value: platinum blonde hair
+        description: プラチナブロンド
+      - value: red hair
+        description: 赤毛
+      - value: auburn hair
+        description: 赤褐色
+      - value: orange hair
+        description: オレンジ
+      - value: gray hair
+        description: グレー
+      - value: white hair
+        description: 白
+      - value: silver hair
+        description: シルバー
+      # --- ファンタジー色 ---
+      - value: pink hair
+        description: ピンク
+      - value: blue hair
+        description: 青
+      - value: light blue hair
+        description: 水色
+      - value: purple hair
+        description: 紫
+      - value: green hair
+        description: 緑
+      - value: aqua hair
+        description: アクア
+      # --- 特殊カラー ---
+      - value: multicolored hair
+        description: マルチカラー
+      - value: gradient hair
+        description: グラデーション
+      - value: split-color hair
+        description: 左右二色
+      - value: two-tone hair
+        description: ツートーン
+      - value: colored inner hair
+        description: インナーカラー
+      - value: streaked hair
+        description: メッシュ
+      - value: colored tips
+        description: 毛先染め
+      - value: rainbow hair
+        description: 虹色
+
+  # ========================================
+  # hair.bangs - 前髪
+  # ========================================
+  - key: bangs
+    context: hair
+    values:
+      - value: bangs
+        description: 前髪あり
+      - value: blunt bangs
+        description: ぱっつん
+      - value: swept bangs
+        description: 横流し
+      - value: parted bangs
+        description: 真ん中分け
+      - value: asymmetrical bangs
+        description: 左右非対称
+      - value: hair between eyes
+        description: M字バング
+      - value: hair over eyes
+        description: 両目隠れ
+      - value: hair over one eye
+        description: 片目隠れ
+      - value: crossed bangs
+        description: クロス前髪
+      - value: hair intakes
+        description: エアインテーク
+      - value: forehead
+        description: おでこ出し
+      - value: no bangs
+        description: 前髪なし
+      - value: braided bangs
+        description: 編み込み前髪
+
+  # ========================================
+  # hair.extras - 髪の追加要素
+  # ========================================
+  - key: extras
+    context: hair
+    values:
+      # --- アホ毛系 ---
+      - value: ahoge
+        description: アホ毛
+      - value: huge ahoge
+        description: 大きいアホ毛
+      - value: heart ahoge
+        description: ハート型アホ毛
+      - value: antenna hair
+        description: 触角ヘア
+      # --- 動き・質感 ---
+      - value: floating hair
+        description: ふわっとなびく
+      - value: hair spread out
+        description: 広がった髪
+      - value: wind
+        description: 風になびく
+      - value: wet hair
+        description: 濡れ髪
+      - value: shiny hair
+        description: 艶髪
+      - value: metallic hair
+        description: メタリック
+      - value: disheveled hair
+        description: 乱れ髪
+      # --- もみあげ・後れ毛 ---
+      - value: sidelocks
+        description: もみあげ長め
+      - value: lone nape hair
+        description: 後れ毛
+      - value: widow's peak
+        description: 富士額
+
+  # ========================================
+  # eyes.color - 目の色
+  # ========================================
+  - key: color
+    context: eyes
+    values:
+      # --- 基本色 ---
+      - value: black eyes
+        description: 黒
+      - value: dark brown eyes
+        description: ダークブラウン
+      - value: brown eyes
+        description: ブラウン
+      - value: light brown eyes
+        description: ライトブラウン
+      - value: hazel eyes
+        description: ヘーゼル
+      - value: amber eyes
+        description: 琥珀色
+      - value: green eyes
+        description: 緑
+      - value: blue eyes
+        description: 青
+      - value: gray eyes
+        description: グレー
+      # --- ファンタジー色 ---
+      - value: red eyes
+        description: 赤
+      - value: purple eyes
+        description: 紫
+      - value: pink eyes
+        description: ピンク
+      - value: golden eyes
+        description: 金色
+      - value: silver eyes
+        description: 銀色
+      - value: aqua eyes
+        description: アクア
+      # --- 特殊 ---
+      - value: heterochromia
+        description: オッドアイ
+      - value: gradient eyes
+        description: グラデーション
+
+  # ========================================
+  # skin - 肌
+  # ========================================
+  - key: skin
+    context: appearance
+    values:
+      - value: fair skin
+        description: 色白
+      - value: light skin
+        description: 明るい肌
+      - value: medium skin
+        description: 中間
+      - value: olive skin
+        description: オリーブ色
+      - value: tan skin
+        description: 日焼け肌
+      - value: dark skin
+        description: ダーク
+      - value: pale skin
+        description: 青白い
+      - value: porcelain skin
+        description: 陶器のような
+      - value: freckles
+        description: そばかす
+      - value: smooth skin
+        description: 滑らか
+      - value: glowing skin
+        description: 輝く
+
+  # ========================================
+  # build - 体型
+  # ========================================
+  - key: build
+    context: appearance
+    values:
+      - value: slim
+        description: スリム
+      - value: slender
+        description: ほっそり
+      - value: petite
+        description: 小柄
+      - value: average build
+        description: 標準
+      - value: athletic
+        description: アスレチック
+      - value: muscular
+        description: 筋肉質
+      - value: curvy
+        description: カーヴィー
+      - value: tall
+        description: 長身
+      - value: short
+        description: 小柄
+
+  # ========================================
+  # face - 顔立ち
+  # ========================================
+  - key: face
+    context: appearance
+    values:
+      - value: oval face
+        description: 卵型
+      - value: round face
+        description: 丸顔
+      - value: square face
+        description: 四角顔
+      - value: heart-shaped face
+        description: ハート型
+      - value: diamond face
+        description: ダイヤモンド型
+      - value: long face
+        description: 面長
+      - value: angular face
+        description: 角ばった
+      - value: soft features
+        description: 柔らかい顔立ち
+      - value: sharp features
+        description: シャープな顔立ち
+      - value: delicate features
+        description: 繊細な顔立ち
+      - value: strong jawline
+        description: 強い顎ライン
+      - value: high cheekbones
+        description: 高い頬骨
+
+  # ========================================
+  # breast - 胸
+  # ========================================
+  - key: breast
+    context: appearance
+    values:
+      - value: flat chest
+        description: 平ら
+      - value: small breasts
+        description: 小さい
+      - value: medium breasts
+        description: 普通
+      - value: large breasts
+        description: 大きい
+      - value: huge breasts
+        description: とても大きい
+
+  # ========================================
+  # makeup - メイク
+  # ========================================
+  - key: makeup
+    context: appearance
+    values:
+      - value: no makeup
+        description: ノーメイク
+      - value: natural makeup
+        description: ナチュラル
+      - value: light makeup
+        description: 薄化粧
+      - value: glamorous makeup
+        description: グラマラス
+      - value: heavy makeup
+        description: 濃いメイク
+      - value: smoky eyes
+        description: スモーキーアイ
+      - value: red lipstick
+        description: 赤リップ
+      - value: pink lipstick
+        description: ピンクリップ
+      - value: nude lipstick
+        description: ヌードリップ
+      - value: glossy lips
+        description: グロスリップ
+      - value: bold eyeliner
+        description: 太いアイライン
+      - value: cat eye makeup
+        description: キャットアイ
+      - value: false eyelashes
+        description: つけまつ毛
+      - value: long eyelashes
+        description: 長いまつ毛
+      - value: blush
+        description: チーク
+      - value: contoured face
+        description: コントゥアリング
+
+  # ========================================
+  # appearance_extras - 外見の追加要素
+  # ========================================
+  - key: extras
+    context: appearance
+    values:
+      # --- 体型詳細 ---
+      - value: long legs
+        description: 脚が長い
+      - value: slim waist
+        description: 細いウエスト
+      - value: wide hips
+        description: 広いヒップ
+      - value: toned body
+        description: 引き締まった体
+      - value: abs
+        description: 腹筋
+      # --- 装飾・特徴 ---
+      - value: tattoo
+        description: タトゥー
+      - value: arm tattoo
+        description: 腕タトゥー
+      - value: back tattoo
+        description: 背中タトゥー
+      - value: piercing
+        description: ピアス
+      - value: ear piercing
+        description: イヤーピアス
+      - value: navel piercing
+        description: へそピアス
+      - value: mole
+        description: ほくろ
+      - value: beauty mark
+        description: 泣きぼくろ
+      - value: scar
+        description: 傷跡
+      # --- 状態 ---
+      - value: sweaty
+        description: 汗ばんだ
+      - value: wet body
+        description: 濡れた体
+      - value: oiled skin
+        description: オイル肌

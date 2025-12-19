@@ -1,93 +1,1121 @@
 # outfit関連の辞書
 
 entries:
-  # outfit.type - 衣装タイプ
-  - key: type
+  # ========================================
+  # top - トップス
+  # ========================================
+  - key: top
     context: outfit
     values:
-      - value: dress
-        description: ドレス
-      - value: suit
-        description: スーツ
-      - value: casual wear
-        description: カジュアル
-      - value: formal wear
-        description: フォーマル
-      - value: swimwear
-        description: 水着
-      - value: lingerie
-        description: ランジェリー
-      - value: evening gown
+      # --- シャツ ---
+      - value: white shirt
+        description: 白シャツ
+      - value: oxford shirt
+        description: オックスフォードシャツ
+      - value: flannel shirt
+        description: フランネルシャツ
+      - value: western shirt
+        description: ウエスタンシャツ
+      - value: military shirt
+        description: ミリタリーシャツ
+      - value: safari shirt
+        description: サファリシャツ
+      - value: aloha shirt
+        description: アロハシャツ
+      - value: camp shirt
+        description: キャンプシャツ
+      - value: bowling shirt
+        description: ボウリングシャツ
+      - value: baseball shirt
+        description: ベースボールシャツ
+      - value: pajamas shirt
+        description: パジャマシャツ
+      - value: sheer shirt
+        description: シアーシャツ
+      - value: overshirt
+        description: オーバーシャツ
+      - value: tie front shirt
+        description: 前結びシャツ
+      # --- Tシャツ ---
+      - value: t-shirt
+        description: Tシャツ
+      - value: tight t-shirt
+        description: タイトTシャツ
+      - value: sleeveless shirt
+        description: ノースリーブシャツ
+      - value: ringer t-shirt
+        description: リンガーTシャツ
+      - value: henley shirt
+        description: ヘンリーシャツ
+      # --- ポロシャツ ---
+      - value: polo shirt
+        description: ポロシャツ
+      - value: rugby shirt
+        description: ラガーシャツ
+      - value: cycling jersey
+        description: サイクルジャージ
+      # --- ブラウス ---
+      - value: tailored blouse
+        description: テーラードブラウス
+      - value: peplum blouse
+        description: ペプラムブラウス
+      - value: smock blouse
+        description: スモックブラウス
+      - value: victorian blouse
+        description: ヴィクトリアンブラウス
+      - value: peasant blouse
+        description: ペザントブラウス
+      - value: gypsy blouse
+        description: ジプシーブラウス
+      - value: pirate blouse
+        description: パイレーツブラウス
+      - value: bohemian blouse
+        description: ボヘミアンブラウス
+      - value: prairie blouse
+        description: プレーリーブラウス
+      - value: middy blouse
+        description: ミディブラウス
+      - value: china blouse
+        description: チャイナブラウス
+      # --- ニット ---
+      - value: sweater
+        description: セーター
+      - value: cardigan
+        description: カーディガン
+      - value: hoodie
+        description: パーカー
+      - value: cowichan sweater
+        description: カウチンセーター
+      - value: fisherman sweater
+        description: フィッシャーマンセーター
+      - value: nordic sweater
+        description: ノルディックセーター
+      - value: bolero
+        description: ボレロ
+      - value: shrug
+        description: シュラグ
+      # --- タンクトップ・キャミソール ---
+      - value: tank top
+        description: タンクトップ
+      - value: camisole
+        description: キャミソール
+      - value: tube top
+        description: チューブトップ
+      - value: bustier
+        description: ビスチェ
+      - value: crop top
+        description: クロップトップ
+      - value: midriff top
+        description: へそ出しトップ
+      - value: bare top
+        description: ベアトップ
+      - value: halter top
+        description: ホルタートップ
+      - value: bratop
+        description: ブラトップ
+      # --- その他 ---
+      - value: scrub
+        description: スクラブ
+      - value: cook coat
+        description: コックコート
+      - value: jeogori
+        description: チョゴリ
+
+  # ========================================
+  # bottom - ボトムス
+  # ========================================
+  - key: bottom
+    context: outfit
+    values:
+      # --- スカート（タイト系） ---
+      - value: straight skirt
+        description: ストレートスカート
+      - value: tight skirt
+        description: タイトスカート
+      - value: pencil skirt
+        description: ペンシルスカート
+      - value: tube skirt
+        description: チューブスカート
+      - value: peplum skirt
+        description: ペプラムスカート
+      - value: fishtail skirt
+        description: フィッシュテールスカート
+      - value: mermaid skirt
+        description: マーメイドスカート
+      - value: hobble skirt
+        description: ホブルスカート
+      # --- スカート（フレア系） ---
+      - value: flare skirt
+        description: フレアスカート
+      - value: circular skirt
+        description: サーキュラースカート
+      - value: pleated skirt
+        description: プリーツスカート
+      - value: tiered skirt
+        description: ティアードスカート
+      - value: gypsy skirt
+        description: ジプシースカート
+      - value: prairie skirt
+        description: プレーリースカート
+      - value: dirndl skirt
+        description: ダーンドルスカート
+      - value: full skirt
+        description: フルスカート
+      - value: swing skirt
+        description: スイングスカート
+      - value: ballroom skirt
+        description: ボールルームスカート
+      # --- スカート（その他） ---
+      - value: mini skirt
+        description: ミニスカート
+      - value: midi skirt
+        description: ミディスカート
+      - value: long skirt
+        description: ロングスカート
+      - value: high waist skirt
+        description: ハイウエストスカート
+      - value: wrap skirt
+        description: ラップスカート
+      - value: tulip skirt
+        description: チューリップスカート
+      - value: balloon skirt
+        description: バルーンスカート
+      - value: tulle skirt
+        description: チュールスカート
+      - value: tutu skirt
+        description: チュチュスカート
+      - value: ruffled skirt
+        description: フリルスカート
+      - value: kilt skirt
+        description: キルトスカート
+      - value: culotte skirt
+        description: キュロットスカート
+      - value: skort
+        description: スコート
+      - value: suspender skirt
+        description: サスペンダースカート
+      - value: chima
+        description: チマ
+      # --- パンツ（デニム） ---
+      - value: denim pants
+        description: デニムパンツ
+      - value: jeans
+        description: ジーンズ
+      - value: skinny jeans
+        description: スキニージーンズ
+      - value: boyfriend jeans
+        description: ボーイフレンドジーンズ
+      - value: ripped jeans
+        description: ダメージジーンズ
+      - value: bootcut jeans
+        description: ブーツカットジーンズ
+      - value: bell bottom pants
+        description: ベルボトム
+      # --- パンツ（カジュアル） ---
+      - value: cargo pants
+        description: カーゴパンツ
+      - value: chino pants
+        description: チノパン
+      - value: slacks
+        description: スラックス
+      - value: jogger pants
+        description: ジョガーパンツ
+      - value: sweatpants
+        description: スウェットパンツ
+      - value: leggings
+        description: レギンス
+      - value: jeggings
+        description: ジェギンス
+      # --- パンツ（ワイド系） ---
+      - value: wide pants
+        description: ワイドパンツ
+      - value: palazzo pants
+        description: パラッツォパンツ
+      - value: baggy pants
+        description: バギーパンツ
+      - value: gaucho pants
+        description: ガウチョパンツ
+      - value: harem pants
+        description: ハーレムパンツ
+      - value: sarrouel pants
+        description: サルエルパンツ
+      # --- ショートパンツ ---
+      - value: shorts
+        description: ショートパンツ
+      - value: hot pants
+        description: ホットパンツ
+      - value: bermuda shorts
+        description: バミューダパンツ
+      - value: cycling shorts
+        description: サイクリングショーツ
+      - value: denim shorts
+        description: デニムショーツ
+      # --- その他 ---
+      - value: capri pants
+        description: カプリパンツ
+      - value: cropped pants
+        description: クロップドパンツ
+      - value: tapered pants
+        description: テーパードパンツ
+      - value: high waist pants
+        description: ハイウエストパンツ
+      - value: suspender pants
+        description: サスペンダーパンツ
+      - value: overalls
+        description: オーバーオール
+      - value: hakama pants
+        description: 袴パンツ
+      - value: bloomers
+        description: ブルマー
+      - value: jodhpurs
+        description: 乗馬パンツ
+      - value: sailor pants
+        description: セーラーパンツ
+      - value: lederhosen
+        description: レーダーホーゼン
+
+  # ========================================
+  # dress - ワンピース・ドレス
+  # ========================================
+  - key: dress
+    context: outfit
+    values:
+      # --- ドレスシルエット ---
+      - value: a-line dress
+        description: Aラインドレス
+      - value: empire dress
+        description: エンパイアドレス
+      - value: sheath dress
+        description: シースドレス
+      - value: shift dress
+        description: シフトドレス
+      - value: mermaid dress
+        description: マーメイドドレス
+      - value: princess dress
+        description: プリンセスドレス
+      - value: ball gown
+        description: ボールガウン
+      - value: cocoon dress
+        description: コクーンドレス
+      - value: hourglass dress
+        description: アワーグラスドレス
+      # --- カジュアルドレス ---
+      - value: shirt dress
+        description: シャツワンピース
+      - value: t-shirt dress
+        description: Tシャツワンピース
+      - value: sweater dress
+        description: ニットワンピース
+      - value: tank dress
+        description: タンクワンピース
+      - value: camisole dress
+        description: キャミワンピース
+      - value: slip dress
+        description: スリップドレス
+      - value: sundress
+        description: サンドレス
+      - value: skater dress
+        description: スケータードレス
+      - value: wrap dress
+        description: ラップドレス
+      - value: tunic
+        description: チュニック
+      # --- フォーマル ---
+      - value: evening dress
         description: イブニングドレス
       - value: cocktail dress
         description: カクテルドレス
+      - value: little black dress
+        description: リトルブラックドレス
+      - value: wedding dress
+        description: ウェディングドレス
+      - value: prom dress
+        description: プロムドレス
+      # --- スタイル ---
+      - value: bohemian dress
+        description: ボヘミアンドレス
+      - value: peasant dress
+        description: ペザントドレス
+      - value: vintage dress
+        description: ヴィンテージドレス
+      - value: flapper dress
+        description: フラッパードレス
+      - value: pinafore dress
+        description: ジャンパースカート
+      - value: jumper dress
+        description: ジャンパードレス
+      - value: apron dress
+        description: エプロンドレス
+      - value: tiered dress
+        description: ティアードワンピース
+      - value: layered dress
+        description: レイヤードドレス
+      - value: fringe dress
+        description: フリンジドレス
+      - value: backless dress
+        description: バックレスドレス
+      - value: one shoulder dress
+        description: ワンショルダードレス
+      - value: corset dress
+        description: コルセットドレス
+      - value: hoop dress
+        description: フープドレス
+      # --- ボディスーツ系 ---
+      - value: jumpsuit
+        description: ジャンプスーツ
+      - value: rompers
+        description: ロンパース
+      - value: catsuit
+        description: キャットスーツ
+      - value: bodysuit
+        description: ボディスーツ
+      - value: leotard
+        description: レオタード
+      # --- 和装・民族 ---
+      - value: kimono
+        description: 着物
+      - value: yukata
+        description: 浴衣
+      - value: kimono dress
+        description: 着物ドレス
+      - value: cheongsam
+        description: チャイナドレス
+      - value: qipao
+        description: チーパオ
+      - value: ao dai
+        description: アオザイ
+      - value: hanbok
+        description: 韓服
+      - value: saree
+        description: サリー
+      - value: dirndl
+        description: ディアンドル
+
+  # ========================================
+  # outerwear - アウター
+  # ========================================
+  - key: outerwear
+    context: outfit
+    values:
+      # --- ジャケット ---
+      - value: jacket
+        description: ジャケット
+      - value: blazer
+        description: ブレザー
+      - value: denim jacket
+        description: デニムジャケット
+      - value: leather jacket
+        description: レザージャケット
+      - value: bomber jacket
+        description: ボンバージャケット
+      - value: military jacket
+        description: ミリタリージャケット
+      - value: safari jacket
+        description: サファリジャケット
+      - value: varsity jacket
+        description: スタジャン
+      - value: biker jacket
+        description: ライダースジャケット
+      - value: track jacket
+        description: トラックジャケット
+      - value: puffer jacket
+        description: ダウンジャケット
+      - value: quilted jacket
+        description: キルティングジャケット
+      - value: bolero jacket
+        description: ボレロジャケット
+      # --- コート ---
+      - value: coat
+        description: コート
+      - value: trench coat
+        description: トレンチコート
+      - value: pea coat
+        description: ピーコート
+      - value: duffle coat
+        description: ダッフルコート
+      - value: overcoat
+        description: オーバーコート
+      - value: fur coat
+        description: ファーコート
+      - value: raincoat
+        description: レインコート
+      - value: lab coat
+        description: 白衣
+      # --- その他 ---
+      - value: cape
+        description: ケープ
+      - value: cloak
+        description: マント
+      - value: poncho
+        description: ポンチョ
+      - value: shawl
+        description: ショール
+      - value: vest
+        description: ベスト
+      - value: waistcoat
+        description: ウエストコート
+      - value: down vest
+        description: ダウンベスト
+
+  # ========================================
+  # legwear - レッグウェア
+  # ========================================
+  - key: legwear
+    context: outfit
+    values:
+      # --- ソックス ---
+      - value: socks
+        description: ソックス
+      - value: ankle socks
+        description: アンクルソックス
+      - value: crew socks
+        description: クルーソックス
+      - value: knee socks
+        description: ニーソックス
+      - value: knee highs
+        description: ニーハイ
+      - value: over knee socks
+        description: オーバーニーソックス
+      - value: thigh highs
+        description: サイハイソックス
+      - value: loose socks
+        description: ルーズソックス
+      - value: tube socks
+        description: チューブソックス
+      - value: toe socks
+        description: 五本指ソックス
+      - value: tabi
+        description: 足袋
+      # --- ストッキング ---
+      - value: stockings
+        description: ストッキング
+      - value: pantyhose
+        description: パンスト
+      - value: tights
+        description: タイツ
+      - value: fishnet tights
+        description: 網タイツ
+      - value: lace tights
+        description: レースタイツ
+      - value: sheer tights
+        description: シアータイツ
+      - value: opaque tights
+        description: 厚手タイツ
+      - value: patterned tights
+        description: 柄タイツ
+      # --- ガーター ---
+      - value: garter belt
+        description: ガーターベルト
+      - value: garter straps
+        description: ガーターストラップ
+      - value: thigh strap
+        description: 太ももストラップ
+      # --- その他 ---
+      - value: leg warmers
+        description: レッグウォーマー
+      - value: hold ups
+        description: ホールドアップ
+
+  # ========================================
+  # footwear - フットウェア
+  # ========================================
+  - key: footwear
+    context: outfit
+    values:
+      # --- ヒール ---
+      - value: high heels
+        description: ハイヒール
+      - value: stiletto heels
+        description: ピンヒール
+      - value: pumps
+        description: パンプス
+      - value: kitten heels
+        description: キトンヒール
+      - value: wedge heels
+        description: ウェッジヒール
+      - value: platform heels
+        description: 厚底ヒール
+      - value: block heels
+        description: チャンキーヒール
+      - value: slingback heels
+        description: スリングバック
+      - value: ankle strap heels
+        description: アンクルストラップ
+      - value: mary janes
+        description: メリージェーン
+      # --- ブーツ ---
+      - value: boots
+        description: ブーツ
+      - value: ankle boots
+        description: アンクルブーツ
+      - value: knee boots
+        description: ニーブーツ
+      - value: thigh high boots
+        description: サイハイブーツ
+      - value: over knee boots
+        description: ニーハイブーツ
+      - value: combat boots
+        description: コンバットブーツ
+      - value: cowboy boots
+        description: カウボーイブーツ
+      - value: chelsea boots
+        description: チェルシーブーツ
+      - value: rain boots
+        description: レインブーツ
+      - value: ugg boots
+        description: ムートンブーツ
+      - value: riding boots
+        description: ジョッキーブーツ
+      # --- フラット ---
+      - value: flats
+        description: フラットシューズ
+      - value: ballet flats
+        description: バレエシューズ
+      - value: loafers
+        description: ローファー
+      - value: oxfords
+        description: オックスフォード
+      - value: moccasins
+        description: モカシン
+      - value: espadrilles
+        description: エスパドリーユ
+      # --- スニーカー ---
+      - value: sneakers
+        description: スニーカー
+      - value: high top sneakers
+        description: ハイカットスニーカー
+      - value: low top sneakers
+        description: ローカットスニーカー
+      - value: canvas sneakers
+        description: キャンバススニーカー
+      - value: running shoes
+        description: ランニングシューズ
+      # --- サンダル ---
+      - value: sandals
+        description: サンダル
+      - value: flip flops
+        description: ビーチサンダル
+      - value: gladiator sandals
+        description: グラディエーターサンダル
+      - value: wedge sandals
+        description: ウェッジサンダル
+      - value: platform sandals
+        description: 厚底サンダル
+      - value: slides
+        description: スライドサンダル
+      # --- その他 ---
+      - value: slippers
+        description: スリッパ
+      - value: barefoot
+        description: 裸足
+      - value: geta
+        description: 下駄
+      - value: zori
+        description: 草履
+      - value: uwabaki
+        description: 上履き
+
+  # ========================================
+  # swimwear - 水着
+  # ========================================
+  - key: swimwear
+    context: outfit
+    values:
+      # --- ビキニ ---
+      - value: bikini
+        description: ビキニ
+      - value: string bikini
+        description: 紐ビキニ
+      - value: triangle bikini
+        description: トライアングルビキニ
+      - value: bandeau bikini
+        description: バンドゥビキニ
+      - value: halter bikini
+        description: ホルタービキニ
+      - value: high neck bikini
+        description: ハイネックビキニ
+      - value: brazilian bikini
+        description: ブラジリアンビキニ
+      - value: micro bikini
+        description: マイクロビキニ
+      - value: fringe bikini
+        description: フリンジビキニ
+      - value: tie side bikini
+        description: サイド紐ビキニ
+      # --- ワンピース ---
+      - value: one piece swimsuit
+        description: ワンピース水着
+      - value: monokini
+        description: モノキニ
+      - value: tankini
+        description: タンキニ
+      - value: competition swimsuit
+        description: 競泳水着
+      - value: school swimsuit
+        description: スクール水着
+      # --- その他 ---
+      - value: rash guard
+        description: ラッシュガード
+      - value: wetsuit
+        description: ウェットスーツ
+      - value: surf shorts
+        description: サーフパンツ
+      - value: swim trunks
+        description: 水泳パンツ
+      - value: pareo
+        description: パレオ
+      - value: cover up
+        description: カバーアップ
+
+  # ========================================
+  # underwear - 下着
+  # ========================================
+  - key: underwear
+    context: outfit
+    values:
+      # --- ブラジャー ---
+      - value: bra
+        description: ブラジャー
+      - value: bralette
+        description: ブラレット
+      - value: sports bra
+        description: スポーツブラ
+      - value: push up bra
+        description: 寄せ上げブラ
+      - value: strapless bra
+        description: ストラップレスブラ
+      - value: balconette bra
+        description: バルコネットブラ
+      - value: plunge bra
+        description: プランジブラ
+      - value: demi cup bra
+        description: デミカップブラ
+      - value: front closure bra
+        description: 前留めブラ
+      # --- ショーツ ---
+      - value: panties
+        description: ショーツ
+      - value: thong
+        description: Tバック
+      - value: g string
+        description: Gストリング
+      - value: boyshorts
+        description: ボーイレッグ
+      - value: hipster panties
+        description: ヒップハンガー
+      - value: high waist panties
+        description: ハイウエストショーツ
+      - value: briefs
+        description: ブリーフ
+      # --- ランジェリー ---
+      - value: lingerie
+        description: ランジェリー
+      - value: babydoll
+        description: ベビードール
+      - value: chemise
+        description: シュミーズ
+      - value: teddy
+        description: テディ
+      - value: slip
+        description: スリップ
+      - value: negligee
+        description: ネグリジェ
+      # --- 補正下着 ---
+      - value: corset
+        description: コルセット
+      - value: bustier
+        description: ビスチェ
+      - value: girdle
+        description: ガードル
+      - value: waist cincher
+        description: ウエストニッパー
+      # --- その他 ---
+      - value: petticoat
+        description: ペチコート
+      - value: crinoline
+        description: クリノリン
+
+  # ========================================
+  # accessories - アクセサリー
+  # ========================================
+  - key: accessories
+    context: outfit
+    values:
+      # --- ネックレス ---
+      - value: necklace
+        description: ネックレス
+      - value: choker
+        description: チョーカー
+      - value: pendant
+        description: ペンダント
+      - value: pearl necklace
+        description: パールネックレス
+      - value: chain necklace
+        description: チェーンネックレス
+      # --- イヤリング ---
+      - value: earrings
+        description: イヤリング
+      - value: stud earrings
+        description: スタッドピアス
+      - value: hoop earrings
+        description: フープピアス
+      - value: drop earrings
+        description: ドロップピアス
+      # --- ブレスレット ---
+      - value: bracelet
+        description: ブレスレット
+      - value: bangle
+        description: バングル
+      - value: anklet
+        description: アンクレット
+      # --- リング ---
+      - value: ring
+        description: 指輪
+      - value: wedding ring
+        description: 結婚指輪
+      # --- 時計 ---
+      - value: watch
+        description: 腕時計
+      # --- ヘアアクセ ---
+      - value: hair ribbon
+        description: ヘアリボン
+      - value: hairband
+        description: カチューシャ
+      - value: hair clip
+        description: ヘアクリップ
+      - value: scrunchie
+        description: シュシュ
+      - value: barrette
+        description: バレッタ
+      - value: hair pin
+        description: ヘアピン
+      - value: tiara
+        description: ティアラ
+      - value: hair flower
+        description: 髪飾り花
+      # --- 帽子 ---
+      - value: hat
+        description: 帽子
+      - value: beret
+        description: ベレー帽
+      - value: cap
+        description: キャップ
+      - value: beanie
+        description: ニット帽
+      - value: fedora
+        description: 中折れ帽
+      - value: sun hat
+        description: 日よけ帽
+      - value: straw hat
+        description: 麦わら帽子
+      - value: bucket hat
+        description: バケットハット
+      - value: wide brim hat
+        description: つば広帽子
+      - value: cowboy hat
+        description: カウボーイハット
+      - value: top hat
+        description: シルクハット
+      # --- メガネ ---
+      - value: glasses
+        description: 眼鏡
+      - value: sunglasses
+        description: サングラス
+      - value: round glasses
+        description: 丸眼鏡
+      # --- バッグ ---
+      - value: handbag
+        description: ハンドバッグ
+      - value: shoulder bag
+        description: ショルダーバッグ
+      - value: tote bag
+        description: トートバッグ
+      - value: clutch bag
+        description: クラッチバッグ
+      - value: backpack
+        description: リュック
+      # --- その他 ---
+      - value: scarf
+        description: スカーフ
+      - value: necktie
+        description: ネクタイ
+      - value: bow tie
+        description: 蝶ネクタイ
+      - value: belt
+        description: ベルト
+      - value: suspenders
+        description: サスペンダー
+      - value: gloves
+        description: 手袋
+      - value: elbow gloves
+        description: ロング手袋
+      - value: umbrella
+        description: 傘
+      - value: fan
+        description: 扇子
+
+  # ========================================
+  # style - スタイル・テイスト
+  # ========================================
+  - key: style
+    context: outfit
+    values:
+      # --- ベーシック ---
+      - value: casual
+        description: カジュアル
+      - value: formal
+        description: フォーマル
+      - value: smart casual
+        description: スマートカジュアル
+      - value: business casual
+        description: ビジネスカジュアル
       - value: streetwear
         description: ストリート
-      - value: athletic wear
-        description: スポーツウェア
+      - value: sporty
+        description: スポーティー
+      - value: athleisure
+        description: アスレジャー
+      # --- エレガント ---
+      - value: elegant
+        description: エレガント
+      - value: glamorous
+        description: グラマラス
+      - value: chic
+        description: シック
+      - value: sophisticated
+        description: 洗練された
+      - value: classic
+        description: クラシック
+      - value: preppy
+        description: プレッピー
+      # --- 個性的 ---
+      - value: bohemian
+        description: ボヘミアン
+      - value: vintage
+        description: ヴィンテージ
+      - value: retro
+        description: レトロ
+      - value: gothic
+        description: ゴシック
+      - value: punk
+        description: パンク
+      - value: grunge
+        description: グランジ
+      - value: kawaii
+        description: 可愛い系
+      - value: lolita
+        description: ロリータ
+      - value: gyaru
+        description: ギャル
+      - value: dark academia
+        description: ダークアカデミア
+      - value: cottagecore
+        description: コテージコア
+      # --- 民族・文化 ---
+      - value: ethnic
+        description: エスニック
+      - value: western
+        description: ウエスタン
+      - value: oriental
+        description: オリエンタル
+      # --- シーン ---
+      - value: beachwear
+        description: ビーチウェア
+      - value: resort wear
+        description: リゾートウェア
+      - value: activewear
+        description: アクティブウェア
+      - value: loungewear
+        description: ルームウェア
+      - value: sleepwear
+        description: 寝間着
+      - value: workwear
+        description: ワークウェア
 
-  # outfit.material - 素材
+  # ========================================
+  # color - 服の色
+  # ========================================
+  - key: color
+    context: outfit
+    values:
+      # --- 基本色 ---
+      - value: white
+        description: 白
+      - value: black
+        description: 黒
+      - value: gray
+        description: グレー
+      - value: navy
+        description: ネイビー
+      - value: beige
+        description: ベージュ
+      - value: brown
+        description: ブラウン
+      - value: cream
+        description: クリーム
+      # --- 暖色 ---
+      - value: red
+        description: 赤
+      - value: pink
+        description: ピンク
+      - value: orange
+        description: オレンジ
+      - value: yellow
+        description: 黄色
+      - value: burgundy
+        description: バーガンディ
+      # --- 寒色 ---
+      - value: blue
+        description: 青
+      - value: light blue
+        description: 水色
+      - value: turquoise
+        description: ターコイズ
+      - value: green
+        description: 緑
+      - value: olive
+        description: オリーブ
+      - value: khaki
+        description: カーキ
+      # --- その他 ---
+      - value: purple
+        description: 紫
+      - value: lavender
+        description: ラベンダー
+      - value: gold
+        description: ゴールド
+      - value: silver
+        description: シルバー
+      # --- パターン ---
+      - value: striped
+        description: ストライプ
+      - value: plaid
+        description: チェック
+      - value: polka dot
+        description: 水玉
+      - value: floral
+        description: 花柄
+      - value: animal print
+        description: アニマル柄
+      - value: camouflage
+        description: 迷彩
+
+  # ========================================
+  # material - 素材
+  # ========================================
   - key: material
     context: outfit
     values:
-      - value: silk
-        description: シルク
+      # --- 天然素材 ---
       - value: cotton
         description: コットン
+      - value: linen
+        description: リネン
+      - value: silk
+        description: シルク
+      - value: wool
+        description: ウール
+      - value: cashmere
+        description: カシミア
       - value: leather
         description: レザー
+      - value: suede
+        description: スエード
+      - value: fur
+        description: ファー
+      - value: denim
+        description: デニム
+      # --- 合成素材 ---
+      - value: polyester
+        description: ポリエステル
+      - value: nylon
+        description: ナイロン
+      - value: latex
+        description: ラテックス
+      - value: pvc
+        description: PVC
+      # --- 質感 ---
+      - value: lace
+        description: レース
       - value: velvet
         description: ベルベット
       - value: satin
         description: サテン
-      - value: lace
-        description: レース
-      - value: denim
-        description: デニム
-      - value: wool
-        description: ウール
       - value: chiffon
         description: シフォン
+      - value: tulle
+        description: チュール
+      - value: sequin
+        description: スパンコール
       - value: mesh
         description: メッシュ
-      - value: latex
-        description: ラテックス
-      - value: PVC
+      - value: sheer
+        description: シースルー
+      - value: knit
+        description: ニット
+      - value: tweed
+        description: ツイード
+      - value: corduroy
+        description: コーデュロイ
+      - value: fleece
+        description: フリース
 
-  # outfit.fit - フィット感
+  # ========================================
+  # fit - フィット感
+  # ========================================
   - key: fit
     context: outfit
     values:
       - value: tight
         description: タイト
-      - value: loose
-        description: ルーズ
       - value: fitted
         description: フィット
-      - value: oversized
-        description: オーバーサイズ
       - value: slim
         description: スリム
+      - value: regular
+        description: レギュラー
       - value: relaxed
         description: リラックス
+      - value: loose
+        description: ルーズ
+      - value: oversized
+        description: オーバーサイズ
+      - value: cropped
+        description: 丈短め
+      - value: longline
+        description: 丈長め
 
-  # outfit.style - スタイル
-  - key: style
+  # ========================================
+  # state - 服の状態
+  # ========================================
+  - key: state
     context: outfit
     values:
-      - value: elegant
-        description: エレガント
-      - value: minimalist
-        description: ミニマリスト
-      - value: avant-garde
-        description: アバンギャルド
-      - value: classic
-        description: クラシック
-      - value: modern
-        description: モダン
-      - value: vintage
-        description: ヴィンテージ
-      - value: bohemian
-        description: ボヘミアン
-      - value: edgy
-        description: エッジー
+      - value: wet clothes
+        description: 濡れた服
+      - value: torn clothes
+        description: 破れた服
+      - value: disheveled clothes
+        description: 乱れた服
+      - value: unbuttoned
+        description: ボタン開け
+      - value: open jacket
+        description: 前開きジャケット
+      - value: lifted shirt
+        description: まくり上げたシャツ
+      - value: rolled up sleeves
+        description: 腕まくり
+      - value: tucked in
+        description: インした
+      - value: untucked
+        description: 出した
+      - value: off shoulder
+        description: 肩出し
+      - value: clothes pull
+        description: 服を引っ張る
+      - value: clothes lift
+        description: 服をめくる
+      - value: skirt lift
+        description: スカートめくり
+      - value: shirt lift
+        description: シャツめくり

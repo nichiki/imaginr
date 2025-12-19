@@ -1,78 +1,253 @@
 # expression関連の辞書
 
 entries:
+  # ========================================
   # expression.type - 表情タイプ
+  # ========================================
   - key: type
     context: expression
     values:
+      # --- 基本 ---
       - value: neutral
         description: 無表情
-      - value: neutral cool
-        description: クールな無表情
-      - value: thoughtful
-        description: 思索的
+      - value: expressionless
+        description: 無表情（感情なし）
+      - value: blank stare
+        description: 放心、ぼんやり
+      - value: serious
+        description: 真剣
+      - value: determined
+        description: 決意
       - value: confident
         description: 自信
+      - value: thoughtful
+        description: 思索的
+      - value: contemplative
+        description: 瞑想的
+      - value: pensive
+        description: 物思い
+      - value: thinking
+        description: 考え中
+      # --- 笑顔系 ---
+      - value: smile
+        description: 笑顔
+      - value: light smile
+        description: 微笑
+      - value: happy
+        description: 幸せ
+      - value: laugh
+        description: 笑う
+      - value: grin
+        description: にやり
+      - value: smug
+        description: ドヤ顔
+      - value: smirk
+        description: 含み笑い
+      - value: giggling
+        description: くすくす笑い
+      - value: evil smile
+        description: 悪い笑み
+      - value: evil grin
+        description: 悪いにやり
+      - value: crazy smile
+        description: 狂気の笑み
+      - value: seductive smile
+        description: 誘惑の笑み
+      - value: sad smile
+        description: 悲しい笑顔
+      - value: nervous smile
+        description: 引きつり笑い
+      - value: false smile
+        description: 作り笑い
+      # --- 悲しみ・涙系 ---
+      - value: sad
+        description: 悲しい
+      - value: depressed
+        description: 憂鬱
+      - value: crying
+        description: 泣く
+      - value: sobbing
+        description: すすり泣き
+      - value: tears
+        description: 涙
+      - value: tearing up
+        description: 涙目
+      - value: happy tears
+        description: うれし涙
+      - value: lonely
+        description: 孤独
+      - value: despair
+        description: 絶望
+      # --- 怒り系 ---
+      - value: angry
+        description: 怒り
+      - value: annoyed
+        description: イラつき
+      - value: frustrated
+        description: 不満
+      - value: scowl
+        description: しかめっ面
+      - value: glaring
+        description: 睨む
+      - value: frown
+        description: 眉をひそめる
+      - value: rage
+        description: 激怒
+      # --- 驚き・恐怖系 ---
+      - value: surprised
+        description: 驚き
+      - value: shocked
+        description: ショック
+      - value: scared
+        description: 恐怖
+      - value: horrified
+        description: 怯え
+      - value: panicking
+        description: パニック
+      - value: nervous
+        description: 緊張
+      - value: worried
+        description: 心配
+      # --- 恥ずかしさ系 ---
+      - value: blush
+        description: 赤面
+      - value: embarrassed
+        description: 恥ずかしい
+      - value: shy
+        description: 内気
+      - value: flustered
+        description: 慌てる
+      # --- その他 ---
+      - value: bored
+        description: 退屈
+      - value: sleepy
+        description: 眠そう
+      - value: drunk
+        description: 酔い
+      - value: exhausted
+        description: 疲労
+      - value: pain
+        description: 痛み
+      - value: disappointed
+        description: 失望
+      - value: disdain
+        description: 軽蔑
+      - value: disgust
+        description: 嫌悪
+      - value: excited
+        description: 興奮
       - value: mysterious
         description: ミステリアス
       - value: serene
         description: 穏やか
       - value: intense
         description: 強烈
-      - value: subtle smile
-        description: 微笑
-      - value: contemplative
-        description: 瞑想的
-      - value: determined
-        description: 決意
 
-  # eyes.direction - 目の方向
-  - key: direction
-    context: eyes
+  # ========================================
+  # expression.eyes - 目の状態
+  # ========================================
+  - key: eyes
+    context: expression
     values:
-      - value: forward
-        description: 正面
-      - value: camera
+      # --- 開閉 ---
+      - value: closed eyes
+        description: 閉じた目
+      - value: half-closed eyes
+        description: 半目
+      - value: one eye closed
+        description: 片目閉じ
+      - value: wide-eyed
+        description: 見開いた目
+      # --- 視線方向 ---
+      - value: looking at viewer
         description: カメラ目線
-      - value: slightly averted
-        description: 少し逸らす
-      - value: downward
-        description: 下向き
-      - value: upward
-        description: 上向き
-      - value: distant
+      - value: looking away
+        description: 視線を逸らす
+      - value: looking down
+        description: 下を見る
+      - value: looking up
+        description: 上を見る
+      - value: looking to the side
+        description: 横を見る
+      - value: looking back
+        description: 振り返る
+      - value: looking afar
         description: 遠くを見る
-      - value: closed
-        description: 閉じた
-
-  # eyes.quality - 目の質感
-  - key: quality
-    context: eyes
-    values:
-      - value: calm, distant
-        description: 穏やか、遠い
-      - value: focused but soft
-        description: 集中、ソフト
-      - value: sharp
-        description: 鋭い
-      - value: dreamy
+      - value: eye contact
+        description: アイコンタクト
+      # --- 目の質感・状態 ---
+      - value: sparkling eyes
+        description: 輝く目
+      - value: glowing eyes
+        description: 光る目
+      - value: empty eyes
+        description: 虚ろな目
+      - value: dreamy eyes
         description: 夢見がち
-      - value: piercing
-        description: 射抜く
-      - value: warm
-        description: 温かい
+      - value: bedroom eyes
+        description: 流し目
+      - value: crazy eyes
+        description: 狂気の目
+      - value: heart-shaped pupils
+        description: ハート瞳
+      - value: spiral eyes
+        description: ぐるぐる目
+      # --- 涙・汗 ---
+      - value: teary eyes
+        description: 涙目
+      - value: streaming tears
+        description: 涙が流れる
+      - value: floating tears
+        description: 浮かぶ涙
+      # --- 眉 ---
+      - value: raised eyebrows
+        description: ハの字眉
+      - value: v-shaped eyebrows
+        description: V字眉
+      - value: furrowed brow
+        description: 眉をひそめる
 
-  # mouth - 口
+  # ========================================
+  # expression.mouth - 口の状態
+  # ========================================
   - key: mouth
     context: expression
     values:
-      - value: closed, relaxed
-        description: 閉じてリラックス
-      - value: slightly parted
+      # --- 開閉 ---
+      - value: closed mouth
+        description: 閉じた口
+      - value: parted lips
         description: 少し開いた
-      - value: subtle smile
-        description: 微笑
-      - value: pursed
-        description: すぼめた
-      - value: open
-        description: 開いた
+      - value: open mouth
+        description: 開いた口
+      - value: gaping
+        description: 大きく開いた
+      # --- 笑い ---
+      - value: smile
+        description: 笑み
+      - value: grin
+        description: 歯を見せる笑み
+      - value: clenched teeth
+        description: 歯を食いしばる
+      # --- 特殊 ---
+      - value: pout
+        description: 口を尖らせる
+      - value: wavy mouth
+        description: 波打つ口
+      - value: tongue out
+        description: 舌を出す
+      - value: licking lips
+        description: 唇を舐める
+      - value: biting lip
+        description: 唇を噛む
+      - value: drooling
+        description: よだれ
+      # --- 記号的 ---
+      - value: :3
+        description: 猫口
+      - value: :o
+        description: 驚き口
+      - value: :d
+        description: にっこり
+      - value: ;p
+        description: ウインク舌出し

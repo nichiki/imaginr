@@ -1,9 +1,0 @@
-# Lighting Schema: Natural Light
-
-lighting:
-  type: natural
-  source: ${light_source|daylight}
-  time: ${time_of_day|golden hour}
-  direction: ${light_direction|side lighting}
-  quality: ${light_quality|soft, diffused}
-  shadows: ${shadow_quality|soft shadows}
