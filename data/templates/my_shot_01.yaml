@@ -1,0 +1,49 @@
+# my_shot_01
+
+_base: base.yaml
+
+# 主題
+subject: person
+
+# 属性
+demographics:
+  gender: woman
+  age: young adult
+  ethnicity: Japanese
+
+# 外見
+appearance:
+  hair:
+    length: long hair
+    style: low ponytail
+    color: chestnut hair
+  eyes:
+    color: brown eyes
+  skin: smooth skin
+
+# 服装
+outfit:
+  style: elegant evening
+  dress: black cocktail dress
+  footwear: high heels
+  accessories:
+    - pearl earrings
+    - clutch bag
+
+# ライティング
+lighting:
+  style: cinematic
+  type: candlelight
+  color: warm white
+  shadow: soft shadows
+
+# 構図
+composition:
+  - three quarter
+
+# 撮影技法
+photography:
+  shot_with: shot on DSLR
+  lens: 85mm f/1.2
+  effects:
+    - smooth bokeh
