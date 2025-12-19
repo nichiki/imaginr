@@ -20,6 +20,7 @@ import {
   DictionaryEntry,
 } from '@/lib/dictionary-api';
 import { loadState, saveState } from '@/lib/storage';
+import { SettingsDialog } from '@/components/settings-dialog';
 import {
   extractVariablesWithPath,
   resolveVariables,
@@ -51,6 +52,10 @@ export default function Home() {
   // 変数関連
   const [variables, setVariables] = useState<VariableDefinition[]>([]);
   const [variableValues, setVariableValues] = useState<VariableValues>({});
+
+  // 設定ダイアログ
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const [settingsKey, setSettingsKey] = useState(0);
 
   // マージ結果（変数解決前）
   const [mergedYamlRaw, setMergedYamlRaw] = useState('');
@@ -809,17 +814,19 @@ export default function Home() {
   return (
     <div className="flex flex-col h-screen bg-[#1e1e1e] text-[#d4d4d4]">
       {/* Header */}
-      <header className="h-10 flex-shrink-0 bg-[#2d2d2d] flex items-center px-4 gap-4 border-b border-[#333]">
-        <h1 className="text-sm font-medium text-white">Image Prompt Builder</h1>
-        <span className="text-xs text-[#888]">
-          Ctrl+S: 保存
-        </span>
-        {isDirty && (
-          <span className="text-xs text-amber-400">● 未保存</span>
-        )}
-        {isSaving && (
-          <span className="text-xs text-blue-400">保存中...</span>
-        )}
+      <header className="h-10 flex-shrink-0 bg-[#2d2d2d] flex items-center justify-between px-4 border-b border-[#333]">
+        <div className="flex items-center gap-4">
+          <h1 className="text-sm font-medium text-white">Image Prompt Builder</h1>
+          <span className="text-xs text-[#888]">
+            Ctrl+S: 保存
+          </span>
+          {isDirty && (
+            <span className="text-xs text-amber-400">● 未保存</span>
+          )}
+          {isSaving && (
+            <span className="text-xs text-blue-400">保存中...</span>
+          )}
+        </div>
       </header>
 
       {/* Main Area */}
@@ -917,13 +924,22 @@ export default function Home() {
         {/* Preview */}
         <div className="flex-1 min-w-0">
           <PreviewPanel
+            key={settingsKey}
             mergedYaml={mergedYaml}
             promptText={promptText}
             lookName={lookName}
             isYamlValid={isYamlValid}
+            onOpenSettings={() => setSettingsOpen(true)}
           />
         </div>
       </div>
+
+      {/* Settings Dialog */}
+      <SettingsDialog
+        open={settingsOpen}
+        onOpenChange={setSettingsOpen}
+        onSettingsChange={() => setSettingsKey((k) => k + 1)}
+      />
     </div>
   );
 }
