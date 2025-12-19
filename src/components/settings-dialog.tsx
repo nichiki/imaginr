@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, CheckCircle, XCircle } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Upload, Trash2 } from 'lucide-react';
 import { loadComfyUISettings, saveComfyUISettings, type ComfyUISettings } from '@/lib/storage';
 import { ComfyUIClient } from '@/lib/comfyui-api';
 
@@ -44,6 +44,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
   const [workflows, setWorkflows] = useState<WorkflowFile[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [connectionError, setConnectionError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
 
   // 設定とワークフロー一覧を読み込む
   useEffect(() => {
@@ -94,6 +95,57 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
       setConnectionError(null);
     }
   };
+
+  const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsUploading(true);
+    try {
+      const content = await file.text();
+      // JSONとして有効か確認
+      JSON.parse(content);
+
+      const name = file.name.replace('.json', '');
+      const response = await fetch('/api/comfyui', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, content }),
+      });
+
+      if (response.ok) {
+        const { fileName } = await response.json();
+        await fetchWorkflows();
+        updateSettings({ workflowFile: fileName });
+      } else {
+        alert('アップロードに失敗しました');
+      }
+    } catch {
+      alert('無効なJSONファイルです');
+    } finally {
+      setIsUploading(false);
+      e.target.value = '';
+    }
+  }, []);
+
+  const handleDeleteWorkflow = useCallback(async (fileName: string) => {
+    if (!confirm(`"${fileName}" を削除しますか？`)) return;
+
+    try {
+      const response = await fetch(`/api/comfyui?file=${encodeURIComponent(fileName)}`, {
+        method: 'DELETE',
+      });
+
+      if (response.ok) {
+        await fetchWorkflows();
+        if (settings.workflowFile === fileName) {
+          updateSettings({ workflowFile: '' });
+        }
+      }
+    } catch {
+      alert('削除に失敗しました');
+    }
+  }, [settings.workflowFile]);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -157,33 +209,65 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
                   <Label htmlFor="workflow" className="text-xs text-[#888]">
                     ワークフロー
                   </Label>
-                  <Select
-                    value={settings.workflowFile}
-                    onValueChange={(value) => updateSettings({ workflowFile: value })}
-                  >
-                    <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm">
-                      <SelectValue placeholder="ワークフローを選択" />
-                    </SelectTrigger>
-                    <SelectContent className="bg-[#252526] border-[#333]">
-                      {workflows.length === 0 ? (
-                        <SelectItem value="_none" disabled className="text-[#888]">
-                          data/comfyui/ にJSONを配置
-                        </SelectItem>
-                      ) : (
-                        workflows.map((wf) => (
-                          <SelectItem
-                            key={wf.name}
-                            value={wf.name}
-                            className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
-                          >
-                            {wf.label}
+                  <div className="flex gap-2">
+                    <Select
+                      value={settings.workflowFile}
+                      onValueChange={(value) => updateSettings({ workflowFile: value })}
+                    >
+                      <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm flex-1">
+                        <SelectValue placeholder="ワークフローを選択" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#252526] border-[#333]">
+                        {workflows.length === 0 ? (
+                          <SelectItem value="_none" disabled className="text-[#888]">
+                            ワークフローがありません
                           </SelectItem>
-                        ))
+                        ) : (
+                          workflows.map((wf) => (
+                            <SelectItem
+                              key={wf.name}
+                              value={wf.name}
+                              className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+                            >
+                              {wf.label}
+                            </SelectItem>
+                          ))
+                        )}
+                      </SelectContent>
+                    </Select>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="shrink-0 px-2"
+                      disabled={isUploading}
+                      onClick={() => document.getElementById('workflow-upload')?.click()}
+                    >
+                      {isUploading ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <Upload className="h-4 w-4" />
                       )}
-                    </SelectContent>
-                  </Select>
+                    </Button>
+                    {settings.workflowFile && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="shrink-0 px-2 text-red-500 hover:text-red-400"
+                        onClick={() => handleDeleteWorkflow(settings.workflowFile)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                  <input
+                    id="workflow-upload"
+                    type="file"
+                    accept=".json"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
                   <p className="text-xs text-[#666]">
-                    data/comfyui/ にComfyUIからエクスポートしたワークフローJSONを配置してください
+                    ComfyUIからAPI形式でエクスポートしたJSONをアップロード
                   </p>
                 </div>
 
