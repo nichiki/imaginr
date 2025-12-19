@@ -8,7 +8,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { Copy, Check, AlertCircle, Play, Loader2, Settings, Trash2, X, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Copy, Check, AlertCircle, Play, Loader2, Settings, Trash2, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { loadComfyUISettings, type ComfyUISettings } from '@/lib/storage';
 import { ComfyUIClient, type GenerationProgress } from '@/lib/comfyui-api';
@@ -182,6 +182,23 @@ export function PreviewPanel({
     }
   }, [selectedImage]);
 
+  const handleDownloadImage = useCallback(async (image: ImageInfo) => {
+    try {
+      const response = await fetch(`/api/images/${image.filename}`);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = image.filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Failed to download image:', error);
+    }
+  }, []);
+
   const canCopy = activeTab === 'merged' ? (isYamlValid && !!mergedYaml) : (activeTab === 'prompt' && !!promptText);
   const canGenerate = comfySettings?.enabled && !!mergedYaml && !isGenerating;
 
@@ -280,7 +297,7 @@ export function PreviewPanel({
             {promptText || '(プロンプトテキストがここに表示されます)'}
           </pre>
         </TabsContent>
-        <TabsContent value="image" className="flex-1 m-0 overflow-auto relative">
+        <TabsContent value="image" className="flex-1 m-0 overflow-hidden relative">
           {!comfySettings?.enabled ? (
             <div className="p-4 flex flex-col items-center justify-center h-full gap-3 text-[#888]">
               <Settings className="h-8 w-8" />
@@ -298,7 +315,64 @@ export function PreviewPanel({
             </div>
           ) : (
             <>
-              {/* 生成中オーバーレイ */}
+              {/* スクロール可能なコンテンツエリア */}
+              <div className="h-full overflow-auto">
+                {/* エラー表示 */}
+                {generationError && (
+                  <div className="p-3 bg-red-900/30 border-b border-red-800 flex items-center gap-2">
+                    <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
+                    <span className="text-xs text-red-400 flex-1">{generationError}</span>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-6 px-2 text-xs text-red-400 hover:text-red-300"
+                      onClick={() => setGenerationError(null)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  </div>
+                )}
+
+                {/* 画像ギャラリー */}
+                {isLoadingImages ? (
+                  <div className="p-4 flex items-center justify-center">
+                    <Loader2 className="h-6 w-6 animate-spin text-[#888]" />
+                  </div>
+                ) : images.length === 0 ? (
+                  <div className="p-4 flex flex-col items-center justify-center h-full gap-3 text-[#888]">
+                    <Play className="h-8 w-8" />
+                    <span className="text-sm">「生成」ボタンで画像を生成</span>
+                  </div>
+                ) : (
+                  <div className="p-2 grid grid-cols-6 gap-2">
+                    {images.map((image) => (
+                      <div
+                        key={image.id}
+                        className="relative group cursor-pointer aspect-square bg-[#1e1e1e] rounded overflow-hidden"
+                        onClick={() => setSelectedImage(image)}
+                      >
+                        <img
+                          src={`/api/images/${image.filename}`}
+                          alt={image.id}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-red-600 text-white"
+                          onClick={(e) => handleDeleteImage(image, e)}
+                        >
+                          <Trash2 className="h-3 w-3" />
+                        </Button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* 生成中オーバーレイ - スクロールエリア外に配置 */}
               {isGenerating && (
                 <div className="absolute inset-0 bg-[#252526]/90 flex flex-col items-center justify-center gap-3 z-10">
                   <Loader2 className="h-8 w-8 animate-spin text-[#888]" />
@@ -312,60 +386,6 @@ export function PreviewPanel({
                   {generationProgress?.currentNode && (
                     <span className="text-xs text-[#666]">Node: {generationProgress.currentNode}</span>
                   )}
-                </div>
-              )}
-
-              {/* エラー表示 */}
-              {generationError && (
-                <div className="p-3 bg-red-900/30 border-b border-red-800 flex items-center gap-2">
-                  <AlertCircle className="h-4 w-4 text-red-500 flex-shrink-0" />
-                  <span className="text-xs text-red-400 flex-1">{generationError}</span>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-6 px-2 text-xs text-red-400 hover:text-red-300"
-                    onClick={() => setGenerationError(null)}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                </div>
-              )}
-
-              {/* 画像ギャラリー */}
-              {isLoadingImages ? (
-                <div className="p-4 flex items-center justify-center">
-                  <Loader2 className="h-6 w-6 animate-spin text-[#888]" />
-                </div>
-              ) : images.length === 0 ? (
-                <div className="p-4 flex flex-col items-center justify-center h-full gap-3 text-[#888]">
-                  <Play className="h-8 w-8" />
-                  <span className="text-sm">「生成」ボタンで画像を生成</span>
-                </div>
-              ) : (
-                <div className="p-2 grid grid-cols-6 gap-2">
-                  {images.map((image) => (
-                    <div
-                      key={image.id}
-                      className="relative group cursor-pointer aspect-square bg-[#1e1e1e] rounded overflow-hidden"
-                      onClick={() => setSelectedImage(image)}
-                    >
-                      <img
-                        src={`/api/images/${image.filename}`}
-                        alt={image.id}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-red-600 text-white"
-                        onClick={(e) => handleDeleteImage(image, e)}
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    </div>
-                  ))}
                 </div>
               )}
             </>
@@ -386,15 +406,27 @@ export function PreviewPanel({
                 alt={selectedImage.id}
                 className="w-full h-auto max-h-[85vh] object-contain"
               />
-              {/* 閉じるボタン */}
-              <Button
-                variant="ghost"
-                size="sm"
-                className="absolute top-2 right-2 h-8 w-8 p-0 bg-black/50 hover:bg-[#555] text-white"
-                onClick={() => setSelectedImage(null)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
+              {/* 閉じる・ダウンロードボタン */}
+              <div className="absolute top-2 right-2 flex gap-1">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-black/50 hover:bg-[#555] text-white"
+                  onClick={() => handleDownloadImage(selectedImage)}
+                  title="ダウンロード"
+                >
+                  <Download className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 w-8 p-0 bg-black/50 hover:bg-[#555] text-white"
+                  onClick={() => setSelectedImage(null)}
+                  title="閉じる"
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </div>
               {/* 左右ナビゲーション */}
               {images.length > 1 && (
                 <>

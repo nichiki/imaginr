@@ -274,7 +274,7 @@ export default function Home() {
           setPromptTextRaw('');
           setLookName(undefined);
           setIsYamlValid(false);
-          setVariables([]);
+          // 変数リストは維持（invalidでも前回の変数を表示し続ける）
           return;
         }
 
@@ -315,7 +315,7 @@ export default function Home() {
         setPromptTextRaw('');
         setLookName(undefined);
         setIsYamlValid(false);
-        setVariables([]);
+        // 変数リストは維持（invalidでも前回の変数を表示し続ける）
       }
     })();
 
@@ -900,27 +900,24 @@ export default function Home() {
         className="flex-shrink-0 relative flex"
         style={{ height: previewHeight }}
       >
-        {/* Variable Form - only show when variables exist */}
-        {variables.length > 0 && (
-          <>
-            <div
-              className="flex-shrink-0 overflow-y-auto"
-              style={{ width: variablePanelWidth }}
-            >
-              <VariableForm
-                variables={variables}
-                values={variableValues}
-                onChange={setVariableValues}
-                dictionaryCache={dictionaryCache}
-              />
-            </div>
-            {/* Variable Panel Resize Handle */}
-            <div
-              className="w-1 flex-shrink-0 bg-[#333] cursor-ew-resize hover:bg-[#007acc]"
-              onMouseDown={handleVariableResizeStart}
-            />
-          </>
-        )}
+        {/* Variable Form - always show */}
+        <div
+          className="flex-shrink-0 overflow-y-auto"
+          style={{ width: variablePanelWidth }}
+        >
+          <VariableForm
+            variables={variables}
+            values={variableValues}
+            onChange={setVariableValues}
+            dictionaryCache={dictionaryCache}
+            isYamlValid={isYamlValid}
+          />
+        </div>
+        {/* Variable Panel Resize Handle */}
+        <div
+          className="w-1 flex-shrink-0 bg-[#333] cursor-ew-resize hover:bg-[#007acc]"
+          onMouseDown={handleVariableResizeStart}
+        />
         {/* Preview */}
         <div className="flex-1 min-w-0">
           <PreviewPanel

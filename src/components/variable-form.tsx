@@ -18,7 +18,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
-import { Save, Trash2, X } from 'lucide-react';
+import { Save, Trash2, X, AlertTriangle } from 'lucide-react';
 import type { VariableDefinition, VariableValues } from '@/lib/variable-utils';
 import { DictionaryEntry, lookupDictionary } from '@/lib/dictionary-api';
 
@@ -32,6 +32,7 @@ interface VariableFormProps {
   values: VariableValues;
   onChange: (values: VariableValues) => void;
   dictionaryCache: Map<string, DictionaryEntry[]>;
+  isYamlValid?: boolean;
 }
 
 // YAMLパスから辞書を検索するためのキーを生成
@@ -408,7 +409,7 @@ function MultiSelectCheckboxes({
   );
 }
 
-export function VariableForm({ variables, values, onChange, dictionaryCache }: VariableFormProps) {
+export function VariableForm({ variables, values, onChange, dictionaryCache, isYamlValid = true }: VariableFormProps) {
   const [presets, setPresets] = useState<Preset[]>([]);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
@@ -545,17 +546,20 @@ export function VariableForm({ variables, values, onChange, dictionaryCache }: V
     [presets, variables, selectedPreset]
   );
 
-  if (variables.length === 0) {
-    return null;
-  }
-
   return (
     <div className="h-full bg-[#252526] flex flex-col">
       {/* Header - Preview と同じスタイル */}
       <div className="h-11 px-3 flex items-center justify-between border-b border-[#333] flex-shrink-0">
-        <span className="text-xs uppercase text-[#888] font-medium">
-          Variables
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="text-xs uppercase text-[#888] font-medium">
+            Variables
+          </span>
+          {!isYamlValid && (
+            <span title="YAML is invalid">
+              <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />
+            </span>
+          )}
+        </div>
         <div className="flex items-center gap-1">
           {/* Save button */}
           <Button
@@ -563,7 +567,7 @@ export function VariableForm({ variables, values, onChange, dictionaryCache }: V
             size="sm"
             className="h-6 w-6 p-0 text-[#888] hover:text-[#d4d4d4] hover:bg-[#3c3c3c] disabled:opacity-30 disabled:hover:bg-transparent"
             onClick={handleSaveClick}
-            disabled={selectedPreset ? !isModified : false}
+            disabled={variables.length === 0 || (selectedPreset ? !isModified : false)}
             title={selectedPreset ? `Save to "${selectedPreset}"` : 'Save as new preset'}
           >
             <Save className="h-3.5 w-3.5" />
@@ -621,6 +625,11 @@ export function VariableForm({ variables, values, onChange, dictionaryCache }: V
 
       {/* Variable inputs */}
       <div className="flex-1 overflow-y-auto p-3">
+        {variables.length === 0 ? (
+          <div className="text-xs text-[#666] text-center py-4">
+            No variables
+          </div>
+        ) : (
         <div className="flex flex-col gap-3">
           {variables.map((variable) => {
             const suggestions = getDictionaryEntries(variable.yamlPath, dictionaryCache);
@@ -678,6 +687,7 @@ export function VariableForm({ variables, values, onChange, dictionaryCache }: V
             );
           })}
         </div>
+        )}
       </div>
 
       {/* Save as new preset dialog */}
