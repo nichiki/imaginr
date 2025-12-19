@@ -1,0 +1,14 @@
+# ========================================
+# 03_layers/pose: ウォーキング・キャンディッド
+# 歩きながらの自然なショット
+# ========================================
+
+pose:
+  base: walking
+  direction: three-quarter view
+  action: mid-stride, natural movement
+
+expression:
+  type: candid
+  eyes: looking slightly away
+  mouth: natural, slightly parted

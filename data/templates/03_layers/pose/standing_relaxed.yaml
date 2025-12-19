@@ -1,0 +1,14 @@
+# ========================================
+# 03_layers/pose: スタンディング・リラックス
+# 自然な立ちポーズ
+# ========================================
+
+pose:
+  base: standing
+  direction: three-quarter view
+  action: weight on one leg, relaxed stance
+
+expression:
+  type: gentle smile
+  eyes: looking at camera
+  mouth: soft smile

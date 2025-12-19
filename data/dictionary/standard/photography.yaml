@@ -1,40 +1,40 @@
-# カメラ設定
+# 撮影技法
 entries:
-  # カメラタイプ
-  - key: type
-    context: "camera"
+  # 撮影機材
+  - key: shot_with
+    context: "photography"
     values:
       # フィルムカメラ
-      - value: 35mm film camera
-        description: 35mmフィルム
-      - value: medium format film camera
-        description: 中判フィルム
-      - value: large format camera
-        description: 大判カメラ
-      - value: instant camera
-        description: インスタント
-      - value: polaroid camera
-        description: ポラロイド
+      - value: shot on 35mm film
+        description: 35mmフィルムで撮影
+      - value: shot on medium format film
+        description: 中判フィルムで撮影
+      - value: shot on large format
+        description: 大判で撮影
+      - value: shot on instant film
+        description: インスタントフィルムで撮影
+      - value: shot on Polaroid
+        description: ポラロイドで撮影
       # デジタルカメラ
-      - value: DSLR
-        description: デジタル一眼レフ
-      - value: mirrorless camera
-        description: ミラーレス
-      - value: full frame camera
-        description: フルサイズ
-      - value: medium format digital
-        description: 中判デジタル
+      - value: shot on DSLR
+        description: デジタル一眼レフで撮影
+      - value: shot on mirrorless camera
+        description: ミラーレスで撮影
+      - value: shot on full frame sensor
+        description: フルサイズセンサーで撮影
+      - value: shot on medium format digital
+        description: 中判デジタルで撮影
       # その他
-      - value: smartphone camera
-        description: スマートフォン
-      - value: action camera
-        description: アクションカメラ
-      - value: drone camera
-        description: ドローン
+      - value: shot on smartphone
+        description: スマートフォンで撮影
+      - value: shot on action camera
+        description: アクションカメラで撮影
+      - value: aerial photography
+        description: ドローン空撮
 
   # レンズ
   - key: lens
-    context: "camera"
+    context: "photography"
     values:
       # 焦点距離
       - value: 24mm wide angle
@@ -70,7 +70,7 @@ entries:
 
   # フィルム
   - key: film
-    context: "camera"
+    context: "photography"
     values:
       # カラーネガ
       - value: Kodak Portra 400
@@ -106,7 +106,7 @@ entries:
 
   # エフェクト
   - key: effects
-    context: "camera"
+    context: "photography"
     values:
       # 被写界深度
       - value: shallow depth of field

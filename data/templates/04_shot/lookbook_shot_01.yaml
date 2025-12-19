@@ -1,0 +1,47 @@
+# ========================================
+# 04_shot: ルックブック ショット01
+# 📸 カットレベルで決めるもの
+# ✏️ 変数として残すもの（毎回変えたい）
+# ========================================
+
+_base: 02_look/casual_summer.yaml
+
+# 🔄 パターン化された照明・ポーズを合成
+_layers:
+  - 03_layers/lighting/golden_hour.yaml
+  - 03_layers/pose/standing_relaxed.yaml
+
+# --- 服装 📸（このカットの服）---
+outfit:
+  top: white linen blouse
+  bottom: high-waisted denim shorts
+  dress: ~                         # ワンピースじゃない
+  outerwear: ~                     # 夏なのでアウターなし
+  footwear: white sneakers
+  # accessories は ✏️ 変数のまま → 毎回変えられる
+
+# --- 髪型 📸（このカットは決め打ち）---
+appearance:
+  hair:
+    style: loose waves
+    # color は ✏️ 変数のまま → 色違いバリエーション試せる
+
+# --- 撮影 ---
+photography:
+  film: ~                          # フィルムシミュは使わない
+
+# --- 表情 ✏️（毎回変えたいので変数のまま）---
+expression:
+  type: ${expression}              # 「笑って」「クールに」を都度指定
+
+# --- 構図 📸 ---
+composition:
+  - full body shot
+  - rule of thirds
+  - negative space on left
+
+# --- 環境 📸 ---
+environment:
+  background: blurred urban street
+  time: late afternoon
+  weather: clear sky

@@ -1,0 +1,54 @@
+# ========================================
+# 02_look: カジュアルサマー企画
+# 🔒 企画レベルで固定するもののみ
+# ========================================
+
+_base: 01_base/base.yaml
+
+# --- 被写体 🔒 ---
+subject: person
+
+demographics:
+  gender: woman
+  age: young adult
+  ethnicity: Japanese
+
+# --- 外見 🔒（髪色・髪型は変数で残す）---
+appearance:
+  hair:
+    length: long hair
+    style: ${hair_style}           # 📸/✏️ カット毎 or バリエーション
+    color: ${hair_color}           # ✏️ 色違い試したい
+  eyes:
+    color: brown eyes
+  skin: healthy skin
+  build: slim
+
+# --- 服装 🔒（テーマのみ、詳細は shot/変数）---
+outfit:
+  style: casual summer
+  top: ${outfit_top}               # 📸/✏️ カット毎
+  bottom: ${outfit_bottom}         # 📸/✏️ カット毎
+  dress: ${outfit_dress}           # 📸/✏️ カット毎
+  outerwear: ${outfit_outerwear}   # 📸/✏️ カット毎
+  footwear: ${outfit_footwear}     # 📸 カット毎
+  accessories: ${outfit_accessories[]}  # ✏️ 毎回変えたい
+
+# --- ビジュアル 🔒 ---
+aesthetic: lifestyle photography, natural and effortless
+mood: relaxed, carefree
+
+# --- 撮影機材 🔒 ---
+photography:
+  shot_with: shot on mirrorless camera
+  lens: 85mm f/1.4
+  film: ${film}                    # 🔒 だけどフィルムシミュ変えたい時用
+  effects:
+    - shallow depth of field
+    - natural skin tones
+
+# --- 環境 🔒（大枠のみ）---
+environment:
+  location: tokyo urban area
+  setting: outdoor
+  # background, time, weather は shot で決める
