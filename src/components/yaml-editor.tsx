@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useCallback, useImperativeHandle, forwardRef, useEffect, useState } from 'react';
+import { useRef, useCallback, useImperativeHandle, forwardRef, useEffect } from 'react';
 import Editor, { OnMount, OnChange } from '@monaco-editor/react';
 import type { editor, languages, Position, IDisposable } from 'monaco-editor';
 import type { Snippet } from '@/lib/snippet-api';
@@ -9,7 +9,6 @@ import type { DictionaryEntry } from '@/lib/dictionary-api';
 interface YamlEditorProps {
   value: string;
   onChange: (value: string) => void;
-  onSnippetRequest?: (position: { x: number; y: number }, context: string) => void;
   fileList?: string[];
   snippets?: Snippet[];
   dictionaryCache?: Map<string, DictionaryEntry[]>;
@@ -20,7 +19,7 @@ export interface YamlEditorRef {
 }
 
 const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function YamlEditor(
-  { value, onChange, onSnippetRequest, fileList = [], snippets = [], dictionaryCache },
+  { value, onChange, fileList = [], snippets = [], dictionaryCache },
   ref
 ) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -375,7 +374,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         },
       });
     }
-  }, [onSnippetRequest, getContextPath, lookupDictionary, onChange]);
+  }, [getContextPath, lookupDictionary, onChange]);
 
   const handleChange: OnChange = useCallback(
     (newValue) => {

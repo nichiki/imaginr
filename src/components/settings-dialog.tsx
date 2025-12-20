@@ -21,10 +21,11 @@ import {
 } from '@/components/ui/select';
 import { Loader2, CheckCircle, XCircle, Upload, Trash2, Plus, Pencil } from 'lucide-react';
 import {
-  loadComfyUISettings,
-  saveComfyUISettings,
+  fetchComfyUISettings,
+  saveComfyUISettingsAsync,
   getActiveWorkflow,
   createWorkflowConfig,
+  migrateLocalStorageToFile,
   type ComfyUISettings,
   type WorkflowConfig,
   type NodeOverride,
@@ -53,12 +54,16 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
   const [connectionStatus, setConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
   const [connectionError, setConnectionError] = useState<string | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
   const [editingWorkflow, setEditingWorkflow] = useState<WorkflowConfig | null>(null);
 
   // 設定とワークフロー一覧を読み込む
   useEffect(() => {
     if (open) {
-      setSettings(loadComfyUISettings());
+      // First migrate localStorage to file if needed, then fetch from server
+      migrateLocalStorageToFile().then(() => {
+        fetchComfyUISettings().then(setSettings);
+      });
       fetchAvailableWorkflows();
     }
   }, [open]);
@@ -90,10 +95,18 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
     }
   }, [settings.url]);
 
-  const handleSave = () => {
-    saveComfyUISettings(settings);
-    onSettingsChange?.();
-    onOpenChange(false);
+  const handleSave = async () => {
+    setIsSaving(true);
+    try {
+      await saveComfyUISettingsAsync(settings);
+      onSettingsChange?.();
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Failed to save settings:', error);
+      alert('設定の保存に失敗しました');
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const updateSettings = (updates: Partial<ComfyUISettings>) => {
@@ -143,32 +156,6 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
     } finally {
       setIsUploading(false);
       e.target.value = '';
-    }
-  }, []);
-
-  const handleDeleteWorkflowFile = useCallback(async (fileName: string) => {
-    if (!confirm(`"${fileName}" を削除しますか？`)) return;
-
-    try {
-      const response = await fetch(`/api/comfyui?file=${encodeURIComponent(fileName)}`, {
-        method: 'DELETE',
-      });
-
-      if (response.ok) {
-        await fetchAvailableWorkflows();
-        // このファイルを使っているワークフロー設定も削除
-        setSettings(prev => {
-          const newWorkflows = prev.workflows.filter(w => w.file !== fileName);
-          const activeStillExists = newWorkflows.some(w => w.id === prev.activeWorkflowId);
-          return {
-            ...prev,
-            workflows: newWorkflows,
-            activeWorkflowId: activeStillExists ? prev.activeWorkflowId : (newWorkflows[0]?.id || ''),
-          };
-        });
-      }
-    } catch {
-      alert('削除に失敗しました');
     }
   }, []);
 
@@ -534,9 +521,10 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
           </Button>
           <Button
             onClick={handleSave}
+            disabled={isSaving}
             className="bg-[#094771] text-white hover:bg-[#0e639c]"
           >
-            保存
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : '保存'}
           </Button>
         </DialogFooter>
       </DialogContent>

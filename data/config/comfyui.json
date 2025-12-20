@@ -1,0 +1,15 @@
+{
+  "enabled": true,
+  "url": "http://localhost:8188",
+  "activeWorkflowId": "2f8550d9-d9bf-414e-8bd7-066881379038",
+  "workflows": [
+    {
+      "id": "2f8550d9-d9bf-414e-8bd7-066881379038",
+      "file": "z_image_turbo.json",
+      "name": "z_image_turbo",
+      "promptNodeId": "45",
+      "samplerNodeId": "44",
+      "overrides": []
+    }
+  ]
+}

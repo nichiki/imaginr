@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import fs from 'fs/promises';
 import path from 'path';
+import { createImage, listImages, deleteImage, type ImageInfo } from '@/lib/db/images';
 
 const IMAGES_DIR = path.join(process.cwd(), 'data', 'images');
 
@@ -13,49 +14,18 @@ async function ensureDir() {
   }
 }
 
-export interface ImageInfo {
-  id: string;
-  filename: string;
-  createdAt: string;
-  prompt?: string;
-}
+// Re-export ImageInfo type for compatibility
+export type { ImageInfo };
 
 // 画像一覧を取得
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     await ensureDir();
-    const files = await fs.readdir(IMAGES_DIR);
 
-    const images: ImageInfo[] = [];
-    for (const file of files) {
-      if (!file.endsWith('.png') && !file.endsWith('.jpg') && !file.endsWith('.jpeg') && !file.endsWith('.webp')) {
-        continue;
-      }
+    const searchParams = request.nextUrl.searchParams;
+    const includeDeleted = searchParams.get('deleted') === 'true';
 
-      const filePath = path.join(IMAGES_DIR, file);
-      const stats = await fs.stat(filePath);
-
-      // メタデータファイルがあれば読み込む
-      let prompt: string | undefined;
-      const metaPath = filePath.replace(/\.(png|jpg|jpeg|webp)$/, '.json');
-      try {
-        const metaContent = await fs.readFile(metaPath, 'utf-8');
-        const meta = JSON.parse(metaContent);
-        prompt = meta.prompt;
-      } catch {
-        // メタデータがなければスキップ
-      }
-
-      images.push({
-        id: file.replace(/\.(png|jpg|jpeg|webp)$/, ''),
-        filename: file,
-        createdAt: stats.mtime.toISOString(),
-        prompt,
-      });
-    }
-
-    // 新しい順にソート
-    images.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    const images = listImages(includeDeleted);
 
     return NextResponse.json({ images });
   } catch (error) {
@@ -69,7 +39,7 @@ export async function POST(request: NextRequest) {
   try {
     await ensureDir();
 
-    const { imageUrl, prompt } = await request.json();
+    const { imageUrl, prompt, workflowId } = await request.json();
 
     if (!imageUrl) {
       return NextResponse.json({ error: 'imageUrl is required' }, { status: 400 });
@@ -91,24 +61,28 @@ export async function POST(request: NextRequest) {
     const timestamp = Date.now();
     const randomSuffix = Math.random().toString(36).substring(2, 6);
     const filename = `${timestamp}-${randomSuffix}.${ext}`;
+    const id = `${timestamp}-${randomSuffix}`;
     const filePath = path.join(IMAGES_DIR, filename);
 
     // 画像を保存
     await fs.writeFile(filePath, buffer);
 
-    // メタデータを保存
-    if (prompt) {
-      const metaPath = filePath.replace(/\.(png|jpg|jpeg|webp)$/, '.json');
-      await fs.writeFile(metaPath, JSON.stringify({ prompt, createdAt: new Date().toISOString() }, null, 2));
-    }
+    // DBにメタデータを保存
+    const imageRecord = createImage({
+      id,
+      filename,
+      promptYaml: prompt || '',
+      workflowId,
+      fileSize: buffer.length,
+    });
 
     return NextResponse.json({
       success: true,
       image: {
-        id: filename.replace(/\.(png|jpg|jpeg|webp)$/, ''),
-        filename,
-        createdAt: new Date().toISOString(),
-        prompt,
+        id: imageRecord.id,
+        filename: imageRecord.filename,
+        createdAt: imageRecord.created_at,
+        prompt: imageRecord.prompt_yaml,
       },
     });
   } catch (error) {
@@ -120,10 +94,11 @@ export async function POST(request: NextRequest) {
   }
 }
 
-// 画像を削除
+// 画像を削除（論理削除）
 export async function DELETE(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const filename = searchParams.get('filename');
+  const hardDelete = searchParams.get('hard') === 'true';
 
   if (!filename) {
     return NextResponse.json({ error: 'filename is required' }, { status: 400 });
@@ -137,16 +112,27 @@ export async function DELETE(request: NextRequest) {
       return NextResponse.json({ error: 'Invalid path' }, { status: 400 });
     }
 
-    // 画像を削除
-    await fs.unlink(filePath);
+    const id = filename.replace(/\.(png|jpg|jpeg|webp)$/, '');
 
-    // メタデータも削除（存在すれば）
-    const metaPath = filePath.replace(/\.(png|jpg|jpeg|webp)$/, '.json');
-    try {
-      await fs.unlink(metaPath);
-    } catch {
-      // メタデータがなければ無視
+    if (hardDelete) {
+      // 物理削除：ファイルも削除
+      try {
+        await fs.unlink(filePath);
+      } catch {
+        // ファイルがなくてもDB上は削除
+      }
+
+      // メタデータJSONも削除（レガシー対応）
+      const metaPath = filePath.replace(/\.(png|jpg|jpeg|webp)$/, '.json');
+      try {
+        await fs.unlink(metaPath);
+      } catch {
+        // メタデータがなければ無視
+      }
     }
+
+    // DBから削除（論理削除）
+    deleteImage(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {

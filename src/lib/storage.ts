@@ -82,6 +82,10 @@ const defaultComfyUISettings: ComfyUISettings = {
   workflows: [],
 };
 
+/**
+ * Load ComfyUI settings from localStorage (client-side cache)
+ * For the authoritative settings, use fetchComfyUISettings()
+ */
 export function loadComfyUISettings(): ComfyUISettings {
   if (typeof window === 'undefined') return defaultComfyUISettings;
 
@@ -89,27 +93,6 @@ export function loadComfyUISettings(): ComfyUISettings {
     const saved = localStorage.getItem(COMFYUI_SETTINGS_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
-
-      // 旧形式からのマイグレーション
-      if (parsed.workflowFile && !parsed.workflows?.length) {
-        const migratedWorkflow: WorkflowConfig = {
-          id: crypto.randomUUID(),
-          file: parsed.workflowFile,
-          name: parsed.workflowFile.replace(/\.json$/, ''),
-          promptNodeId: parsed.promptNodeId || '',
-          samplerNodeId: parsed.samplerNodeId || '',
-          overrides: [],
-        };
-        parsed.workflows = [migratedWorkflow];
-        parsed.activeWorkflowId = migratedWorkflow.id;
-        // 旧プロパティを削除
-        delete parsed.workflowFile;
-        delete parsed.promptNodeId;
-        delete parsed.samplerNodeId;
-        // マイグレーション結果を保存
-        localStorage.setItem(COMFYUI_SETTINGS_KEY, JSON.stringify(parsed));
-      }
-
       return { ...defaultComfyUISettings, ...parsed };
     }
   } catch (error) {
@@ -118,6 +101,65 @@ export function loadComfyUISettings(): ComfyUISettings {
   return defaultComfyUISettings;
 }
 
+/**
+ * Fetch ComfyUI settings from server (file-based storage)
+ * This is the authoritative source
+ */
+export async function fetchComfyUISettings(): Promise<ComfyUISettings> {
+  try {
+    const response = await fetch('/api/config');
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    const settings = await response.json();
+
+    // Update localStorage cache
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(COMFYUI_SETTINGS_KEY, JSON.stringify(settings));
+    }
+
+    return { ...defaultComfyUISettings, ...settings };
+  } catch (error) {
+    console.error('Failed to fetch ComfyUI settings:', error);
+    // Fall back to localStorage
+    return loadComfyUISettings();
+  }
+}
+
+/**
+ * Save ComfyUI settings to server (file-based storage)
+ * Also updates localStorage cache
+ */
+export async function saveComfyUISettingsAsync(settings: Partial<ComfyUISettings>): Promise<ComfyUISettings> {
+  try {
+    const response = await fetch('/api/config', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(settings),
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+
+    const newSettings = await response.json();
+
+    // Update localStorage cache
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(COMFYUI_SETTINGS_KEY, JSON.stringify(newSettings));
+    }
+
+    return newSettings;
+  } catch (error) {
+    console.error('Failed to save ComfyUI settings:', error);
+    throw error;
+  }
+}
+
+/**
+ * @deprecated Use saveComfyUISettingsAsync instead for persistence to file
+ * This only saves to localStorage (client-side cache)
+ */
 export function saveComfyUISettings(settings: Partial<ComfyUISettings>): void {
   if (typeof window === 'undefined') return;
 
@@ -127,6 +169,36 @@ export function saveComfyUISettings(settings: Partial<ComfyUISettings>): void {
     localStorage.setItem(COMFYUI_SETTINGS_KEY, JSON.stringify(newSettings));
   } catch (error) {
     console.error('Failed to save ComfyUI settings:', error);
+  }
+}
+
+/**
+ * Migrate settings from localStorage to file
+ * Called once on app initialization
+ */
+export async function migrateLocalStorageToFile(): Promise<void> {
+  if (typeof window === 'undefined') return;
+
+  const migrationKey = 'image-prompt-builder-settings-migrated';
+  if (localStorage.getItem(migrationKey)) {
+    return; // Already migrated
+  }
+
+  try {
+    const localSettings = loadComfyUISettings();
+
+    // Check if there's anything to migrate
+    if (localSettings.workflows.length === 0 && !localSettings.enabled) {
+      localStorage.setItem(migrationKey, 'true');
+      return;
+    }
+
+    // Migrate to file
+    await saveComfyUISettingsAsync(localSettings);
+    localStorage.setItem(migrationKey, 'true');
+    console.log('Settings migrated from localStorage to file');
+  } catch (error) {
+    console.error('Failed to migrate settings:', error);
   }
 }
 

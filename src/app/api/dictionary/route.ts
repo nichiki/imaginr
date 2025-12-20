@@ -64,7 +64,7 @@ async function loadDictionaryFiles(
         console.error(`Error parsing dictionary file ${file}:`, err);
       }
     }
-  } catch (err) {
+  } catch {
     // ディレクトリが存在しない場合は空配列を返す
     console.warn(`Dictionary directory not found: ${dir}`);
   }

@@ -10,7 +10,7 @@ import {
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Copy, Check, AlertCircle, Play, Loader2, Settings, Trash2, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { loadComfyUISettings, getActiveWorkflow, type ComfyUISettings } from '@/lib/storage';
+import { fetchComfyUISettings, loadComfyUISettings, getActiveWorkflow, type ComfyUISettings } from '@/lib/storage';
 import { ComfyUIClient, type GenerationProgress } from '@/lib/comfyui-api';
 
 interface ImageInfo {
@@ -79,7 +79,9 @@ export function PreviewPanel({
 
   // 設定を読み込む
   useEffect(() => {
+    // Start with localStorage cache, then fetch from server
     setComfySettings(loadComfyUISettings());
+    fetchComfyUISettings().then(setComfySettings);
   }, []);
 
   // 画像一覧を読み込む

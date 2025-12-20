@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useSyncExternalStore, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -71,6 +71,52 @@ function loadPresets(variables: VariableDefinition[]): Preset[] {
   }
 }
 
+// localStorageのプリセットを監視するためのsubscribe関数
+function subscribeToPresets(callback: () => void): () => void {
+  const handler = (e: StorageEvent) => {
+    if (e.key?.startsWith('var-presets:')) {
+      callback();
+    }
+  };
+  window.addEventListener('storage', handler);
+  return () => window.removeEventListener('storage', handler);
+}
+
+// プリセット用のカスタムフック
+function usePresets(variables: VariableDefinition[]): [Preset[], (presets: Preset[]) => void] {
+  const getSnapshot = useCallback(() => {
+    return JSON.stringify(loadPresets(variables));
+  }, [variables]);
+
+  const getServerSnapshot = useCallback(() => {
+    return JSON.stringify([]);
+  }, []);
+
+  const presetsJson = useSyncExternalStore(
+    subscribeToPresets,
+    getSnapshot,
+    getServerSnapshot
+  );
+
+  const presets = useMemo(() => {
+    try {
+      return JSON.parse(presetsJson) as Preset[];
+    } catch {
+      return [];
+    }
+  }, [presetsJson]);
+
+  const setPresets = useCallback((newPresets: Preset[]) => {
+    savePresetsToStorage(variables, newPresets);
+    // 同一タブ内では storage イベントが発火しないので手動でトリガー
+    window.dispatchEvent(new StorageEvent('storage', {
+      key: getPresetStorageKey(variables),
+    }));
+  }, [variables]);
+
+  return [presets, setPresets];
+}
+
 // プリセットを保存
 function savePresetsToStorage(variables: VariableDefinition[], presets: Preset[]): void {
   if (typeof window === 'undefined') return;
@@ -108,12 +154,30 @@ function AutocompleteInput({
   suggestions: DictionaryEntry[];
 }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [filteredSuggestions, setFilteredSuggestions] = useState<DictionaryEntry[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(-1);
   const [dropdownPosition, setDropdownPosition] = useState<'below' | 'above'>('below');
   const inputRef = useRef<HTMLInputElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+
+  // 入力値でフィルタ（useMemoで計算）
+  const filteredSuggestions = useMemo(() => {
+    if (!value.trim()) {
+      return suggestions;
+    }
+    const lower = value.toLowerCase();
+    return suggestions.filter(
+      (s) =>
+        s.value.toLowerCase().includes(lower) ||
+        s.description?.toLowerCase().includes(lower)
+    );
+  }, [value, suggestions]);
+
+  // onChangeをラップしてselectedIndexをリセット
+  const handleValueChange = useCallback((newValue: string) => {
+    setSelectedIndex(-1);
+    onChange(newValue);
+  }, [onChange]);
 
   // ドロップダウンの表示位置を計算
   const calculateDropdownPosition = useCallback(() => {
@@ -135,23 +199,6 @@ function AutocompleteInput({
     }
   }, []);
 
-  // 入力値でフィルタ
-  useEffect(() => {
-    if (!value.trim()) {
-      setFilteredSuggestions(suggestions);
-    } else {
-      const lower = value.toLowerCase();
-      setFilteredSuggestions(
-        suggestions.filter(
-          (s) =>
-            s.value.toLowerCase().includes(lower) ||
-            s.description?.toLowerCase().includes(lower)
-        )
-      );
-    }
-    setSelectedIndex(-1);
-  }, [value, suggestions]);
-
   // フォーカス時に位置を計算
   const handleFocus = useCallback(() => {
     calculateDropdownPosition();
@@ -160,11 +207,11 @@ function AutocompleteInput({
 
   const handleSelect = useCallback(
     (entry: DictionaryEntry) => {
-      onChange(entry.value);
+      handleValueChange(entry.value);
       setIsOpen(false);
       inputRef.current?.focus();
     },
-    [onChange]
+    [handleValueChange]
   );
 
   const handleKeyDown = useCallback(
@@ -207,9 +254,9 @@ function AutocompleteInput({
   }, [selectedIndex]);
 
   const handleClear = useCallback(() => {
-    onChange('');
+    handleValueChange('');
     inputRef.current?.focus();
-  }, [onChange]);
+  }, [handleValueChange]);
 
   return (
     <div ref={containerRef} className="relative">
@@ -217,7 +264,7 @@ function AutocompleteInput({
         ref={inputRef}
         id={id}
         value={value}
-        onChange={(e) => onChange(e.target.value)}
+        onChange={(e) => handleValueChange(e.target.value)}
         onFocus={handleFocus}
         onBlur={() => {
           // 少し遅延させてクリックイベントが先に処理されるようにする
@@ -409,19 +456,19 @@ function MultiSelectCheckboxes({
   );
 }
 
-export function VariableForm({ variables, values, onChange, dictionaryCache, isYamlValid = true }: VariableFormProps) {
-  const [presets, setPresets] = useState<Preset[]>([]);
+// 内部コンポーネント（variablesが変わるとリマウント）
+function VariableFormInner({
+  variables,
+  values,
+  onChange,
+  dictionaryCache,
+  isYamlValid = true
+}: VariableFormProps) {
+  // プリセットはlocalStorageと同期（useSyncExternalStore使用）
+  const [presets, setPresets] = usePresets(variables);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
   const [selectedPreset, setSelectedPreset] = useState<string>('');
-
-  // プリセット読み込み
-  useEffect(() => {
-    if (variables.length > 0) {
-      setPresets(loadPresets(variables));
-      setSelectedPreset('');
-    }
-  }, [variables]);
 
   // 選択中のプリセットと現在の値が異なるかチェック
   const isModified = useMemo(() => {
@@ -463,7 +510,7 @@ export function VariableForm({ variables, values, onChange, dictionaryCache, isY
     setNewPresetName('');
     setIsCreateDialogOpen(false);
     setSelectedPreset(newPreset.name);
-  }, [newPresetName, values, presets, variables]);
+  }, [newPresetName, values, presets, variables, setPresets]);
 
   // 選択中のプリセットを上書き保存
   const handleSavePreset = useCallback(() => {
@@ -480,7 +527,7 @@ export function VariableForm({ variables, values, onChange, dictionaryCache, isY
 
     setPresets(newPresets);
     savePresetsToStorage(variables, newPresets);
-  }, [selectedPreset, values, presets, variables]);
+  }, [selectedPreset, values, presets, variables, setPresets]);
 
   // プリセット読み込み（または「なし」でクリア）
   const handleLoadPreset = useCallback(
@@ -543,7 +590,7 @@ export function VariableForm({ variables, values, onChange, dictionaryCache, isY
         setSelectedPreset('');
       }
     },
-    [presets, variables, selectedPreset]
+    [presets, variables, selectedPreset, setPresets]
   );
 
   return (
@@ -726,4 +773,15 @@ export function VariableForm({ variables, values, onChange, dictionaryCache, isY
       </Dialog>
     </div>
   );
+}
+
+// ラッパーコンポーネント（variablesが変わるとInnerをリマウント）
+export function VariableForm(props: VariableFormProps) {
+  // variablesKeyをkeyとして使うことで、変数セットが変わったら内部コンポーネントをリマウント
+  const variablesKey = useMemo(
+    () => props.variables.map((v) => v.name).sort().join(','),
+    [props.variables]
+  );
+
+  return <VariableFormInner key={variablesKey} {...props} />;
 }

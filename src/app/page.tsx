@@ -29,6 +29,50 @@ import {
 } from '@/lib/variable-utils';
 import { VariableForm } from '@/components/variable-form';
 
+// 全フォルダのパスを収集
+function collectAllFolders(items: FileTreeItem[]): string[] {
+  const folders: string[] = [];
+  for (const item of items) {
+    if (item.type === 'folder') {
+      folders.push(item.path);
+      if (item.children) {
+        folders.push(...collectAllFolders(item.children));
+      }
+    }
+  }
+  return folders;
+}
+
+// ファイルがツリー内に存在するか確認
+function fileExistsInTree(items: FileTreeItem[], path: string): boolean {
+  for (const item of items) {
+    if (item.path === path) return true;
+    if (item.type === 'folder' && item.children) {
+      if (fileExistsInTree(item.children, path)) return true;
+    }
+  }
+  return false;
+}
+
+// ツリーから最初のファイルを探す
+function findFirstFile(items: FileTreeItem[], preferFolder?: string): string | null {
+  for (const item of items) {
+    if (item.type === 'folder' && item.children) {
+      if (!preferFolder || item.name === preferFolder) {
+        const found = findFirstFile(item.children);
+        if (found) return found;
+      }
+    } else if (item.type === 'file') {
+      return item.path;
+    }
+  }
+  // preferFolderで見つからなかったら全体から探す
+  if (preferFolder) {
+    return findFirstFile(items);
+  }
+  return null;
+}
+
 export default function Home() {
   // ファイルツリー
   const [fileTree, setFileTree] = useState<FileTreeItem[]>([]);
@@ -81,31 +125,6 @@ export default function Home() {
   const resizeType = useRef<'preview' | 'left' | 'right' | 'variable' | null>(null);
   const startPos = useRef(0);
   const startSize = useRef(0);
-
-  // 全フォルダのパスを収集
-  function collectAllFolders(items: FileTreeItem[]): string[] {
-    const folders: string[] = [];
-    for (const item of items) {
-      if (item.type === 'folder') {
-        folders.push(item.path);
-        if (item.children) {
-          folders.push(...collectAllFolders(item.children));
-        }
-      }
-    }
-    return folders;
-  }
-
-  // ファイルがツリー内に存在するか確認
-  function fileExistsInTree(items: FileTreeItem[], path: string): boolean {
-    for (const item of items) {
-      if (item.path === path) return true;
-      if (item.type === 'folder' && item.children) {
-        if (fileExistsInTree(item.children, path)) return true;
-      }
-    }
-    return false;
-  }
 
   // 初期読み込み
   useEffect(() => {
@@ -175,25 +194,6 @@ export default function Home() {
     }
     loadFiles();
   }, []);
-
-  // ツリーから最初のファイルを探す
-  function findFirstFile(items: FileTreeItem[], preferFolder?: string): string | null {
-    for (const item of items) {
-      if (item.type === 'folder' && item.children) {
-        if (!preferFolder || item.name === preferFolder) {
-          const found = findFirstFile(item.children);
-          if (found) return found;
-        }
-      } else if (item.type === 'file') {
-        return item.path;
-      }
-    }
-    // preferFolderで見つからなかったら全体から探す
-    if (preferFolder) {
-      return findFirstFile(items);
-    }
-    return null;
-  }
 
   // 現在のファイル内容
   const currentContent = useMemo(
