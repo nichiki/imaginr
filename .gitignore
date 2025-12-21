@@ -45,3 +45,6 @@ next-env.d.ts
 
 # comfyui workflows
 /data/comfyui/
+
+# database
+/data/db/
