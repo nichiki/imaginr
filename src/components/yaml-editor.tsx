@@ -1,10 +1,11 @@
 'use client';
 
-import { useRef, useCallback, useImperativeHandle, forwardRef, useEffect } from 'react';
+import { useState, useRef, useCallback, useImperativeHandle, forwardRef, useEffect } from 'react';
 import Editor, { OnMount, OnChange } from '@monaco-editor/react';
 import type { editor, languages, Position, IDisposable } from 'monaco-editor';
 import type { Snippet } from '@/lib/snippet-api';
 import type { DictionaryEntry } from '@/lib/dictionary-api';
+import { DictionaryQuickAddDialog } from './dictionary-quick-add-dialog';
 
 interface YamlEditorProps {
   value: string;
@@ -12,6 +13,7 @@ interface YamlEditorProps {
   fileList?: string[];
   snippets?: Snippet[];
   dictionaryCache?: Map<string, DictionaryEntry[]>;
+  onDictionaryChange?: () => void;
 }
 
 export interface YamlEditorRef {
@@ -19,7 +21,7 @@ export interface YamlEditorRef {
 }
 
 const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function YamlEditor(
-  { value, onChange, fileList = [], snippets = [], dictionaryCache },
+  { value, onChange, fileList = [], snippets = [], dictionaryCache, onDictionaryChange },
   ref
 ) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -28,6 +30,12 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
   const fileListRef = useRef<string[]>(fileList);
   const snippetsRef = useRef<Snippet[]>(snippets);
   const dictionaryCacheRef = useRef<Map<string, DictionaryEntry[]> | undefined>(dictionaryCache);
+
+  // Dictionary quick add dialog state
+  const [quickAddOpen, setQuickAddOpen] = useState(false);
+  const [quickAddValue, setQuickAddValue] = useState('');
+  const [quickAddContext, setQuickAddContext] = useState('*');
+  const [quickAddKey, setQuickAddKey] = useState('');
 
   // IME composition状態を追跡
   const isComposingRef = useRef(false);
@@ -131,6 +139,43 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
     const wildcardKey = `*.${key}`;
     return cache.get(wildcardKey) || [];
   }, []);
+
+  // カーソル位置から現在のキーを取得
+  const getCurrentKey = useCallback((model: editor.ITextModel, lineNumber: number): string | null => {
+    const line = model.getLineContent(lineNumber);
+    // "  key: value" 形式
+    const keyMatch = line.match(/^\s*-?\s*(\w+):\s*(.*)$/);
+    if (keyMatch) {
+      return keyMatch[1];
+    }
+    return null;
+  }, []);
+
+  // 辞書に追加ダイアログを開く
+  const openQuickAddDialog = useCallback(() => {
+    const editor = editorRef.current;
+    if (!editor) return;
+
+    const model = editor.getModel();
+    const position = editor.getPosition();
+    if (!model || !position) return;
+
+    // 選択されているテキストを取得
+    const selection = editor.getSelection();
+    let selectedText = '';
+    if (selection && !selection.isEmpty()) {
+      selectedText = model.getValueInRange(selection);
+    }
+
+    // コンテキストとキーを推測
+    const contextPath = getContextPath(model, position.lineNumber);
+    const currentKey = getCurrentKey(model, position.lineNumber);
+
+    setQuickAddValue(selectedText.trim());
+    setQuickAddContext(contextPath.length > 0 ? contextPath[contextPath.length - 1] : '*');
+    setQuickAddKey(currentKey || '');
+    setQuickAddOpen(true);
+  }, [getContextPath, getCurrentKey]);
 
   const handleEditorDidMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor;
@@ -345,6 +390,21 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
       editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
     });
 
+    // 辞書に追加アクションを登録
+    const addToDictAction = editor.addAction({
+      id: 'add-to-dictionary',
+      label: '辞書に追加',
+      keybindings: [
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyD,
+      ],
+      contextMenuGroupId: 'navigation',
+      contextMenuOrder: 1.5,
+      run: () => {
+        openQuickAddDialog();
+      },
+    });
+    disposablesRef.current.push(addToDictAction);
+
     // エディタのフォーカス
     editor.focus();
 
@@ -374,7 +434,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         },
       });
     }
-  }, [getContextPath, lookupDictionary, onChange]);
+  }, [getContextPath, lookupDictionary, onChange, openQuickAddDialog]);
 
   const handleChange: OnChange = useCallback(
     (newValue) => {
@@ -481,6 +541,16 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
             showStatusBar: false,
           },
         }}
+      />
+
+      {/* Dictionary Quick Add Dialog */}
+      <DictionaryQuickAddDialog
+        open={quickAddOpen}
+        onOpenChange={setQuickAddOpen}
+        initialValue={quickAddValue}
+        suggestedContext={quickAddContext}
+        suggestedKey={quickAddKey}
+        onSuccess={onDictionaryChange}
       />
     </div>
   );

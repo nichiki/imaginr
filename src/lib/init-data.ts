@@ -56,7 +56,8 @@ export async function initializeAppData(): Promise<void> {
 
   // Folders to copy from bundled resources
   // Note: comfyui is NOT copied - users must add their own workflows
-  const folders = ['templates', 'dictionary', 'snippets'];
+  // Note: dictionary is NOT copied - it's imported into DB directly from bundled resources
+  const folders = ['templates', 'snippets'];
 
   for (const folder of folders) {
     try {

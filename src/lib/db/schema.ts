@@ -4,7 +4,7 @@
 
 import type { UnifiedDatabase } from './index';
 
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 // Async version for UnifiedDatabase interface
 export async function initializeSchemaAsync(db: UnifiedDatabase): Promise<void> {
@@ -31,6 +31,9 @@ async function runMigrationsAsync(db: UnifiedDatabase, fromVersion: number): Pro
   }
   if (fromVersion < 2) {
     await migrateToV2Async(db);
+  }
+  if (fromVersion < 3) {
+    await migrateToV3Async(db);
   }
 
   // Update schema version
@@ -136,6 +139,24 @@ async function migrateToV2Async(db: UnifiedDatabase): Promise<void> {
   `);
 
   await db.execute('CREATE INDEX IF NOT EXISTS idx_presets_template ON presets(template_path)');
+}
+
+async function migrateToV3Async(db: UnifiedDatabase): Promise<void> {
+  // Dictionary table - stores autocomplete entries for YAML editor
+  // Migrated from file-based dictionary/standard/*.yaml to SQLite
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS dictionary (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      context TEXT NOT NULL,
+      key TEXT NOT NULL,
+      value TEXT NOT NULL,
+      description TEXT,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(context, key, value)
+    )
+  `);
+
+  await db.execute('CREATE INDEX IF NOT EXISTS idx_dict_context_key ON dictionary(context, key)');
 }
 
 

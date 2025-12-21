@@ -19,7 +19,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, CheckCircle, XCircle, Upload, Pencil, FolderOpen } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Upload, Pencil, FolderOpen, BookOpen } from 'lucide-react';
+import { DictionaryManagerDialog } from './dictionary-manager-dialog';
 import { WorkflowEditor } from './workflow-editor';
 import {
   fetchComfyUISettings,
@@ -37,6 +38,7 @@ interface SettingsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSettingsChange?: () => void;
+  onDictionaryChange?: () => void;
 }
 
 interface WorkflowFile {
@@ -44,7 +46,7 @@ interface WorkflowFile {
   label: string;
 }
 
-export function SettingsDialog({ open, onOpenChange, onSettingsChange }: SettingsDialogProps) {
+export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDictionaryChange }: SettingsDialogProps) {
   const [settings, setSettings] = useState<ComfyUISettings>({
     enabled: false,
     url: 'http://localhost:8188',
@@ -58,6 +60,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
   const [isSaving, setIsSaving] = useState(false);
   const [editingWorkflow, setEditingWorkflow] = useState<WorkflowConfig | null>(null);
   const [dataFolderPath, setDataFolderPath] = useState<string>('');
+  const [dictionaryManagerOpen, setDictionaryManagerOpen] = useState(false);
 
   // 設定とワークフロー一覧を読み込む
   useEffect(() => {
@@ -265,6 +268,22 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
             </p>
           </div>
 
+          {/* 辞書管理 */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">辞書管理</Label>
+            <Button
+              variant="outline"
+              onClick={() => setDictionaryManagerOpen(true)}
+              className="w-full h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white justify-start"
+            >
+              <BookOpen className="h-4 w-4 mr-2" />
+              辞書管理を開く
+            </Button>
+            <p className="text-xs text-[#888]">
+              オートコンプリート用の辞書を管理
+            </p>
+          </div>
+
           {/* ComfyUI設定 */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
@@ -451,6 +470,13 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
           </Button>
         </DialogFooter>
       </DialogContent>
+
+      {/* Dictionary Manager Dialog */}
+      <DictionaryManagerDialog
+        open={dictionaryManagerOpen}
+        onOpenChange={setDictionaryManagerOpen}
+        onDictionaryChange={onDictionaryChange}
+      />
     </Dialog>
   );
 }

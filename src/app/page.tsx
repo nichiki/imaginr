@@ -183,8 +183,9 @@ export default function Home() {
           console.error('Failed to load snippets:', e);
         }
 
-        // 辞書を読み込み
+        // 辞書を読み込み（初回起動時はバンドルファイルからインポート）
         try {
+          await dictionaryAPI.initializeFromBundled();
           const dictData = await dictionaryAPI.list();
           const cache = buildDictionaryCache(dictData);
           setDictionaryCache(cache);
@@ -927,6 +928,15 @@ export default function Home() {
             fileList={allFilePaths}
             snippets={snippets}
             dictionaryCache={dictionaryCache}
+            onDictionaryChange={async () => {
+              try {
+                const dictData = await dictionaryAPI.list();
+                const cache = buildDictionaryCache(dictData);
+                setDictionaryCache(cache);
+              } catch (e) {
+                console.error('Failed to reload dictionary:', e);
+              }
+            }}
           />
         </div>
 
@@ -995,6 +1005,16 @@ export default function Home() {
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
         onSettingsChange={() => setSettingsKey((k) => k + 1)}
+        onDictionaryChange={async () => {
+          // Reload dictionary cache
+          try {
+            const dictData = await dictionaryAPI.list();
+            const cache = buildDictionaryCache(dictData);
+            setDictionaryCache(cache);
+          } catch (e) {
+            console.error('Failed to reload dictionary:', e);
+          }
+        }}
       />
     </div>
   );

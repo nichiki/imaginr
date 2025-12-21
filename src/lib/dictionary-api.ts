@@ -1,104 +1,38 @@
 // 辞書API クライアント
-// Tauri専用
-
-import { getDictionaryPath, joinPath } from './tauri-utils';
-import { readTextFile, readDir, exists } from '@tauri-apps/plugin-fs';
-import yaml from 'js-yaml';
+// Tauri専用 - SQLite DBから読み込み
 
 export interface DictionaryEntry {
   value: string;
   description?: string;  // 補足説明（省略可）
 }
 
-export interface DictionaryItem {
-  key: string;           // YAMLキー名 (例: "color", "type")
-  context: string;       // 親コンテキスト (例: "*", "outfit", "outfit.top")
-  values: DictionaryEntry[];
-  source: 'standard' | 'user';  // 標準辞書かユーザー辞書か
-}
-
 // フラット化された辞書エントリ（API経由で取得する形式）
 export interface FlatDictionaryEntry {
+  id: number;           // DB ID（削除・更新用）
   key: string;
   context: string;
   value: string;
   description?: string;
-  source: 'standard' | 'user';
 }
 
-// 辞書YAMLファイルの形式
-interface DictionaryFile {
-  entries: Array<{
-    key: string;
-    context: string;
-    values: Array<{
-      value: string;
-      description?: string;
-    }>;
-  }>;
-}
-
-// Tauri版の実装
+// Tauri版の実装（DBベース）
 const tauriDictionaryAPI = {
-  async loadDictionaryFiles(
-    dir: string,
-    source: 'standard' | 'user'
-  ): Promise<FlatDictionaryEntry[]> {
-    const entries: FlatDictionaryEntry[] = [];
+  async list(): Promise<FlatDictionaryEntry[]> {
+    const { getAllEntries } = await import('./dictionary-db-api');
+    const entries = await getAllEntries();
 
-    try {
-      if (!(await exists(dir))) {
-        return entries;
-      }
-
-      const files = await readDir(dir);
-      const yamlFiles = files.filter(
-        (f) => !f.isDirectory && (f.name.endsWith('.yaml') || f.name.endsWith('.yml'))
-      );
-
-      for (const file of yamlFiles) {
-        try {
-          const filePath = await joinPath(dir, file.name);
-          const content = await readTextFile(filePath);
-          const data = yaml.load(content) as DictionaryFile | null;
-
-          if (data?.entries && Array.isArray(data.entries)) {
-            for (const entry of data.entries) {
-              if (entry.key && entry.context && Array.isArray(entry.values)) {
-                for (const val of entry.values) {
-                  entries.push({
-                    key: entry.key,
-                    context: entry.context,
-                    value: val.value,
-                    description: val.description,
-                    source,
-                  });
-                }
-              }
-            }
-          }
-        } catch (err) {
-          console.error(`Error parsing dictionary file ${file.name}:`, err);
-        }
-      }
-    } catch (error) {
-      console.warn('Dictionary directory not accessible:', dir, error);
-    }
-
-    return entries;
+    return entries.map(entry => ({
+      id: entry.id,
+      key: entry.key,
+      context: entry.context,
+      value: entry.value,
+      description: entry.description,
+    }));
   },
 
-  async list(): Promise<FlatDictionaryEntry[]> {
-    const dictionaryDir = await getDictionaryPath();
-    const standardDir = await joinPath(dictionaryDir, 'standard');
-    const userDir = await joinPath(dictionaryDir, 'user');
-
-    const [standardEntries, userEntries] = await Promise.all([
-      this.loadDictionaryFiles(standardDir, 'standard'),
-      this.loadDictionaryFiles(userDir, 'user'),
-    ]);
-
-    return [...standardEntries, ...userEntries];
+  async initializeFromBundled(): Promise<boolean> {
+    const { initializeFromBundledFiles } = await import('./dictionary-db-api');
+    return initializeFromBundledFiles();
   },
 };
 
