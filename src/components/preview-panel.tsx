@@ -2,37 +2,25 @@
 
 import { useState, useCallback, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
-import { Copy, Check, AlertCircle, Play, Loader2, Settings, Trash2, X, ChevronLeft, ChevronRight, Download } from 'lucide-react';
+import { Copy, Check, AlertCircle, Play, Loader2, X, Settings, Search } from 'lucide-react';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { fetchComfyUISettings, loadComfyUISettings, getActiveWorkflow, type ComfyUISettings } from '@/lib/storage';
 import { ComfyUIClient, type GenerationProgress } from '@/lib/comfyui-api';
-
-interface ImageInfo {
-  id: string;
-  filename: string;
-  createdAt: string;
-  prompt?: string;
-}
+import { ImageGallery } from './image-gallery';
+import { ImageViewer, type ImageInfo } from './image-viewer';
 
 interface PreviewPanelProps {
   mergedYaml: string;
   promptText: string;
   lookName?: string;
   isYamlValid?: boolean;
-  onOpenSettings?: () => void;
 }
 
 export function PreviewPanel({
   mergedYaml,
   promptText,
   isYamlValid = true,
-  onOpenSettings,
 }: PreviewPanelProps) {
   const [activeTab, setActiveTab] = useState<'merged' | 'prompt' | 'image'>('merged');
   const [copied, setCopied] = useState(false);
@@ -45,37 +33,7 @@ export function PreviewPanel({
   const [images, setImages] = useState<ImageInfo[]>([]);
   const [selectedImage, setSelectedImage] = useState<ImageInfo | null>(null);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
-
-  // 画像ナビゲーション
-  const navigateImage = useCallback((direction: 'prev' | 'next') => {
-    if (!selectedImage || images.length === 0) return;
-    const currentIndex = images.findIndex(img => img.id === selectedImage.id);
-    if (currentIndex === -1) return;
-    const newIndex = direction === 'prev'
-      ? (currentIndex - 1 + images.length) % images.length
-      : (currentIndex + 1) % images.length;
-    setSelectedImage(images[newIndex]);
-  }, [selectedImage, images]);
-
-  // キーボードナビゲーション（拡大表示中のみ）
-  useEffect(() => {
-    if (!selectedImage) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'ArrowLeft') {
-        e.preventDefault();
-        navigateImage('prev');
-      } else if (e.key === 'ArrowRight') {
-        e.preventDefault();
-        navigateImage('next');
-      } else if (e.key === 'Escape') {
-        setSelectedImage(null);
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [selectedImage, navigateImage]);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // 設定を読み込む
   useEffect(() => {
@@ -84,11 +42,14 @@ export function PreviewPanel({
     fetchComfyUISettings().then(setComfySettings);
   }, []);
 
-  // 画像一覧を読み込む
-  const loadImages = useCallback(async () => {
+  // 画像一覧を読み込む（検索クエリ対応）
+  const loadImages = useCallback(async (query?: string) => {
     setIsLoadingImages(true);
     try {
-      const response = await fetch('/api/images');
+      const url = query
+        ? `/api/images/search?q=${encodeURIComponent(query)}`
+        : '/api/images';
+      const response = await fetch(url);
       if (response.ok) {
         const data = await response.json();
         setImages(data.images || []);
@@ -104,6 +65,14 @@ export function PreviewPanel({
   useEffect(() => {
     loadImages();
   }, [loadImages]);
+
+  // 検索クエリ変更時のデバウンス検索
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      loadImages(searchQuery || undefined);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery, loadImages]);
 
   const copyToClipboard = useCallback(async () => {
     const text = activeTab === 'merged' ? mergedYaml : promptText;
@@ -192,8 +161,7 @@ export function PreviewPanel({
     }
   }, [comfySettings, mergedYaml, loadImages]);
 
-  const handleDeleteImage = useCallback(async (image: ImageInfo, e: React.MouseEvent) => {
-    e.stopPropagation();
+  const handleDeleteImage = useCallback(async (image: ImageInfo) => {
     if (!confirm('この画像を削除しますか？')) return;
 
     try {
@@ -210,23 +178,6 @@ export function PreviewPanel({
       console.error('Failed to delete image:', error);
     }
   }, [selectedImage]);
-
-  const handleDownloadImage = useCallback(async (image: ImageInfo) => {
-    try {
-      const response = await fetch(`/api/images/${image.filename}`);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = image.filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Failed to download image:', error);
-    }
-  }, []);
 
   const canCopy = activeTab === 'merged' ? (isYamlValid && !!mergedYaml) : (activeTab === 'prompt' && !!promptText);
   const activeWorkflowForCheck = comfySettings ? getActiveWorkflow(comfySettings) : null;
@@ -280,16 +231,27 @@ export function PreviewPanel({
                 )}
               </Button>
             )}
-            {onOpenSettings && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="h-7 w-7 p-0 text-[#888] hover:text-white hover:bg-[#094771]"
-                onClick={onOpenSettings}
-                title="設定"
-              >
-                <Settings className="h-3.5 w-3.5" />
-              </Button>
+            {/* 検索バー（Imageタブ選択時のみ） */}
+            {activeTab === 'image' && comfySettings?.enabled && (
+              <div className="relative ml-2">
+                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-[#888]" />
+                <Input
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="検索"
+                  className="w-64 pl-7 pr-6 h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4] placeholder:text-[#888]"
+                />
+                {searchQuery && (
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="absolute right-0.5 top-1/2 -translate-y-1/2 h-5 w-5 p-0 text-[#888] hover:text-white"
+                    onClick={() => setSearchQuery('')}
+                  >
+                    <X className="h-3 w-3" />
+                  </Button>
+                )}
+              </div>
             )}
           </div>
           <TabsList className="h-7 bg-[#3c3c3c]">
@@ -332,16 +294,7 @@ export function PreviewPanel({
             <div className="p-4 flex flex-col items-center justify-center h-full gap-3 text-[#888]">
               <Settings className="h-8 w-8" />
               <span className="text-sm">ComfyUIが設定されていません</span>
-              {onOpenSettings && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  className="text-xs"
-                  onClick={onOpenSettings}
-                >
-                  設定を開く
-                </Button>
-              )}
+              <span className="text-xs">ヘッダー右上の設定から有効にしてください</span>
             </div>
           ) : (
             <>
@@ -364,42 +317,13 @@ export function PreviewPanel({
                 )}
 
                 {/* 画像ギャラリー */}
-                {isLoadingImages ? (
-                  <div className="p-4 flex items-center justify-center">
-                    <Loader2 className="h-6 w-6 animate-spin text-[#888]" />
-                  </div>
-                ) : images.length === 0 ? (
-                  <div className="p-4 flex flex-col items-center justify-center h-full gap-3 text-[#888]">
-                    <Play className="h-8 w-8" />
-                    <span className="text-sm">「生成」ボタンで画像を生成</span>
-                  </div>
-                ) : (
-                  <div className="p-2 grid grid-cols-6 gap-2">
-                    {images.map((image) => (
-                      <div
-                        key={image.id}
-                        className="relative group cursor-pointer aspect-square bg-[#1e1e1e] rounded overflow-hidden"
-                        onClick={() => setSelectedImage(image)}
-                      >
-                        <img
-                          src={`/api/images/${image.filename}`}
-                          alt={image.id}
-                          className="w-full h-full object-cover"
-                          loading="lazy"
-                        />
-                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-colors" />
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="absolute top-1 right-1 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-black/50 hover:bg-red-600 text-white"
-                          onClick={(e) => handleDeleteImage(image, e)}
-                        >
-                          <Trash2 className="h-3 w-3" />
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <ImageGallery
+                  images={images}
+                  isLoading={isLoadingImages}
+                  searchQuery={searchQuery}
+                  onSelectImage={setSelectedImage}
+                  onDeleteImage={handleDeleteImage}
+                />
               </div>
 
               {/* 生成中オーバーレイ - スクロールエリア外に配置 */}
@@ -424,72 +348,12 @@ export function PreviewPanel({
       </Tabs>
 
       {/* 画像拡大ダイアログ */}
-      <Dialog open={!!selectedImage} onOpenChange={(open) => !open && setSelectedImage(null)}>
-        <DialogContent className="!w-auto !max-w-[90vw] max-h-[90vh] p-0 bg-[#1e1e1e] border-[#333] overflow-hidden" showCloseButton={false}>
-          <VisuallyHidden>
-            <DialogTitle>画像プレビュー</DialogTitle>
-          </VisuallyHidden>
-          {selectedImage && (
-            <div className="flex flex-col">
-              <div className="relative">
-                <img
-                  src={`/api/images/${selectedImage.filename}`}
-                  alt={selectedImage.id}
-                  className="max-w-[90vw] max-h-[calc(90vh-40px)] object-contain"
-                />
-                {/* 閉じる・ダウンロードボタン */}
-                <div className="absolute top-2 right-2 flex gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 bg-black/50 hover:bg-[#555] text-white"
-                    onClick={() => handleDownloadImage(selectedImage)}
-                    title="ダウンロード"
-                  >
-                    <Download className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="h-8 w-8 p-0 bg-black/50 hover:bg-[#555] text-white"
-                    onClick={() => setSelectedImage(null)}
-                    title="閉じる"
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </div>
-                {/* 左右ナビゲーション */}
-                {images.length > 1 && (
-                  <>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute left-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 bg-black/50 hover:bg-[#555] text-white"
-                      onClick={() => navigateImage('prev')}
-                    >
-                      <ChevronLeft className="h-6 w-6" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-2 top-1/2 -translate-y-1/2 h-10 w-10 p-0 bg-black/50 hover:bg-[#555] text-white"
-                      onClick={() => navigateImage('next')}
-                    >
-                      <ChevronRight className="h-6 w-6" />
-                    </Button>
-                  </>
-                )}
-              </div>
-              {/* 日付表示 - 画像の下に配置 */}
-              {selectedImage.createdAt && (
-                <div className="p-2 bg-[#1e1e1e] text-xs text-[#888] text-center border-t border-[#333]">
-                  {new Date(selectedImage.createdAt).toLocaleString('ja-JP')}
-                </div>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+      <ImageViewer
+        image={selectedImage}
+        images={images}
+        onClose={() => setSelectedImage(null)}
+        onNavigate={setSelectedImage}
+      />
     </div>
   );
 }

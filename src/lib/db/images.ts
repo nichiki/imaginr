@@ -159,13 +159,21 @@ export function toggleFavorite(id: string): boolean {
 }
 
 /**
- * Full-text search
+ * Full-text search with automatic prefix matching
+ * Each word gets * appended for prefix matching (e.g., "brown e" -> "brown* e*")
+ * Use "word" (quotes) for exact word matching
  */
 export function searchImages(query: string, includeDeleted = false): ImageInfo[] {
   const db = getDatabase();
 
-  // Escape special FTS characters
-  const escapedQuery = query.replace(/['"]/g, '');
+  // Build FTS query: add * to each word for prefix matching
+  const ftsQuery = query
+    .replace(/['"]/g, '')
+    .trim()
+    .split(/\s+/)
+    .filter(word => word.length > 0)
+    .map(word => word.endsWith('*') ? word : `${word}*`)
+    .join(' ');
 
   const rows = db.prepare(`
     SELECT i.id, i.filename, i.prompt_yaml, i.created_at, i.deleted_at, i.favorite
@@ -174,7 +182,7 @@ export function searchImages(query: string, includeDeleted = false): ImageInfo[]
     WHERE images_fts MATCH ?
     ${includeDeleted ? '' : 'AND i.deleted_at IS NULL'}
     ORDER BY i.created_at DESC
-  `).all(escapedQuery) as Array<{
+  `).all(ftsQuery) as Array<{
     id: string;
     filename: string;
     prompt_yaml: string;

@@ -28,6 +28,8 @@ import {
   VariableValues,
 } from '@/lib/variable-utils';
 import { VariableForm } from '@/components/variable-form';
+import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
 
 // 全フォルダのパスを収集
 function collectAllFolders(items: FileTreeItem[]): string[] {
@@ -827,6 +829,15 @@ export default function Home() {
             <span className="text-xs text-blue-400">保存中...</span>
           )}
         </div>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-7 w-7 p-0 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
+          onClick={() => setSettingsOpen(true)}
+          title="設定"
+        >
+          <Settings className="h-4 w-4" />
+        </Button>
       </header>
 
       {/* Main Area */}
@@ -926,7 +937,6 @@ export default function Home() {
             promptText={promptText}
             lookName={lookName}
             isYamlValid={isYamlValid}
-            onOpenSettings={() => setSettingsOpen(true)}
           />
         </div>
       </div>
