@@ -1,13 +1,4 @@
-// Tauri environment detection and utilities
-
-import { appDataDir, join } from '@tauri-apps/api/path';
-
-/**
- * Check if running in Tauri environment
- */
-export function isTauri(): boolean {
-  return typeof window !== 'undefined' && '__TAURI__' in window;
-}
+// Tauri utilities for path management
 
 let cachedAppDataPath: string | null = null;
 
@@ -21,10 +12,8 @@ export async function getAppDataPath(): Promise<string> {
     return cachedAppDataPath;
   }
 
-  if (!isTauri()) {
-    throw new Error('getAppDataPath() is only available in Tauri environment');
-  }
-
+  // 動的インポートでTauri APIを読み込む
+  const { appDataDir } = await import('@tauri-apps/api/path');
   cachedAppDataPath = await appDataDir();
   return cachedAppDataPath;
 }
@@ -33,11 +22,7 @@ export async function getAppDataPath(): Promise<string> {
  * Join path segments using Tauri's path API (cross-platform)
  */
 export async function joinPath(...segments: string[]): Promise<string> {
-  if (!isTauri()) {
-    // Fallback for non-Tauri environment (should not happen in production)
-    return segments.join('/');
-  }
-
+  const { join } = await import('@tauri-apps/api/path');
   let result = segments[0];
   for (let i = 1; i < segments.length; i++) {
     result = await join(result, segments[i]);
@@ -50,7 +35,7 @@ export async function joinPath(...segments: string[]): Promise<string> {
  */
 export async function getTemplatesPath(): Promise<string> {
   const appData = await getAppDataPath();
-  return joinPath(appData, 'data', 'templates');
+  return joinPath(appData, 'templates');
 }
 
 /**
@@ -58,7 +43,7 @@ export async function getTemplatesPath(): Promise<string> {
  */
 export async function getSnippetsPath(): Promise<string> {
   const appData = await getAppDataPath();
-  return joinPath(appData, 'data', 'snippets');
+  return joinPath(appData, 'snippets');
 }
 
 /**
@@ -66,7 +51,7 @@ export async function getSnippetsPath(): Promise<string> {
  */
 export async function getDictionaryPath(): Promise<string> {
   const appData = await getAppDataPath();
-  return joinPath(appData, 'data', 'dictionary');
+  return joinPath(appData, 'dictionary');
 }
 
 /**
@@ -74,7 +59,7 @@ export async function getDictionaryPath(): Promise<string> {
  */
 export async function getImagesPath(): Promise<string> {
   const appData = await getAppDataPath();
-  return joinPath(appData, 'data', 'images');
+  return joinPath(appData, 'images');
 }
 
 /**
@@ -82,7 +67,7 @@ export async function getImagesPath(): Promise<string> {
  */
 export async function getComfyUIPath(): Promise<string> {
   const appData = await getAppDataPath();
-  return joinPath(appData, 'data', 'comfyui');
+  return joinPath(appData, 'comfyui');
 }
 
 /**

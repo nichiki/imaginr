@@ -1,7 +1,7 @@
 // 辞書API クライアント
-// Tauri / Web両対応
+// Tauri専用
 
-import { isTauri, getDictionaryPath, joinPath } from './tauri-utils';
+import { getDictionaryPath, joinPath } from './tauri-utils';
 import { readTextFile, readDir, exists } from '@tauri-apps/plugin-fs';
 import yaml from 'js-yaml';
 
@@ -25,15 +25,6 @@ export interface FlatDictionaryEntry {
   description?: string;
   source: 'standard' | 'user';
 }
-
-// Web版の実装
-const webDictionaryAPI = {
-  async list(): Promise<FlatDictionaryEntry[]> {
-    const res = await fetch('/api/dictionary');
-    if (!res.ok) throw new Error('Failed to fetch dictionary');
-    return res.json();
-  },
-};
 
 // 辞書YAMLファイルの形式
 interface DictionaryFile {
@@ -111,8 +102,7 @@ const tauriDictionaryAPI = {
   },
 };
 
-// 環境に応じてAPIを切り替え
-export const dictionaryAPI = isTauri() ? tauriDictionaryAPI : webDictionaryAPI;
+export const dictionaryAPI = tauriDictionaryAPI;
 
 // 辞書をルックアップ用のMapに変換
 // キー: "context.key" (例: "outfit.type", "*.color")

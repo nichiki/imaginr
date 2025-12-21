@@ -1,4 +1,7 @@
 // ローカルストレージへの永続化ユーティリティ
+// Tauri専用
+
+import { getConfigPath } from './tauri-utils';
 
 const STORAGE_KEY = 'image-prompt-builder-state';
 const COMFYUI_SETTINGS_KEY = 'image-prompt-builder-comfyui';
@@ -102,16 +105,21 @@ export function loadComfyUISettings(): ComfyUISettings {
 }
 
 /**
- * Fetch ComfyUI settings from server (file-based storage)
+ * Fetch ComfyUI settings from file (Tauri)
  * This is the authoritative source
  */
 export async function fetchComfyUISettings(): Promise<ComfyUISettings> {
   try {
-    const response = await fetch('/api/config');
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
+    const configPath = await getConfigPath();
+
+    let settings: ComfyUISettings;
+    if (await exists(configPath)) {
+      const content = await readTextFile(configPath);
+      settings = JSON.parse(content);
+    } else {
+      settings = defaultComfyUISettings;
     }
-    const settings = await response.json();
 
     // Update localStorage cache
     if (typeof window !== 'undefined') {
@@ -127,22 +135,26 @@ export async function fetchComfyUISettings(): Promise<ComfyUISettings> {
 }
 
 /**
- * Save ComfyUI settings to server (file-based storage)
+ * Save ComfyUI settings to file (Tauri)
  * Also updates localStorage cache
  */
 export async function saveComfyUISettingsAsync(settings: Partial<ComfyUISettings>): Promise<ComfyUISettings> {
   try {
-    const response = await fetch('/api/config', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(settings),
-    });
+    // Merge with current settings
+    const current = await fetchComfyUISettings();
+    const newSettings = { ...current, ...settings };
 
-    if (!response.ok) {
-      throw new Error(`HTTP ${response.status}`);
+    const { writeTextFile, mkdir, exists } = await import('@tauri-apps/plugin-fs');
+    const { appDataDir } = await import('@tauri-apps/api/path');
+    const configPath = await getConfigPath();
+
+    // Ensure app data directory exists
+    const appData = await appDataDir();
+    if (!(await exists(appData))) {
+      await mkdir(appData, { recursive: true });
     }
 
-    const newSettings = await response.json();
+    await writeTextFile(configPath, JSON.stringify(newSettings, null, 2));
 
     // Update localStorage cache
     if (typeof window !== 'undefined') {

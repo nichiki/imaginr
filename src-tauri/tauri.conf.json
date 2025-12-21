@@ -7,7 +7,7 @@
     "beforeDevCommand": "npm run dev",
     "devUrl": "http://localhost:3000",
     "beforeBuildCommand": "npm run build",
-    "frontendDist": "out"
+    "frontendDist": "../out"
   },
   "app": {
     "windows": [
@@ -35,6 +35,9 @@
     "targets": "all",
     "icon": [
       "icons/icon.ico"
-    ]
+    ],
+    "resources": {
+      "../data": "data"
+    }
   }
 }

@@ -10,7 +10,7 @@ import { ComfyUIClient, type GenerationProgress } from '@/lib/comfyui-api';
 import { ImageGallery } from './image-gallery';
 import { ImageViewer, type ImageInfo } from './image-viewer';
 import { imageAPI, searchImagesByQuery } from '@/lib/image-api';
-import { isTauri, getComfyUIPath, joinPath } from '@/lib/tauri-utils';
+import { getComfyUIPath, joinPath } from '@/lib/tauri-utils';
 
 interface PreviewPanelProps {
   mergedYaml: string;
@@ -104,29 +104,16 @@ export function PreviewPanel({
 
     try {
       // ワークフローを取得
-      let workflow: Record<string, unknown>;
+      const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
+      const comfyuiDir = await getComfyUIPath();
+      const workflowPath = await joinPath(comfyuiDir, activeWorkflow.file);
 
-      if (isTauri()) {
-        // Tauri: read workflow from local file
-        const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
-        const comfyuiDir = await getComfyUIPath();
-        const workflowPath = await joinPath(comfyuiDir, activeWorkflow.file);
-
-        if (!(await exists(workflowPath))) {
-          throw new Error(`Workflow file not found: ${activeWorkflow.file}`);
-        }
-
-        const content = await readTextFile(workflowPath);
-        workflow = JSON.parse(content);
-      } else {
-        // Web: fetch from API
-        const response = await fetch(`/api/comfyui?file=${encodeURIComponent(activeWorkflow.file)}`);
-        if (!response.ok) {
-          throw new Error('Failed to load workflow');
-        }
-        const data = await response.json();
-        workflow = data.workflow;
+      if (!(await exists(workflowPath))) {
+        throw new Error(`Workflow file not found: ${activeWorkflow.file}`);
       }
+
+      const content = await readTextFile(workflowPath);
+      const workflow: Record<string, unknown> = JSON.parse(content);
 
       // 生成（マージ済みYAMLを送信）
       const client = new ComfyUIClient(comfySettings.url);

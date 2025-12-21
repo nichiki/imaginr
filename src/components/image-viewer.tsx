@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { X, ChevronLeft, ChevronRight, Download, Copy, Check, Loader2 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
 import { getImageDisplayUrl } from '@/lib/image-api';
-import { isTauri, getImagesPath, joinPath } from '@/lib/tauri-utils';
+import { getImagesPath, joinPath } from '@/lib/tauri-utils';
 
 export interface ImageInfo {
   id: string;
@@ -91,34 +91,20 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
     if (!image) return;
 
     try {
-      if (isTauri()) {
-        // Tauri: use save dialog and copy file
-        const { save } = await import('@tauri-apps/plugin-dialog');
-        const { copyFile } = await import('@tauri-apps/plugin-fs');
+      // Tauri: use save dialog and copy file
+      const { save } = await import('@tauri-apps/plugin-dialog');
+      const { copyFile } = await import('@tauri-apps/plugin-fs');
 
-        const imagesDir = await getImagesPath();
-        const sourcePath = await joinPath(imagesDir, image.filename);
+      const imagesDir = await getImagesPath();
+      const sourcePath = await joinPath(imagesDir, image.filename);
 
-        const destPath = await save({
-          defaultPath: image.filename,
-          filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }],
-        });
+      const destPath = await save({
+        defaultPath: image.filename,
+        filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }],
+      });
 
-        if (destPath) {
-          await copyFile(sourcePath, destPath);
-        }
-      } else {
-        // Web: fetch and download via blob
-        const response = await fetch(`/api/images/${image.filename}`);
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = image.filename;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(url);
+      if (destPath) {
+        await copyFile(sourcePath, destPath);
       }
     } catch (error) {
       console.error('Failed to download image:', error);

@@ -10,11 +10,11 @@ export interface UnifiedDatabase {
   close(): Promise<void>;
 }
 
-// Tauri SQL database type
+// Tauri SQL database type (close returns boolean per tauri-plugin-sql API)
 interface TauriSqlDatabase {
   execute(query: string, bindValues?: unknown[]): Promise<{ rowsAffected: number; lastInsertId: number }>;
   select<T>(query: string, bindValues?: unknown[]): Promise<T[]>;
-  close(): Promise<void>;
+  close(): Promise<boolean>;
 }
 
 let dbInstance: UnifiedDatabase | null = null;
@@ -33,7 +33,7 @@ class TauriDatabaseWrapper implements UnifiedDatabase {
   }
 
   async close(): Promise<void> {
-    return this.db.close();
+    await this.db.close();
   }
 }
 

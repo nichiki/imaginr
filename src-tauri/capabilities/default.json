@@ -23,9 +23,17 @@
     "fs:allow-app-write-recursive",
     "fs:allow-appdata-read-recursive",
     "fs:allow-appdata-write-recursive",
+    "fs:allow-resource-read-recursive",
     "http:default",
     "http:allow-fetch",
     "http:allow-fetch-cancel",
+    {
+      "identifier": "http:default",
+      "allow": [
+        { "url": "http://*:*" },
+        { "url": "https://*" }
+      ]
+    },
     "sql:default",
     "sql:allow-load",
     "sql:allow-execute",
@@ -35,6 +43,13 @@
     "dialog:allow-save",
     "window-state:default",
     "window-state:allow-restore-state",
-    "window-state:allow-save-window-state"
+    "window-state:allow-save-window-state",
+    {
+      "identifier": "opener:allow-open-path",
+      "allow": [
+        { "path": "$APPDATA" },
+        { "path": "$APPDATA/**" }
+      ]
+    }
   ]
 }

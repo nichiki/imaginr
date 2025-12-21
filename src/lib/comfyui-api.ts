@@ -1,7 +1,6 @@
-// ComfyUI API Client - Simplified polling-based approach
-// Uses Next.js API proxy (web) or direct HTTP (Tauri) to avoid CORS issues
+// ComfyUI API Client - Tauri専用
+// Direct HTTP requests using Tauri plugin (no CORS issues)
 
-import { isTauri } from './tauri-utils';
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 import type { NodeOverride } from './storage';
 
@@ -22,49 +21,22 @@ type ProgressCallback = (progress: GenerationProgress) => void;
 
 export class ComfyUIClient {
   private baseUrl: string;
-  private proxyUrl: string = '/api/comfyui/proxy';
-  private useTauri: boolean;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
-    this.useTauri = isTauri();
   }
 
-  // HTTPリクエスト（Tauri: 直接、Web: プロキシ経由）
+  // HTTPリクエスト（Tauri: 直接、CORSなし）
   private async httpGet(endpoint: string): Promise<Response> {
-    if (this.useTauri) {
-      // Tauri: 直接リクエスト（CORSなし）
-      return tauriFetch(`${this.baseUrl}${endpoint}`);
-    } else {
-      // Web: プロキシ経由
-      const params = new URLSearchParams({
-        baseUrl: this.baseUrl,
-        endpoint,
-      });
-      return fetch(`${this.proxyUrl}?${params}`);
-    }
+    return tauriFetch(`${this.baseUrl}${endpoint}`);
   }
 
   private async httpPost(endpoint: string, body: unknown): Promise<Response> {
-    if (this.useTauri) {
-      // Tauri: 直接リクエスト（CORSなし）
-      return tauriFetch(`${this.baseUrl}${endpoint}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-    } else {
-      // Web: プロキシ経由
-      const params = new URLSearchParams({
-        baseUrl: this.baseUrl,
-        endpoint,
-      });
-      return fetch(`${this.proxyUrl}?${params}`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(body),
-      });
-    }
+    return tauriFetch(`${this.baseUrl}${endpoint}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+    });
   }
 
   async generate(

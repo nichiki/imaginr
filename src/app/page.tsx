@@ -30,6 +30,7 @@ import {
 import { VariableForm } from '@/components/variable-form';
 import { Button } from '@/components/ui/button';
 import { Settings } from 'lucide-react';
+import { initializeAppData } from '@/lib/init-data';
 
 // 全フォルダのパスを収集
 function collectAllFolders(items: FileTreeItem[]): string[] {
@@ -132,6 +133,9 @@ export default function Home() {
   useEffect(() => {
     async function loadFiles() {
       try {
+        // 初回起動時の初期データコピー
+        await initializeAppData();
+
         // 保存された状態を復元
         const savedState = loadState();
         setPreviewHeight(savedState.previewHeight);

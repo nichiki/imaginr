@@ -1,7 +1,7 @@
 // スニペットAPI クライアント
-// Tauri / Web両対応
+// Tauri専用
 
-import { isTauri, getSnippetsPath, joinPath } from './tauri-utils';
+import { getSnippetsPath, joinPath } from './tauri-utils';
 import { readTextFile, writeTextFile, exists, mkdir } from '@tauri-apps/plugin-fs';
 import yaml from 'js-yaml';
 
@@ -13,42 +13,6 @@ export interface Snippet {
   description?: string;
   content: string;
 }
-
-// Web版の実装
-const webSnippetAPI = {
-  async list(): Promise<Snippet[]> {
-    const res = await fetch('/api/snippets');
-    if (!res.ok) throw new Error('Failed to fetch snippets');
-    return res.json();
-  },
-
-  async create(snippet: Omit<Snippet, 'id'> & { id?: string }): Promise<Snippet> {
-    const res = await fetch('/api/snippets', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(snippet),
-    });
-    if (!res.ok) throw new Error('Failed to create snippet');
-    return res.json();
-  },
-
-  async update(snippet: Snippet): Promise<Snippet> {
-    const res = await fetch('/api/snippets', {
-      method: 'PUT',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(snippet),
-    });
-    if (!res.ok) throw new Error('Failed to update snippet');
-    return res.json();
-  },
-
-  async delete(id: string): Promise<void> {
-    const res = await fetch(`/api/snippets?id=${encodeURIComponent(id)}`, {
-      method: 'DELETE',
-    });
-    if (!res.ok) throw new Error('Failed to delete snippet');
-  },
-};
 
 // Tauri版の実装
 const tauriSnippetAPI = {
@@ -112,8 +76,7 @@ const tauriSnippetAPI = {
   },
 };
 
-// 環境に応じてAPIを切り替え
-export const snippetAPI = isTauri() ? tauriSnippetAPI : webSnippetAPI;
+export const snippetAPI = tauriSnippetAPI;
 
 // カテゴリでグループ化（フラット・カテゴリ名はそのまま使用）
 export function getSnippetsByCategory(snippets: Snippet[]): Map<string, Snippet[]> {

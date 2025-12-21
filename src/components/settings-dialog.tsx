@@ -19,7 +19,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, CheckCircle, XCircle, Upload, Pencil } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Upload, Pencil, FolderOpen } from 'lucide-react';
 import { WorkflowEditor } from './workflow-editor';
 import {
   fetchComfyUISettings,
@@ -31,6 +31,7 @@ import {
   type WorkflowConfig,
 } from '@/lib/storage';
 import { ComfyUIClient } from '@/lib/comfyui-api';
+import { getComfyUIPath, joinPath, getAppDataPath } from '@/lib/tauri-utils';
 
 interface SettingsDialogProps {
   open: boolean;
@@ -56,6 +57,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
   const [isUploading, setIsUploading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [editingWorkflow, setEditingWorkflow] = useState<WorkflowConfig | null>(null);
+  const [dataFolderPath, setDataFolderPath] = useState<string>('');
 
   // 設定とワークフロー一覧を読み込む
   useEffect(() => {
@@ -65,16 +67,31 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
         fetchComfyUISettings().then(setSettings);
       });
       fetchAvailableWorkflows();
+      // Get data folder path
+      getAppDataPath().then(setDataFolderPath);
     }
   }, [open]);
 
   const fetchAvailableWorkflows = async () => {
     try {
-      const response = await fetch('/api/comfyui');
-      if (response.ok) {
-        const data = await response.json();
-        setAvailableWorkflows(data.workflows || []);
+      const { readDir, exists, mkdir } = await import('@tauri-apps/plugin-fs');
+      const comfyuiDir = await getComfyUIPath();
+
+      // Ensure directory exists
+      if (!(await exists(comfyuiDir))) {
+        await mkdir(comfyuiDir, { recursive: true });
+        setAvailableWorkflows([]);
+        return;
       }
+
+      const entries = await readDir(comfyuiDir);
+      const workflows: WorkflowFile[] = entries
+        .filter(entry => entry.name?.endsWith('.json'))
+        .map(entry => ({
+          name: entry.name!,
+          label: entry.name!.replace('.json', ''),
+        }));
+      setAvailableWorkflows(workflows);
     } catch (error) {
       console.error('Failed to fetch workflows:', error);
     }
@@ -118,6 +135,16 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
     }
   };
 
+  const handleOpenDataFolder = useCallback(async () => {
+    if (!dataFolderPath) return;
+    try {
+      const { openPath } = await import('@tauri-apps/plugin-opener');
+      await openPath(dataFolderPath);
+    } catch (error) {
+      console.error('Failed to open data folder:', error);
+    }
+  }, [dataFolderPath]);
+
   const handleFileUpload = useCallback(async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -129,28 +156,30 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
       JSON.parse(content);
 
       const name = file.name.replace('.json', '');
-      const response = await fetch('/api/comfyui', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, content }),
-      });
+      const fileName = file.name;
 
-      if (response.ok) {
-        const { fileName } = await response.json();
-        await fetchAvailableWorkflows();
+      const { writeTextFile, mkdir, exists } = await import('@tauri-apps/plugin-fs');
+      const comfyuiDir = await getComfyUIPath();
 
-        // 新しいワークフロー設定を作成して追加
-        const newWorkflow = createWorkflowConfig(fileName, name);
-        setSettings(prev => ({
-          ...prev,
-          workflows: [...prev.workflows, newWorkflow],
-          activeWorkflowId: newWorkflow.id,
-        }));
-        // 編集モードに入る
-        setEditingWorkflow(newWorkflow);
-      } else {
-        alert('アップロードに失敗しました');
+      // Ensure directory exists
+      if (!(await exists(comfyuiDir))) {
+        await mkdir(comfyuiDir, { recursive: true });
       }
+
+      const filePath = await joinPath(comfyuiDir, fileName);
+      await writeTextFile(filePath, content);
+
+      await fetchAvailableWorkflows();
+
+      // 新しいワークフロー設定を作成して追加
+      const newWorkflow = createWorkflowConfig(fileName, name);
+      setSettings(prev => ({
+        ...prev,
+        workflows: [...prev.workflows, newWorkflow],
+        activeWorkflowId: newWorkflow.id,
+      }));
+      // 編集モードに入る
+      setEditingWorkflow(newWorkflow);
     } catch {
       alert('無効なJSONファイルです');
     } finally {
@@ -210,6 +239,30 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* データフォルダ */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">データフォルダ</Label>
+            <div className="flex gap-2">
+              <Input
+                value={dataFolderPath}
+                readOnly
+                className="bg-[#3c3c3c] border-[#555] text-[#888] text-sm h-9 flex-1"
+              />
+              <Button
+                variant="outline"
+                size="default"
+                onClick={handleOpenDataFolder}
+                className="shrink-0 h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white"
+                title="フォルダを開く"
+              >
+                <FolderOpen className="h-4 w-4" />
+              </Button>
+            </div>
+            <p className="text-xs text-[#888]">
+              テンプレート、辞書、スニペット、生成画像の保存先
+            </p>
+          </div>
+
           {/* ComfyUI設定 */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
