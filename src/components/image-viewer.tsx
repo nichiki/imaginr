@@ -7,8 +7,10 @@ import {
 } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
-import { X, ChevronLeft, ChevronRight, Download, Copy, Check } from 'lucide-react';
+import { X, ChevronLeft, ChevronRight, Download, Copy, Check, Loader2 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
+import { getImageDisplayUrl } from '@/lib/image-api';
+import { isTauri, getImagesPath, joinPath } from '@/lib/tauri-utils';
 
 export interface ImageInfo {
   id: string;
@@ -26,6 +28,21 @@ interface ImageViewerProps {
 
 export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerProps) {
   const [copied, setCopied] = useState(false);
+  const [imageUrl, setImageUrl] = useState<string | null>(null);
+
+  // 画像URLを取得
+  useEffect(() => {
+    if (!image) {
+      setImageUrl(null);
+      return;
+    }
+
+    let cancelled = false;
+    getImageDisplayUrl(image.filename).then((url) => {
+      if (!cancelled) setImageUrl(url);
+    });
+    return () => { cancelled = true; };
+  }, [image]);
 
   // プロンプトをコピー
   const copyPrompt = useCallback(async () => {
@@ -37,7 +54,7 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
     } catch (error) {
       console.error('Failed to copy prompt:', error);
     }
-  }, [image?.prompt]);
+  }, [image]);
 
   // 画像ナビゲーション
   const navigateImage = useCallback((direction: 'prev' | 'next') => {
@@ -72,17 +89,37 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
 
   const handleDownload = useCallback(async () => {
     if (!image) return;
+
     try {
-      const response = await fetch(`/api/images/${image.filename}`);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = image.filename;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(url);
+      if (isTauri()) {
+        // Tauri: use save dialog and copy file
+        const { save } = await import('@tauri-apps/plugin-dialog');
+        const { copyFile } = await import('@tauri-apps/plugin-fs');
+
+        const imagesDir = await getImagesPath();
+        const sourcePath = await joinPath(imagesDir, image.filename);
+
+        const destPath = await save({
+          defaultPath: image.filename,
+          filters: [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'webp'] }],
+        });
+
+        if (destPath) {
+          await copyFile(sourcePath, destPath);
+        }
+      } else {
+        // Web: fetch and download via blob
+        const response = await fetch(`/api/images/${image.filename}`);
+        const blob = await response.blob();
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = image.filename;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
     } catch (error) {
       console.error('Failed to download image:', error);
     }
@@ -130,11 +167,15 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
             <div className="flex-1 flex overflow-hidden min-h-0">
               {/* 左側：画像 */}
               <div className="relative flex-1 flex items-center justify-center bg-[#1e1e1e] border-r border-[#333] min-w-0 overflow-hidden">
-                <img
-                  src={`/api/images/${image.filename}`}
-                  alt={image.id}
-                  className="max-w-full max-h-[calc(90vh-60px)] object-contain"
-                />
+                {imageUrl ? (
+                  <img
+                    src={imageUrl}
+                    alt={image.id}
+                    className="max-w-full max-h-[calc(90vh-60px)] object-contain"
+                  />
+                ) : (
+                  <Loader2 className="h-8 w-8 animate-spin text-[#888]" />
+                )}
                 {/* 左右ナビゲーション */}
                 {images.length > 1 && (
                   <>

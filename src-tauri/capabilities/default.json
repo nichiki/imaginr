@@ -30,6 +30,11 @@
     "sql:allow-load",
     "sql:allow-execute",
     "sql:allow-select",
-    "sql:allow-close"
+    "sql:allow-close",
+    "dialog:default",
+    "dialog:allow-save",
+    "window-state:default",
+    "window-state:allow-restore-state",
+    "window-state:allow-save-window-state"
   ]
 }

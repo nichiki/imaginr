@@ -1,6 +1,8 @@
 // YAML attribute extraction and storage
+// Supports both sync (better-sqlite3) and async (UnifiedDatabase)
+// NOTE: This file should only be imported server-side or via dynamic import
 
-import type Database from 'better-sqlite3';
+import type { UnifiedDatabase } from './index';
 
 export interface Attribute {
   key: string;
@@ -51,59 +53,58 @@ export function extractAttributes(
   return attrs;
 }
 
+// =============================================================================
+// Async API for UnifiedDatabase (works with both better-sqlite3 wrapper and tauri-plugin-sql)
+// =============================================================================
+
 /**
- * Save attributes for an image
+ * Save attributes for an image (async version)
  * Replaces any existing attributes
  */
-export function saveAttributes(
-  db: Database.Database,
+export async function saveAttributesAsync(
+  db: UnifiedDatabase,
   imageId: string,
   attributes: Attribute[]
-): void {
+): Promise<void> {
   // Delete existing attributes
-  db.prepare('DELETE FROM image_attributes WHERE image_id = ?').run(imageId);
+  await db.execute('DELETE FROM image_attributes WHERE image_id = ?', [imageId]);
 
   // Insert new attributes
-  const insert = db.prepare(
-    'INSERT INTO image_attributes (image_id, key, value) VALUES (?, ?, ?)'
-  );
-
-  const insertMany = db.transaction((attrs: Attribute[]) => {
-    for (const attr of attrs) {
-      insert.run(imageId, attr.key, attr.value);
-    }
-  });
-
-  insertMany(attributes);
+  for (const attr of attributes) {
+    await db.execute(
+      'INSERT INTO image_attributes (image_id, key, value) VALUES (?, ?, ?)',
+      [imageId, attr.key, attr.value]
+    );
+  }
 }
 
 /**
- * Get all attributes for an image
+ * Get all attributes for an image (async version)
  */
-export function getAttributes(
-  db: Database.Database,
+export async function getAttributesAsync(
+  db: UnifiedDatabase,
   imageId: string
-): Attribute[] {
-  return db
-    .prepare('SELECT key, value FROM image_attributes WHERE image_id = ?')
-    .all(imageId) as Attribute[];
+): Promise<Attribute[]> {
+  return db.select<Attribute>(
+    'SELECT key, value FROM image_attributes WHERE image_id = ?',
+    [imageId]
+  );
 }
 
 /**
- * Search images by attribute key-value pair
+ * Search images by attribute key-value pair (async version)
  * Supports partial matching with LIKE
  */
-export function searchByAttribute(
-  db: Database.Database,
+export async function searchByAttributeAsync(
+  db: UnifiedDatabase,
   keyPattern: string,
   valuePattern: string
-): string[] {
-  const rows = db
-    .prepare(`
-      SELECT DISTINCT image_id FROM image_attributes
-      WHERE key LIKE ? AND value LIKE ?
-    `)
-    .all(`%${keyPattern}%`, `%${valuePattern}%`) as Array<{ image_id: string }>;
-
+): Promise<string[]> {
+  const rows = await db.select<{ image_id: string }>(
+    `SELECT DISTINCT image_id FROM image_attributes
+     WHERE key LIKE ? AND value LIKE ?`,
+    [`%${keyPattern}%`, `%${valuePattern}%`]
+  );
   return rows.map((r) => r.image_id);
 }
+

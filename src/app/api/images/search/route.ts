@@ -1,7 +1,7 @@
 // Image search API - full-text and attribute search
 import { NextRequest, NextResponse } from 'next/server';
 import { searchImages } from '@/lib/db/images';
-import { searchByAttribute } from '@/lib/db/attributes';
+import { searchByAttributeAsync } from '@/lib/db/attributes';
 import { getDatabase } from '@/lib/db';
 
 // GET /api/images/search?q=blonde&attr=hair.color:blonde&deleted=true
@@ -14,7 +14,7 @@ export async function GET(request: NextRequest) {
 
     // Full-text search
     if (query) {
-      const images = searchImages(query, includeDeleted);
+      const images = await searchImages(query, includeDeleted);
       return NextResponse.json({ images, searchType: 'fulltext', query });
     }
 
@@ -28,8 +28,8 @@ export async function GET(request: NextRequest) {
         );
       }
 
-      const db = getDatabase();
-      const imageIds = searchByAttribute(db, key, value);
+      const db = await getDatabase();
+      const imageIds = await searchByAttributeAsync(db, key, value);
 
       // Get full image info for matching IDs
       if (imageIds.length === 0) {
@@ -37,20 +37,22 @@ export async function GET(request: NextRequest) {
       }
 
       const placeholders = imageIds.map(() => '?').join(',');
-      const rows = db.prepare(`
-        SELECT id, filename, prompt_yaml, created_at, deleted_at, favorite
-        FROM images
-        WHERE id IN (${placeholders})
-        ${includeDeleted ? '' : 'AND deleted_at IS NULL'}
-        ORDER BY created_at DESC
-      `).all(...imageIds) as Array<{
+      const deletedClause = includeDeleted ? '' : 'AND deleted_at IS NULL';
+
+      const rows = await db.select<{
         id: string;
         filename: string;
         prompt_yaml: string;
         created_at: string;
         deleted_at: string | null;
         favorite: number;
-      }>;
+      }>(`
+        SELECT id, filename, prompt_yaml, created_at, deleted_at, favorite
+        FROM images
+        WHERE id IN (${placeholders})
+        ${deletedClause}
+        ORDER BY created_at DESC
+      `, imageIds);
 
       const images = rows.map((row) => ({
         id: row.id,

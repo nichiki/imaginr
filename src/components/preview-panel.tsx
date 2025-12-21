@@ -9,6 +9,8 @@ import { fetchComfyUISettings, loadComfyUISettings, getActiveWorkflow, type Comf
 import { ComfyUIClient, type GenerationProgress } from '@/lib/comfyui-api';
 import { ImageGallery } from './image-gallery';
 import { ImageViewer, type ImageInfo } from './image-viewer';
+import { imageAPI, searchImagesByQuery } from '@/lib/image-api';
+import { isTauri, getComfyUIPath, joinPath } from '@/lib/tauri-utils';
 
 interface PreviewPanelProps {
   mergedYaml: string;
@@ -46,13 +48,14 @@ export function PreviewPanel({
   const loadImages = useCallback(async (query?: string) => {
     setIsLoadingImages(true);
     try {
-      const url = query
-        ? `/api/images/search?q=${encodeURIComponent(query)}`
-        : '/api/images';
-      const response = await fetch(url);
-      if (response.ok) {
-        const data = await response.json();
-        setImages(data.images || []);
+      if (query) {
+        // Use search API
+        const results = await searchImagesByQuery(query);
+        setImages(results);
+      } else {
+        // Use imageAPI for listing
+        const results = await imageAPI.list();
+        setImages(results);
       }
     } catch (error) {
       console.error('Failed to load images:', error);
@@ -101,11 +104,29 @@ export function PreviewPanel({
 
     try {
       // ワークフローを取得
-      const response = await fetch(`/api/comfyui?file=${encodeURIComponent(activeWorkflow.file)}`);
-      if (!response.ok) {
-        throw new Error('Failed to load workflow');
+      let workflow: Record<string, unknown>;
+
+      if (isTauri()) {
+        // Tauri: read workflow from local file
+        const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
+        const comfyuiDir = await getComfyUIPath();
+        const workflowPath = await joinPath(comfyuiDir, activeWorkflow.file);
+
+        if (!(await exists(workflowPath))) {
+          throw new Error(`Workflow file not found: ${activeWorkflow.file}`);
+        }
+
+        const content = await readTextFile(workflowPath);
+        workflow = JSON.parse(content);
+      } else {
+        // Web: fetch from API
+        const response = await fetch(`/api/comfyui?file=${encodeURIComponent(activeWorkflow.file)}`);
+        if (!response.ok) {
+          throw new Error('Failed to load workflow');
+        }
+        const data = await response.json();
+        workflow = data.workflow;
       }
-      const { workflow } = await response.json();
 
       // 生成（マージ済みYAMLを送信）
       const client = new ComfyUIClient(comfySettings.url);
@@ -126,20 +147,8 @@ export function PreviewPanel({
         for (const imageUrl of result.images) {
           try {
             console.log('Saving image from:', imageUrl);
-            const saveResponse = await fetch('/api/images', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                imageUrl,
-                prompt: mergedYaml,
-              }),
-            });
-            if (!saveResponse.ok) {
-              const errorText = await saveResponse.text();
-              console.error('Failed to save image:', errorText);
-            } else {
-              console.log('Image saved successfully');
-            }
+            await imageAPI.save(imageUrl, mergedYaml, activeWorkflow.id);
+            console.log('Image saved successfully');
           } catch (e) {
             console.error('Failed to save image:', e);
           }
@@ -165,14 +174,10 @@ export function PreviewPanel({
     if (!confirm('この画像を削除しますか？')) return;
 
     try {
-      const response = await fetch(`/api/images?filename=${encodeURIComponent(image.filename)}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
-        setImages((prev) => prev.filter((img) => img.id !== image.id));
-        if (selectedImage?.id === image.id) {
-          setSelectedImage(null);
-        }
+      await imageAPI.delete(image.filename);
+      setImages((prev) => prev.filter((img) => img.id !== image.id));
+      if (selectedImage?.id === image.id) {
+        setSelectedImage(null);
       }
     } catch (error) {
       console.error('Failed to delete image:', error);

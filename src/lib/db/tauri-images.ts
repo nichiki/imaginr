@@ -1,7 +1,7 @@
-// Image metadata CRUD operations
-// Supports both sync (better-sqlite3) and async (UnifiedDatabase)
+// Tauri-only Image metadata CRUD operations
+// This file should only be dynamically imported in Tauri environment
 
-import { getDatabase, UnifiedDatabase } from './index';
+import { getDatabase, UnifiedDatabase } from './tauri-db';
 import { extractAttributes, saveAttributesAsync } from './attributes';
 import yaml from 'js-yaml';
 
@@ -40,10 +40,6 @@ export interface CreateImageInput {
   height?: number;
   fileSize?: number;
 }
-
-// =============================================================================
-// Async API for UnifiedDatabase
-// =============================================================================
 
 /**
  * Create a new image record with attributes
@@ -169,8 +165,6 @@ export async function toggleFavorite(id: string): Promise<boolean> {
 
 /**
  * Full-text search with automatic prefix matching
- * Each word gets * appended for prefix matching (e.g., "brown e" -> "brown* e*")
- * Use "word" (quotes) for exact word matching
  */
 export async function searchImages(query: string, includeDeleted = false): Promise<ImageInfo[]> {
   const db = await getDatabase();
@@ -251,10 +245,9 @@ export async function markMissingAsDeleted(missingIds: string[]): Promise<number
   return count;
 }
 
-// =============================================================================
-// Helper to get database instance for external use
-// =============================================================================
-
+/**
+ * Helper to get database instance for external use
+ */
 export async function getDatabaseInstance(): Promise<UnifiedDatabase> {
   return getDatabase();
 }

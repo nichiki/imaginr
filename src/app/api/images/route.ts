@@ -25,7 +25,7 @@ export async function GET(request: NextRequest) {
     const searchParams = request.nextUrl.searchParams;
     const includeDeleted = searchParams.get('deleted') === 'true';
 
-    const images = listImages(includeDeleted);
+    const images = await listImages(includeDeleted);
 
     return NextResponse.json({ images });
   } catch (error) {
@@ -68,7 +68,7 @@ export async function POST(request: NextRequest) {
     await fs.writeFile(filePath, buffer);
 
     // DBにメタデータを保存
-    const imageRecord = createImage({
+    const imageRecord = await createImage({
       id,
       filename,
       promptYaml: prompt || '',
@@ -132,7 +132,7 @@ export async function DELETE(request: NextRequest) {
     }
 
     // DBから削除（論理削除）
-    deleteImage(id);
+    await deleteImage(id);
 
     return NextResponse.json({ success: true });
   } catch (error) {
