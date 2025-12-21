@@ -183,7 +183,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
 
     // YAML言語の補完プロバイダーを登録
     const completionProvider = monaco.languages.registerCompletionItemProvider('yaml', {
-      triggerCharacters: [' ', ':'],
+      triggerCharacters: [' ', ':', ','],
       provideCompletionItems: (
         model: editor.ITextModel,
         position: Position
@@ -230,7 +230,19 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         if (valueMatchWithSpace) {
           const currentKey = valueMatchWithSpace[1].toLowerCase();
           const spaceAfterColon = valueMatchWithSpace[2]; // スペースがあれば " "、なければ ""
-          const typedValue = valueMatchWithSpace[3];
+          let typedValue = valueMatchWithSpace[3];
+
+          // カンマ区切りの場合、最後のカンマ以降を補完対象にする
+          // 例: "red, blue, gre" → "gre" を補完対象に
+          let commaOffset = 0;
+          let hasSpaceAfterComma = false;
+          const lastCommaIndex = typedValue.lastIndexOf(',');
+          if (lastCommaIndex !== -1) {
+            commaOffset = lastCommaIndex + 1;
+            const afterComma = typedValue.substring(lastCommaIndex + 1);
+            hasSpaceAfterComma = afterComma.startsWith(' ');
+            typedValue = afterComma.trimStart();
+          }
 
           // _base: の後ろならファイル補完
           if (currentKey === '_base') {
@@ -260,7 +272,11 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
           const dictEntries = lookupDictionary(contextPath, currentKey);
 
           if (dictEntries.length > 0) {
-            const needsSpace = spaceAfterColon.length === 0;
+            // コロン直後でスペースがない場合のみスペースを追加
+            const needsSpaceAfterColon = spaceAfterColon.length === 0 && commaOffset === 0;
+            // カンマ直後（スペースなし）の場合、スペースを追加
+            const needsSpaceAfterComma = commaOffset > 0 && !hasSpaceAfterComma;
+
             const filteredEntries = dictEntries.filter((entry) =>
               entry.value.toLowerCase().includes(typedValue.toLowerCase()) ||
               (entry.description && entry.description.toLowerCase().includes(typedValue.toLowerCase()))
@@ -268,18 +284,24 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
 
             if (filteredEntries.length > 0) {
               return {
-                suggestions: filteredEntries.map((entry) => ({
-                  label: entry.description ? `${entry.value}（${entry.description}）` : entry.value,
-                  kind: monaco.languages.CompletionItemKind.Value,
-                  insertText: needsSpace ? ` ${entry.value}` : entry.value,
-                  detail: `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`,
-                  range: {
-                    startLineNumber: position.lineNumber,
-                    startColumn: position.column - typedValue.length,
-                    endLineNumber: position.lineNumber,
-                    endColumn: position.column,
-                  },
-                })),
+                suggestions: filteredEntries.map((entry) => {
+                  let insertText = entry.value;
+                  if (needsSpaceAfterColon || needsSpaceAfterComma) {
+                    insertText = ` ${entry.value}`;
+                  }
+                  return {
+                    label: entry.description ? `${entry.value}（${entry.description}）` : entry.value,
+                    kind: monaco.languages.CompletionItemKind.Value,
+                    insertText,
+                    detail: `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`,
+                    range: {
+                      startLineNumber: position.lineNumber,
+                      startColumn: position.column - typedValue.length,
+                      endLineNumber: position.lineNumber,
+                      endColumn: position.column,
+                    },
+                  };
+                }),
               };
             }
           }
