@@ -1,4 +1,9 @@
 // 辞書API クライアント
+// Tauri / Web両対応
+
+import { isTauri, getDictionaryPath, joinPath } from './tauri-utils';
+import { readTextFile, readDir, exists } from '@tauri-apps/plugin-fs';
+import yaml from 'js-yaml';
 
 export interface DictionaryEntry {
   value: string;
@@ -21,14 +26,93 @@ export interface FlatDictionaryEntry {
   source: 'standard' | 'user';
 }
 
-export const dictionaryAPI = {
-  // 辞書一覧取得（全エントリをフラットに）
+// Web版の実装
+const webDictionaryAPI = {
   async list(): Promise<FlatDictionaryEntry[]> {
     const res = await fetch('/api/dictionary');
     if (!res.ok) throw new Error('Failed to fetch dictionary');
     return res.json();
   },
 };
+
+// 辞書YAMLファイルの形式
+interface DictionaryFile {
+  entries: Array<{
+    key: string;
+    context: string;
+    values: Array<{
+      value: string;
+      description?: string;
+    }>;
+  }>;
+}
+
+// Tauri版の実装
+const tauriDictionaryAPI = {
+  async loadDictionaryFiles(
+    dir: string,
+    source: 'standard' | 'user'
+  ): Promise<FlatDictionaryEntry[]> {
+    const entries: FlatDictionaryEntry[] = [];
+
+    try {
+      if (!(await exists(dir))) {
+        return entries;
+      }
+
+      const files = await readDir(dir);
+      const yamlFiles = files.filter(
+        (f) => !f.isDirectory && (f.name.endsWith('.yaml') || f.name.endsWith('.yml'))
+      );
+
+      for (const file of yamlFiles) {
+        try {
+          const filePath = await joinPath(dir, file.name);
+          const content = await readTextFile(filePath);
+          const data = yaml.load(content) as DictionaryFile | null;
+
+          if (data?.entries && Array.isArray(data.entries)) {
+            for (const entry of data.entries) {
+              if (entry.key && entry.context && Array.isArray(entry.values)) {
+                for (const val of entry.values) {
+                  entries.push({
+                    key: entry.key,
+                    context: entry.context,
+                    value: val.value,
+                    description: val.description,
+                    source,
+                  });
+                }
+              }
+            }
+          }
+        } catch (err) {
+          console.error(`Error parsing dictionary file ${file.name}:`, err);
+        }
+      }
+    } catch (error) {
+      console.warn('Dictionary directory not accessible:', dir, error);
+    }
+
+    return entries;
+  },
+
+  async list(): Promise<FlatDictionaryEntry[]> {
+    const dictionaryDir = await getDictionaryPath();
+    const standardDir = await joinPath(dictionaryDir, 'standard');
+    const userDir = await joinPath(dictionaryDir, 'user');
+
+    const [standardEntries, userEntries] = await Promise.all([
+      this.loadDictionaryFiles(standardDir, 'standard'),
+      this.loadDictionaryFiles(userDir, 'user'),
+    ]);
+
+    return [...standardEntries, ...userEntries];
+  },
+};
+
+// 環境に応じてAPIを切り替え
+export const dictionaryAPI = isTauri() ? tauriDictionaryAPI : webDictionaryAPI;
 
 // 辞書をルックアップ用のMapに変換
 // キー: "context.key" (例: "outfit.type", "*.color")

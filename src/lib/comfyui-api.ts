@@ -1,6 +1,8 @@
 // ComfyUI API Client - Simplified polling-based approach
-// Uses Next.js API proxy to avoid CORS issues
+// Uses Next.js API proxy (web) or direct HTTP (Tauri) to avoid CORS issues
 
+import { isTauri } from './tauri-utils';
+import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
 import type { NodeOverride } from './storage';
 
 export interface GenerationProgress {
@@ -21,31 +23,48 @@ type ProgressCallback = (progress: GenerationProgress) => void;
 export class ComfyUIClient {
   private baseUrl: string;
   private proxyUrl: string = '/api/comfyui/proxy';
+  private useTauri: boolean;
 
   constructor(baseUrl: string) {
     this.baseUrl = baseUrl.replace(/\/$/, '');
+    this.useTauri = isTauri();
   }
 
-  // プロキシ経由でGETリクエスト
-  private async proxyGet(endpoint: string): Promise<Response> {
-    const params = new URLSearchParams({
-      baseUrl: this.baseUrl,
-      endpoint,
-    });
-    return fetch(`${this.proxyUrl}?${params}`);
+  // HTTPリクエスト（Tauri: 直接、Web: プロキシ経由）
+  private async httpGet(endpoint: string): Promise<Response> {
+    if (this.useTauri) {
+      // Tauri: 直接リクエスト（CORSなし）
+      return tauriFetch(`${this.baseUrl}${endpoint}`);
+    } else {
+      // Web: プロキシ経由
+      const params = new URLSearchParams({
+        baseUrl: this.baseUrl,
+        endpoint,
+      });
+      return fetch(`${this.proxyUrl}?${params}`);
+    }
   }
 
-  // プロキシ経由でPOSTリクエスト
-  private async proxyPost(endpoint: string, body: unknown): Promise<Response> {
-    const params = new URLSearchParams({
-      baseUrl: this.baseUrl,
-      endpoint,
-    });
-    return fetch(`${this.proxyUrl}?${params}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(body),
-    });
+  private async httpPost(endpoint: string, body: unknown): Promise<Response> {
+    if (this.useTauri) {
+      // Tauri: 直接リクエスト（CORSなし）
+      return tauriFetch(`${this.baseUrl}${endpoint}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    } else {
+      // Web: プロキシ経由
+      const params = new URLSearchParams({
+        baseUrl: this.baseUrl,
+        endpoint,
+      });
+      return fetch(`${this.proxyUrl}?${params}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+    }
   }
 
   async generate(
@@ -142,7 +161,7 @@ export class ComfyUIClient {
 
   private async queuePrompt(workflow: Record<string, unknown>): Promise<string> {
     console.log('[ComfyUI] Queueing prompt...');
-    const response = await this.proxyPost('/prompt', { prompt: workflow });
+    const response = await this.httpPost('/prompt', { prompt: workflow });
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
@@ -169,7 +188,7 @@ export class ComfyUIClient {
     while (Date.now() - startTime < timeout) {
       try {
         pollCount++;
-        const response = await this.proxyGet(`/history/${promptId}`);
+        const response = await this.httpGet(`/history/${promptId}`);
         if (!response.ok) {
           console.log(`[ComfyUI] Poll ${pollCount}: History not ready (${response.status})`);
           await this.sleep(pollInterval);
@@ -253,7 +272,7 @@ export class ComfyUIClient {
 
   async testConnection(): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await this.proxyGet('/system_stats');
+      const response = await this.httpGet('/system_stats');
       if (response.ok) {
         return { success: true };
       }
