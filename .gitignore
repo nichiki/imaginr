@@ -48,3 +48,7 @@ next-env.d.ts
 
 # database
 /data/db/
+
+# Tauri
+/src-tauri/target/
+/src-tauri/gen/
