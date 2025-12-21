@@ -21,6 +21,7 @@ import {
 } from '@/lib/dictionary-api';
 import { loadState, saveState } from '@/lib/storage';
 import { SettingsDialog } from '@/components/settings-dialog';
+import * as presetAPI from '@/lib/preset-api';
 import {
   extractVariablesWithPath,
   resolveVariables,
@@ -439,6 +440,8 @@ export default function Home() {
 
     try {
       await fileAPI.deleteFile(path);
+      // プリセットも削除
+      await presetAPI.deletePresetsForTemplate(path);
       // ファイルツリーを再読み込み
       const tree = await fileAPI.listFiles();
       setFileTree(tree);
@@ -481,6 +484,12 @@ export default function Home() {
   const handleMoveFile = useCallback(async (from: string, to: string) => {
     try {
       const newPath = await fileAPI.moveFile(from, to);
+      // プリセットのパスも更新
+      if (from.endsWith('.yaml') || from.endsWith('.yml')) {
+        await presetAPI.updatePresetTemplatePath(from, newPath);
+      } else {
+        await presetAPI.updatePresetFolderPath(from, newPath);
+      }
       // ファイルツリーを再読み込み
       const tree = await fileAPI.listFiles();
       setFileTree(tree);
@@ -551,6 +560,8 @@ export default function Home() {
 
     try {
       await fileAPI.deleteFolder(path);
+      // フォルダ内のプリセットも削除
+      await presetAPI.deletePresetsForFolder(path);
       // ファイルツリーを再読み込み
       const tree = await fileAPI.listFiles();
       setFileTree(tree);
@@ -630,6 +641,12 @@ export default function Home() {
     updateReferences: boolean
   ): Promise<RenameResult> => {
     const result = await fileAPI.renameFile(path, newName, updateReferences);
+    // プリセットのパスも更新
+    if (path.endsWith('.yaml') || path.endsWith('.yml')) {
+      await presetAPI.updatePresetTemplatePath(path, result.newPath);
+    } else {
+      await presetAPI.updatePresetFolderPath(path, result.newPath);
+    }
 
     // ファイルツリーを再読み込み
     const tree = await fileAPI.listFiles();
@@ -948,6 +965,7 @@ export default function Home() {
           style={{ width: variablePanelWidth }}
         >
           <VariableForm
+            templatePath={selectedFile}
             variables={variables}
             values={variableValues}
             onChange={setVariableValues}

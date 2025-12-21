@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useCallback, useEffect, useMemo, useSyncExternalStore, useRef } from 'react';
+import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -21,13 +21,16 @@ import {
 import { Save, Trash2, X, AlertTriangle } from 'lucide-react';
 import type { VariableDefinition, VariableValues } from '@/lib/variable-utils';
 import { DictionaryEntry, lookupDictionary } from '@/lib/dictionary-api';
+import * as presetAPI from '@/lib/preset-api';
 
 interface Preset {
+  id?: number;
   name: string;
   values: VariableValues;
 }
 
 interface VariableFormProps {
+  templatePath: string;
   variables: VariableDefinition[];
   values: VariableValues;
   onChange: (values: VariableValues) => void;
@@ -50,78 +53,6 @@ function getDictionaryEntries(
   const contextPath = parts.slice(0, -1); // コンテキストパス (例: ["outfit", "jacket"])
 
   return lookupDictionary(dictionaryCache, contextPath, key);
-}
-
-// プリセットのストレージキーを変数名から生成
-function getPresetStorageKey(variables: VariableDefinition[]): string {
-  const varNames = variables.map((v) => v.name).sort().join(',');
-  return `var-presets:${varNames}`;
-}
-
-// プリセットを読み込み
-function loadPresets(variables: VariableDefinition[]): Preset[] {
-  if (typeof window === 'undefined') return [];
-  const key = getPresetStorageKey(variables);
-  const stored = localStorage.getItem(key);
-  if (!stored) return [];
-  try {
-    return JSON.parse(stored);
-  } catch {
-    return [];
-  }
-}
-
-// localStorageのプリセットを監視するためのsubscribe関数
-function subscribeToPresets(callback: () => void): () => void {
-  const handler = (e: StorageEvent) => {
-    if (e.key?.startsWith('var-presets:')) {
-      callback();
-    }
-  };
-  window.addEventListener('storage', handler);
-  return () => window.removeEventListener('storage', handler);
-}
-
-// プリセット用のカスタムフック
-function usePresets(variables: VariableDefinition[]): [Preset[], (presets: Preset[]) => void] {
-  const getSnapshot = useCallback(() => {
-    return JSON.stringify(loadPresets(variables));
-  }, [variables]);
-
-  const getServerSnapshot = useCallback(() => {
-    return JSON.stringify([]);
-  }, []);
-
-  const presetsJson = useSyncExternalStore(
-    subscribeToPresets,
-    getSnapshot,
-    getServerSnapshot
-  );
-
-  const presets = useMemo(() => {
-    try {
-      return JSON.parse(presetsJson) as Preset[];
-    } catch {
-      return [];
-    }
-  }, [presetsJson]);
-
-  const setPresets = useCallback((newPresets: Preset[]) => {
-    savePresetsToStorage(variables, newPresets);
-    // 同一タブ内では storage イベントが発火しないので手動でトリガー
-    window.dispatchEvent(new StorageEvent('storage', {
-      key: getPresetStorageKey(variables),
-    }));
-  }, [variables]);
-
-  return [presets, setPresets];
-}
-
-// プリセットを保存
-function savePresetsToStorage(variables: VariableDefinition[], presets: Preset[]): void {
-  if (typeof window === 'undefined') return;
-  const key = getPresetStorageKey(variables);
-  localStorage.setItem(key, JSON.stringify(presets));
 }
 
 // 値が一致するかチェック（配列対応）
@@ -456,19 +387,47 @@ function MultiSelectCheckboxes({
   );
 }
 
-// 内部コンポーネント（variablesが変わるとリマウント）
+// 内部コンポーネント（templatePathが変わるとリマウント）
 function VariableFormInner({
+  templatePath,
   variables,
   values,
   onChange,
   dictionaryCache,
   isYamlValid = true
 }: VariableFormProps) {
-  // プリセットはlocalStorageと同期（useSyncExternalStore使用）
-  const [presets, setPresets] = usePresets(variables);
+  // プリセットをDBから読み込み
+  const [presets, setPresets] = useState<Preset[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [newPresetName, setNewPresetName] = useState('');
   const [selectedPreset, setSelectedPreset] = useState<string>('');
+
+  // DBからプリセットを読み込む
+  // Note: isLoadingは初期値trueで、templatePath変更時はコンポーネントがリマウントされるため再度trueになる
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadPresets() {
+      try {
+        const loaded = await presetAPI.getPresets(templatePath);
+        if (!cancelled) {
+          setPresets(loaded.map(p => ({ id: p.id, name: p.name, values: p.values })));
+          setIsLoading(false);
+        }
+      } catch (error) {
+        console.error('Failed to load presets:', error);
+        if (!cancelled) {
+          setPresets([]);
+          setIsLoading(false);
+        }
+      }
+    }
+
+    loadPresets();
+
+    return () => { cancelled = true; };
+  }, [templatePath]);
 
   // 選択中のプリセットと現在の値が異なるかチェック
   const isModified = useMemo(() => {
@@ -487,47 +446,45 @@ function VariableFormInner({
   );
 
   // 新規プリセット作成
-  const handleCreatePreset = useCallback(() => {
+  const handleCreatePreset = useCallback(async () => {
     if (!newPresetName.trim()) return;
 
-    const newPreset: Preset = {
-      name: newPresetName.trim(),
-      values: { ...values },
-    };
+    try {
+      const saved = await presetAPI.savePreset(templatePath, newPresetName.trim(), values);
+      const newPreset: Preset = { id: saved.id, name: saved.name, values: saved.values };
 
-    // 同名のプリセットがあれば上書き
-    const existingIndex = presets.findIndex((p) => p.name === newPreset.name);
-    let newPresets: Preset[];
-    if (existingIndex >= 0) {
-      newPresets = [...presets];
-      newPresets[existingIndex] = newPreset;
-    } else {
-      newPresets = [...presets, newPreset];
+      // 同名のプリセットがあれば置き換え、なければ追加
+      setPresets(prev => {
+        const existingIndex = prev.findIndex(p => p.name === newPreset.name);
+        if (existingIndex >= 0) {
+          const updated = [...prev];
+          updated[existingIndex] = newPreset;
+          return updated;
+        }
+        return [...prev, newPreset];
+      });
+
+      setNewPresetName('');
+      setIsCreateDialogOpen(false);
+      setSelectedPreset(newPreset.name);
+    } catch (error) {
+      console.error('Failed to create preset:', error);
     }
-
-    setPresets(newPresets);
-    savePresetsToStorage(variables, newPresets);
-    setNewPresetName('');
-    setIsCreateDialogOpen(false);
-    setSelectedPreset(newPreset.name);
-  }, [newPresetName, values, presets, variables, setPresets]);
+  }, [newPresetName, values, templatePath]);
 
   // 選択中のプリセットを上書き保存
-  const handleSavePreset = useCallback(() => {
+  const handleSavePreset = useCallback(async () => {
     if (!selectedPreset) return;
 
-    const existingIndex = presets.findIndex((p) => p.name === selectedPreset);
-    if (existingIndex < 0) return;
-
-    const newPresets = [...presets];
-    newPresets[existingIndex] = {
-      name: selectedPreset,
-      values: { ...values },
-    };
-
-    setPresets(newPresets);
-    savePresetsToStorage(variables, newPresets);
-  }, [selectedPreset, values, presets, variables, setPresets]);
+    try {
+      const saved = await presetAPI.savePreset(templatePath, selectedPreset, values);
+      setPresets(prev => prev.map(p =>
+        p.name === selectedPreset ? { id: saved.id, name: saved.name, values: saved.values } : p
+      ));
+    } catch (error) {
+      console.error('Failed to save preset:', error);
+    }
+  }, [selectedPreset, values, templatePath]);
 
   // プリセット読み込み（または「なし」でクリア）
   const handleLoadPreset = useCallback(
@@ -582,16 +539,27 @@ function VariableFormInner({
 
   // プリセット削除
   const handleDeletePreset = useCallback(
-    (presetName: string) => {
-      const newPresets = presets.filter((p) => p.name !== presetName);
-      setPresets(newPresets);
-      savePresetsToStorage(variables, newPresets);
-      if (selectedPreset === presetName) {
-        setSelectedPreset('');
+    async (presetName: string) => {
+      try {
+        await presetAPI.deletePreset(templatePath, presetName);
+        setPresets(prev => prev.filter(p => p.name !== presetName));
+        if (selectedPreset === presetName) {
+          setSelectedPreset('');
+        }
+      } catch (error) {
+        console.error('Failed to delete preset:', error);
       }
     },
-    [presets, variables, selectedPreset, setPresets]
+    [templatePath, selectedPreset]
   );
+
+  if (isLoading) {
+    return (
+      <div className="h-full bg-[#252526] flex items-center justify-center">
+        <span className="text-xs text-[#888]">Loading...</span>
+      </div>
+    );
+  }
 
   return (
     <div className="h-full bg-[#252526] flex flex-col">
@@ -775,13 +743,7 @@ function VariableFormInner({
   );
 }
 
-// ラッパーコンポーネント（variablesが変わるとInnerをリマウント）
+// ラッパーコンポーネント（templatePathが変わるとInnerをリマウント）
 export function VariableForm(props: VariableFormProps) {
-  // variablesKeyをkeyとして使うことで、変数セットが変わったら内部コンポーネントをリマウント
-  const variablesKey = useMemo(
-    () => props.variables.map((v) => v.name).sort().join(','),
-    [props.variables]
-  );
-
-  return <VariableFormInner key={variablesKey} {...props} />;
+  return <VariableFormInner key={props.templatePath} {...props} />;
 }

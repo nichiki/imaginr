@@ -4,7 +4,7 @@
 
 import type { UnifiedDatabase } from './index';
 
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 
 // Async version for UnifiedDatabase interface
 export async function initializeSchemaAsync(db: UnifiedDatabase): Promise<void> {
@@ -28,6 +28,9 @@ export async function initializeSchemaAsync(db: UnifiedDatabase): Promise<void> 
 async function runMigrationsAsync(db: UnifiedDatabase, fromVersion: number): Promise<void> {
   if (fromVersion < 1) {
     await migrateToV1Async(db);
+  }
+  if (fromVersion < 2) {
+    await migrateToV2Async(db);
   }
 
   // Update schema version
@@ -115,6 +118,24 @@ async function migrateToV1Async(db: UnifiedDatabase): Promise<void> {
       completed_at TEXT NOT NULL
     )
   `);
+}
+
+async function migrateToV2Async(db: UnifiedDatabase): Promise<void> {
+  // Variable presets table - stores presets per template file
+  // Note: "values" is a reserved word in SQLite, so we use "preset_values" instead
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS presets (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      template_path TEXT NOT NULL,
+      name TEXT NOT NULL,
+      preset_values TEXT NOT NULL,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      updated_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(template_path, name)
+    )
+  `);
+
+  await db.execute('CREATE INDEX IF NOT EXISTS idx_presets_template ON presets(template_path)');
 }
 
 
