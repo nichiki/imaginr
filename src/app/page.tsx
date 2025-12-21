@@ -332,23 +332,43 @@ export default function Home() {
 
   // ファイル選択ハンドラ
   const handleFileSelect = useCallback(async (path: string) => {
-    // 既にキャッシュにあればそれを使う
-    if (!files[path]) {
+    // 同じファイルを選択した場合は何もしない
+    if (path === selectedFile) return;
+
+    // 未保存の変更がある場合は確認
+    if (isDirty) {
+      const { showConfirm } = await import('@/lib/dialog');
+      const confirmed = await showConfirm(
+        '未保存の変更があります。保存せずに別のファイルを開きますか？',
+        { okLabel: '開く' }
+      );
+      if (!confirmed) return;
+
+      // 現在のファイルの未保存変更を破棄（ディスクから再読み込み）
       try {
-        const content = await fileAPI.readFile(path);
-        setFiles((prev) => ({ ...prev, [path]: content }));
+        const originalContent = await fileAPI.readFile(selectedFile);
+        setFiles((prev) => ({ ...prev, [selectedFile]: originalContent }));
       } catch (error) {
-        console.error('Failed to read file:', error);
-        return;
+        console.error('Failed to reload original file:', error);
       }
     }
+
+    // 新しいファイルを読み込み（常にディスクから読み込む）
+    try {
+      const content = await fileAPI.readFile(path);
+      setFiles((prev) => ({ ...prev, [path]: content }));
+    } catch (error) {
+      console.error('Failed to read file:', error);
+      return;
+    }
+
     setSelectedFile(path);
     setIsDirty(false);
     // 選択したファイルを保存
     if (initialized.current) {
       saveState({ selectedFile: path });
     }
-  }, [files]);
+  }, [selectedFile, isDirty]);
 
   // フォルダ開閉ハンドラ
   const handleToggleFolder = useCallback((path: string) => {
@@ -384,7 +404,8 @@ export default function Home() {
       }
     } catch (error) {
       console.error('Failed to create file:', error);
-      alert('Failed to create file');
+      const { showError } = await import('@/lib/dialog');
+      await showError('ファイルの作成に失敗しました');
     }
   }, []);
 
@@ -406,13 +427,15 @@ export default function Home() {
       });
     } catch (error) {
       console.error('Failed to create folder:', error);
-      alert('Failed to create folder');
+      const { showError } = await import('@/lib/dialog');
+      await showError('フォルダの作成に失敗しました');
     }
   }, []);
 
   // ファイル削除ハンドラ
   const handleDeleteFile = useCallback(async (path: string) => {
-    if (!confirm(`Delete "${path}"?`)) return;
+    const { showConfirm } = await import('@/lib/dialog');
+    if (!await showConfirm(`"${path}" を削除しますか？`)) return;
 
     try {
       await fileAPI.deleteFile(path);
@@ -449,7 +472,8 @@ export default function Home() {
       setIsDirty(false);
     } catch (error) {
       console.error('Failed to delete file:', error);
-      alert('Failed to delete file');
+      const { showError } = await import('@/lib/dialog');
+      await showError('ファイルの削除に失敗しました');
     }
   }, [selectedFile]);
 
@@ -515,13 +539,15 @@ export default function Home() {
       });
     } catch (error) {
       console.error('Failed to move file:', error);
-      alert(error instanceof Error ? error.message : 'Failed to move file');
+      const { showError } = await import('@/lib/dialog');
+      await showError(error instanceof Error ? error.message : 'ファイルの移動に失敗しました');
     }
   }, [selectedFile]);
 
   // フォルダ削除ハンドラ
   const handleDeleteFolder = useCallback(async (path: string) => {
-    if (!confirm(`Delete folder "${path}" and all its contents?`)) return;
+    const { showConfirm } = await import('@/lib/dialog');
+    if (!await showConfirm(`フォルダ "${path}" とその中身をすべて削除しますか？`)) return;
 
     try {
       await fileAPI.deleteFolder(path);
@@ -587,7 +613,8 @@ export default function Home() {
       setIsDirty(false);
     } catch (error) {
       console.error('Failed to delete folder:', error);
-      alert('Failed to delete folder');
+      const { showError } = await import('@/lib/dialog');
+      await showError('フォルダの削除に失敗しました');
     }
   }, [selectedFile]);
 

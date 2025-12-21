@@ -161,7 +161,8 @@ export function FileTree({
       setIsRenameDialogOpen(false);
       setShowReferenceWarning(false);
     } catch (error) {
-      alert(error instanceof Error ? error.message : 'Rename failed');
+      const { showError } = await import('@/lib/dialog');
+      await showError(error instanceof Error ? error.message : 'リネームに失敗しました');
     } finally {
       setIsRenaming(false);
     }

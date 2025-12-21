@@ -191,20 +191,23 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
       await loadSnippets();
     } catch (error) {
       console.error('Failed to save snippet:', error);
-      alert('Failed to save snippet');
+      const { showError } = await import('@/lib/dialog');
+      await showError('スニペットの保存に失敗しました');
     }
   };
 
   // 削除
   const handleDelete = async (snippet: Snippet) => {
-    if (!confirm(`Delete "${snippet.label}"?`)) return;
+    const { showConfirm } = await import('@/lib/dialog');
+    if (!await showConfirm(`"${snippet.label}" を削除しますか？`)) return;
 
     try {
       await snippetAPI.delete(snippet.id);
       await loadSnippets();
     } catch (error) {
       console.error('Failed to delete snippet:', error);
-      alert('Failed to delete snippet');
+      const { showError } = await import('@/lib/dialog');
+      await showError('スニペットの削除に失敗しました');
     }
   };
 

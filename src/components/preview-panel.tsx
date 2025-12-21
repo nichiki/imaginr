@@ -158,7 +158,8 @@ export function PreviewPanel({
   }, [comfySettings, mergedYaml, loadImages]);
 
   const handleDeleteImage = useCallback(async (image: ImageInfo) => {
-    if (!confirm('この画像を削除しますか？')) return;
+    const { showConfirm } = await import('@/lib/dialog');
+    if (!await showConfirm('この画像を削除しますか？')) return;
 
     try {
       await imageAPI.delete(image.filename);

@@ -120,7 +120,8 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to save settings:', error);
-      alert('設定の保存に失敗しました');
+      const { showError } = await import('@/lib/dialog');
+      await showError('設定の保存に失敗しました');
     } finally {
       setIsSaving(false);
     }
@@ -181,7 +182,8 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange }: Setting
       // 編集モードに入る
       setEditingWorkflow(newWorkflow);
     } catch {
-      alert('無効なJSONファイルです');
+      const { showError } = await import('@/lib/dialog');
+      await showError('無効なJSONファイルです');
     } finally {
       setIsUploading(false);
       e.target.value = '';
