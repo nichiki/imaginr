@@ -10,6 +10,7 @@ import {
   remove,
   rename,
   exists,
+  stat,
 } from '@tauri-apps/plugin-fs';
 
 export interface FileTreeItem {
@@ -159,14 +160,31 @@ class TauriFileAPI implements FileAPI {
     const fromFull = await this.getFullPath(from);
     const toFull = await this.getFullPath(to);
 
+    // Check if destination is a directory
+    let targetPath = toFull;
+    let resultPath = to;
+
+    const toExists = await exists(toFull);
+    if (toExists) {
+      const toStat = await stat(toFull);
+      if (toStat.isDirectory) {
+        // If destination is a directory, append the source filename
+        const fileName = from.includes('/')
+          ? from.substring(from.lastIndexOf('/') + 1)
+          : from;
+        targetPath = `${toFull}/${fileName}`;
+        resultPath = to ? `${to}/${fileName}` : fileName;
+      }
+    }
+
     // Ensure parent directory of destination exists
-    const parentPath = toFull.substring(0, toFull.lastIndexOf('/'));
+    const parentPath = targetPath.substring(0, targetPath.lastIndexOf('/'));
     if (parentPath && !(await exists(parentPath))) {
       await mkdir(parentPath, { recursive: true });
     }
 
-    await rename(fromFull, toFull);
-    return to;
+    await rename(fromFull, targetPath);
+    return resultPath;
   }
 
   async findReferences(path: string): Promise<string[]> {
