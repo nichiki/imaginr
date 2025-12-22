@@ -17,8 +17,8 @@
 Tauri専用のデスクトップアプリケーション。Next.js API Routesは使用せず、全てTauriプラグイン経由でファイルシステム・データベース・HTTPにアクセス。
 
 ### データ保存先
-- **Windows**: `%APPDATA%/com.image-prompt-builder.app/`
-- **Mac**: `~/Library/Application Support/com.image-prompt-builder.app/`
+- **Windows**: `%APPDATA%/com.image-prompt-builder/`
+- **Mac**: `~/Library/Application Support/com.image-prompt-builder/`
 
 初回起動時にバンドルリソース（templates, dictionary, snippets）をAppDataにコピー。
 
@@ -160,8 +160,8 @@ interface NodeOverride {
 ## 今後のロードマップ
 
 ### コンテンツ・機能
-- [ ] Mac版のビルド対応
-- [ ] 辞書編集機能（UI上での追加・編集・削除、保存形式の検討）
+- [x] Mac版のビルド対応
+- [x] 辞書編集機能（UI上での追加・編集・削除、保存形式の検討）
 - [ ] 辞書・テンプレート・スニペットのプリセット整備
 - [ ] マニュアル・ドキュメント作成
 
