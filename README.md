@@ -14,7 +14,7 @@ Prompt Builder for AI Image Generation
 
 ## インストール
 
-[Releases](https://github.com/xxx/image-prompt-builder/releases)から最新版をダウンロードしてください。
+[Releases](https://github.com/nichiki/imaginr/releases)から最新版をダウンロードしてください。
 
 - **Windows**: `.msi` または `.exe`
 - **macOS**: `.dmg`
