@@ -1,12 +1,12 @@
 [package]
-name = "image-prompt-builder"
+name = "imaginr"
 version = "0.1.0"
 description = "A YAML-based prompt builder for image generation AI"
 authors = ["you"]
 edition = "2021"
 
 [lib]
-name = "image_prompt_builder_lib"
+name = "imaginr_lib"
 crate-type = ["lib", "cdylib", "staticlib"]
 
 [build-dependencies]
