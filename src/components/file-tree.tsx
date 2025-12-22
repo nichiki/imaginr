@@ -75,6 +75,23 @@ export function FileTree({
   const [isCheckingReferences, setIsCheckingReferences] = useState(false);
   const [showReferenceWarning, setShowReferenceWarning] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
+  const [fileNameError, setFileNameError] = useState('');
+  const [folderNameError, setFolderNameError] = useState('');
+  const [renameError, setRenameError] = useState('');
+
+  // ファイル名/フォルダ名のバリデーション
+  const validateFileName = (name: string): string | null => {
+    if (!name.trim()) return null;
+    // 禁止文字: / \ : * ? " < > |
+    const invalidChars = /[/\\:*?"<>|]/;
+    if (invalidChars.test(name)) {
+      return '使用できない文字が含まれています: / \\ : * ? " < > |';
+    }
+    if (name.startsWith('.')) {
+      return 'ファイル名は . で始められません';
+    }
+    return null;
+  };
 
   // PointerSensorにdistanceを設定してクリックとドラッグを区別
   const sensors = useSensors(
@@ -87,32 +104,46 @@ export function FileTree({
 
   const handleCreateFile = () => {
     if (!newFileName.trim()) return;
+    const error = validateFileName(newFileName);
+    if (error) {
+      setFileNameError(error);
+      return;
+    }
     const fileName = newFileName.endsWith('.yaml') ? newFileName : `${newFileName}.yaml`;
     const path = createInFolder ? `${createInFolder}/${fileName}` : fileName;
     onCreateFile(path);
     setIsCreateDialogOpen(false);
     setNewFileName('');
     setCreateInFolder('');
+    setFileNameError('');
   };
 
   const handleCreateFolder = () => {
     if (!newFolderName.trim()) return;
+    const error = validateFileName(newFolderName);
+    if (error) {
+      setFolderNameError(error);
+      return;
+    }
     const path = createInFolder ? `${createInFolder}/${newFolderName}` : newFolderName;
     onCreateFolder(path);
     setIsFolderDialogOpen(false);
     setNewFolderName('');
     setCreateInFolder('');
+    setFolderNameError('');
   };
 
   const openCreateDialog = (folder: string = '') => {
     setCreateInFolder(folder);
     setNewFileName('');
+    setFileNameError('');
     setIsCreateDialogOpen(true);
   };
 
   const openFolderDialog = (folder: string = '') => {
     setCreateInFolder(folder);
     setNewFolderName('');
+    setFolderNameError('');
     setIsFolderDialogOpen(true);
   };
 
@@ -121,6 +152,7 @@ export function FileTree({
     setNewRenameName(name);
     setReferences([]);
     setShowReferenceWarning(false);
+    setRenameError('');
     setIsRenameDialogOpen(true);
   };
 
@@ -128,6 +160,12 @@ export function FileTree({
     if (!renameTarget || !newRenameName.trim() || !onRenameFile) return;
     if (newRenameName === renameTarget.name) {
       setIsRenameDialogOpen(false);
+      return;
+    }
+
+    const error = validateFileName(newRenameName);
+    if (error) {
+      setRenameError(error);
       return;
     }
 
@@ -263,11 +301,17 @@ export function FileTree({
               <Input
                 placeholder="filename.yaml"
                 value={newFileName}
-                onChange={(e) => setNewFileName(e.target.value)}
+                onChange={(e) => {
+                  setNewFileName(e.target.value);
+                  setFileNameError('');
+                }}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreateFile()}
                 className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
                 autoFocus
               />
+              {fileNameError && (
+                <p className="text-xs text-red-400 mt-2">{fileNameError}</p>
+              )}
               {createInFolder && (
                 <p className="text-xs text-[#888] mt-2">
                   In folder: {createInFolder}
@@ -302,11 +346,17 @@ export function FileTree({
               <Input
                 placeholder="folder name"
                 value={newFolderName}
-                onChange={(e) => setNewFolderName(e.target.value)}
+                onChange={(e) => {
+                  setNewFolderName(e.target.value);
+                  setFolderNameError('');
+                }}
                 onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
                 className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
                 autoFocus
               />
+              {folderNameError && (
+                <p className="text-xs text-red-400 mt-2">{folderNameError}</p>
+              )}
               {createInFolder && (
                 <p className="text-xs text-[#888] mt-2">
                   In folder: {createInFolder}
@@ -346,15 +396,23 @@ export function FileTree({
             </DialogHeader>
             <div className="py-4">
               {!showReferenceWarning ? (
-                <Input
-                  placeholder={renameTarget?.type === 'folder' ? 'folder name' : 'filename.yaml'}
-                  value={newRenameName}
-                  onChange={(e) => setNewRenameName(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()}
-                  className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
-                  autoFocus
-                  disabled={isCheckingReferences || isRenaming}
-                />
+                <>
+                  <Input
+                    placeholder={renameTarget?.type === 'folder' ? 'folder name' : 'filename.yaml'}
+                    value={newRenameName}
+                    onChange={(e) => {
+                      setNewRenameName(e.target.value);
+                      setRenameError('');
+                    }}
+                    onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()}
+                    className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
+                    autoFocus
+                    disabled={isCheckingReferences || isRenaming}
+                  />
+                  {renameError && (
+                    <p className="text-xs text-red-400 mt-2">{renameError}</p>
+                  )}
+                </>
               ) : (
                 <div className="space-y-3">
                   <p className="text-sm text-yellow-400">

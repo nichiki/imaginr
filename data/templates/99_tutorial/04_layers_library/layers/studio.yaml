@@ -1,0 +1,11 @@
+# studio
+
+environment:
+  background: dark background
+  location: studio
+
+lighting:
+  style: soft
+  type: spotlight
+  color: cool white
+  shadow: soft shadows

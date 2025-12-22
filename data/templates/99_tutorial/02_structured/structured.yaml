@@ -1,0 +1,30 @@
+# 02_structured
+
+subject: person
+
+demographics:
+  gender: woman
+  age: young
+  ethnicity: Japanese
+
+appearance:
+  hair:
+    length: long hair
+    style: straight hair
+    color: chestnut hair
+  eyes:
+    color: brown
+
+outfit:
+  top:
+    type: t-shirt
+    color: yellow
+  bottom:
+    type: jeans
+    color: ingido
+  accessories:
+    - purple hair ribbon
+
+environment:
+  background: simple background
+  color: red

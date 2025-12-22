@@ -1,0 +1,12 @@
+# child2
+
+_base: 99_tutorial/03_inheritance/base.yaml
+
+outfit:
+  dress: evening dress
+  legwear: stockings
+  footwear: ankle strap heels
+
+pose:
+  base: standing
+  action: hand in own hair

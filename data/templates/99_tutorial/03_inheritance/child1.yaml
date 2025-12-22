@@ -1,0 +1,11 @@
+# child1
+
+_base: 99_tutorial/03_inheritance/base.yaml
+
+outfit:
+  top: t-shirt
+  bottom: jeans
+
+pose:
+  base: standing
+  action: hands on hips

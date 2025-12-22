@@ -1,0 +1,13 @@
+# base
+
+subject: person
+
+demographics:
+  gender: ${gender}
+  age: ${age}
+  ethnicity: Japanese
+
+appearance:
+  hair:
+    length: ${hair_length}
+    style: ${hair_style}

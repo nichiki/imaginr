@@ -1,0 +1,17 @@
+# 01_getting_started
+
+subject: person
+
+demographics:
+  gender: woman
+  age: young
+  ethnicity: Japanese
+
+appearance:
+  hair:
+    length: long hair
+    style: straight hair
+
+outfit:
+  top: t-shirt
+  bottom: jeans

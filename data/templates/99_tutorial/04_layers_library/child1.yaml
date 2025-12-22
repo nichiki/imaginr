@@ -1,0 +1,11 @@
+# child1
+
+_base: 99_tutorial/04_layers_library/base.yaml
+
+_layers:
+  - 99_tutorial/04_layers_library/layers/streetwear.yaml
+  - 99_tutorial/04_layers_library/layers/studio.yaml
+
+pose:
+  base: standing
+  action: peace sign

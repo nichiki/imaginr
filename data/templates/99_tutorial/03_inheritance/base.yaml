@@ -1,0 +1,13 @@
+# base
+
+subject: person
+
+demographics:
+  gender: woman
+  age: young
+  ethnicity: Japanese
+
+appearance:
+  hair:
+    length: long hair
+    style: straight hair

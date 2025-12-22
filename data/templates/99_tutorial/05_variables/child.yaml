@@ -1,0 +1,11 @@
+# child
+
+_base: 99_tutorial/05_variables/base.yaml
+
+outfit:
+  top: t-shirt
+  bottom: jeans
+
+environment:
+  background: simple background
+  color: ${background_color}
