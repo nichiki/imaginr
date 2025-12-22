@@ -4,8 +4,8 @@ let cachedAppDataPath: string | null = null;
 
 /**
  * Get the application data directory path
- * Windows: %APPDATA%/Image Prompt Builder/
- * Mac: ~/Library/Application Support/Image Prompt Builder/
+ * Windows: %APPDATA%/studio.imaginr/
+ * Mac: ~/Library/Application Support/studio.imaginr/
  */
 export async function getAppDataPath(): Promise<string> {
   if (cachedAppDataPath) {

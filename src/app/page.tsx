@@ -867,7 +867,7 @@ export default function Home() {
       {/* Header */}
       <header className="h-10 flex-shrink-0 bg-[#2d2d2d] flex items-center justify-between px-4 border-b border-[#333]">
         <div className="flex items-center gap-4">
-          <h1 className="text-sm font-medium text-white">Image Prompt Builder</h1>
+          <h1 className="text-sm font-medium text-white">Imaginr</h1>
           <span className="text-xs text-[#888]">
             Ctrl+S: 保存
           </span>

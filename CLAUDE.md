@@ -1,4 +1,4 @@
-# Image Prompt Builder
+# Imaginr
 
 画像生成AI向けのYAMLベースプロンプトビルダー。効率的なプロンプトの作成・管理を目的としている。
 
@@ -17,8 +17,8 @@
 Tauri専用のデスクトップアプリケーション。Next.js API Routesは使用せず、全てTauriプラグイン経由でファイルシステム・データベース・HTTPにアクセス。
 
 ### データ保存先
-- **Windows**: `%APPDATA%/com.image-prompt-builder/`
-- **Mac**: `~/Library/Application Support/com.image-prompt-builder/`
+- **Windows**: `%APPDATA%/studio.imaginr/`
+- **Mac**: `~/Library/Application Support/studio.imaginr/`
 
 初回起動時にバンドルリソース（templates, dictionary, snippets）をAppDataにコピー。
 
