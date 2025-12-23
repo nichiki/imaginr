@@ -472,7 +472,7 @@ export function PreviewPanel({
                 {promptText || '(プロンプトテキストがここに表示されます)'}
               </pre>
             ) : (
-              <div className="h-full flex flex-col">
+              <div className="h-full flex flex-col overflow-hidden">
                 {!ollamaSettings?.enabled ? (
                   <div className="p-4 flex flex-col items-center justify-center h-full gap-3 text-[#888]">
                     <Sparkles className="h-8 w-8" />
@@ -494,12 +494,14 @@ export function PreviewPanel({
                   </div>
                 ) : null}
                 {ollamaSettings?.enabled && (
-                  <Textarea
-                    value={enhancedPrompt}
-                    onChange={(e) => setEnhancedPrompt(e.target.value)}
-                    placeholder={isEnhancing ? 'エンハンス中...' : 'エンハンス実行ボタンを押してください'}
-                    className="flex-1 m-3 bg-[#1e1e1e] border-[#333] text-[#d4d4d4] text-xs font-mono resize-none"
-                  />
+                  <div className="flex-1 p-3 overflow-hidden">
+                    <Textarea
+                      value={enhancedPrompt}
+                      onChange={(e) => setEnhancedPrompt(e.target.value)}
+                      placeholder={isEnhancing ? 'エンハンス中...' : 'エンハンス実行ボタンを押してください'}
+                      className="h-full w-full bg-[#1e1e1e] border-[#333] text-[#d4d4d4] text-xs font-mono resize-none"
+                    />
+                  </div>
                 )}
               </div>
             )}
