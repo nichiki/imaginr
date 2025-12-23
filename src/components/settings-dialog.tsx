@@ -8,10 +8,13 @@ import {
   DialogTitle,
   DialogFooter,
 } from '@/components/ui/dialog';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider';
+import { Textarea } from '@/components/ui/textarea';
 import {
   Select,
   SelectContent,
@@ -19,7 +22,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import { Loader2, CheckCircle, XCircle, Upload, Pencil, FolderOpen, BookOpen } from 'lucide-react';
+import { Loader2, CheckCircle, XCircle, Upload, Pencil, FolderOpen, BookOpen, Brain } from 'lucide-react';
 import { DictionaryManagerDialog } from './dictionary-manager-dialog';
 import { WorkflowEditor } from './workflow-editor';
 import {
@@ -28,10 +31,15 @@ import {
   getActiveWorkflow,
   createWorkflowConfig,
   migrateLocalStorageToFile,
+  fetchOllamaSettings,
+  saveOllamaSettingsAsync,
+  getActiveEnhancerPreset,
   type ComfyUISettings,
   type WorkflowConfig,
+  type OllamaSettings,
 } from '@/lib/storage';
 import { ComfyUIClient } from '@/lib/comfyui-api';
+import { OllamaClient } from '@/lib/ollama-api';
 import { getComfyUIPath, joinPath, getAppDataPath } from '@/lib/tauri-utils';
 
 interface SettingsDialogProps {
@@ -39,6 +47,7 @@ interface SettingsDialogProps {
   onOpenChange: (open: boolean) => void;
   onSettingsChange?: () => void;
   onDictionaryChange?: () => void;
+  onOllamaChange?: () => void;
 }
 
 interface WorkflowFile {
@@ -46,7 +55,10 @@ interface WorkflowFile {
   label: string;
 }
 
-export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDictionaryChange }: SettingsDialogProps) {
+export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDictionaryChange, onOllamaChange }: SettingsDialogProps) {
+  const [activeTab, setActiveTab] = useState<string>('data');
+
+  // ComfyUI設定
   const [settings, setSettings] = useState<ComfyUISettings>({
     enabled: false,
     url: 'http://localhost:8188',
@@ -62,6 +74,21 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
   const [dataFolderPath, setDataFolderPath] = useState<string>('');
   const [dictionaryManagerOpen, setDictionaryManagerOpen] = useState(false);
 
+  // Ollama設定
+  const [ollamaSettings, setOllamaSettings] = useState<OllamaSettings>({
+    enabled: false,
+    baseUrl: 'http://localhost:11434',
+    model: '',
+    temperature: 0.7,
+    enhancerPresets: [],
+    activePresetId: null,
+    customSystemPrompt: '',
+  });
+  const [ollamaModels, setOllamaModels] = useState<string[]>([]);
+  const [ollamaConnectionStatus, setOllamaConnectionStatus] = useState<'idle' | 'testing' | 'success' | 'error'>('idle');
+  const [ollamaConnectionError, setOllamaConnectionError] = useState<string | null>(null);
+  const [isLoadingModels, setIsLoadingModels] = useState(false);
+
   // 設定とワークフロー一覧を読み込む
   useEffect(() => {
     if (open) {
@@ -72,6 +99,8 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
       fetchAvailableWorkflows();
       // Get data folder path
       getAppDataPath().then(setDataFolderPath);
+      // Ollama設定を読み込む
+      fetchOllamaSettings().then(setOllamaSettings);
     }
   }, [open]);
 
@@ -119,7 +148,9 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
     setIsSaving(true);
     try {
       await saveComfyUISettingsAsync(settings);
+      await saveOllamaSettingsAsync(ollamaSettings);
       onSettingsChange?.();
+      onOllamaChange?.();
       onOpenChange(false);
     } catch (error) {
       console.error('Failed to save settings:', error);
@@ -129,6 +160,39 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
       setIsSaving(false);
     }
   };
+
+  // Ollama接続テストとモデル一覧取得
+  const handleTestOllamaConnection = useCallback(async () => {
+    setOllamaConnectionStatus('testing');
+    setOllamaConnectionError(null);
+    setIsLoadingModels(true);
+
+    const client = new OllamaClient(ollamaSettings.baseUrl);
+    const result = await client.testConnection();
+
+    if (result.success) {
+      setOllamaConnectionStatus('success');
+      // モデル一覧を取得
+      const models = await client.listModels();
+      setOllamaModels(models.map(m => m.name));
+    } else {
+      setOllamaConnectionStatus('error');
+      setOllamaConnectionError(result.error || 'Connection failed');
+      setOllamaModels([]);
+    }
+    setIsLoadingModels(false);
+  }, [ollamaSettings.baseUrl]);
+
+  const updateOllamaSettings = (updates: Partial<OllamaSettings>) => {
+    setOllamaSettings(prev => ({ ...prev, ...updates }));
+    if ('baseUrl' in updates) {
+      setOllamaConnectionStatus('idle');
+      setOllamaConnectionError(null);
+      setOllamaModels([]);
+    }
+  };
+
+  const activePreset = getActiveEnhancerPreset(ollamaSettings);
 
   const updateSettings = (updates: Partial<ComfyUISettings>) => {
     setSettings(prev => ({ ...prev, ...updates }));
@@ -238,57 +302,74 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4] max-w-lg max-h-[85vh] overflow-y-auto">
+      <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4] max-w-lg max-h-[85vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="text-[#d4d4d4]">設定</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6 py-4">
-          {/* データフォルダ */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">データフォルダ</Label>
-            <div className="flex gap-2">
-              <Input
-                value={dataFolderPath}
-                readOnly
-                className="bg-[#3c3c3c] border-[#555] text-[#888] text-sm h-9 flex-1"
-              />
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col overflow-hidden">
+          <TabsList className="bg-[#3c3c3c] shrink-0">
+            <TabsTrigger value="data" className="text-[#d4d4d4] data-[state=active]:text-white data-[state=active]:bg-[#094771]">
+              <FolderOpen className="h-4 w-4 mr-1.5" />
+              データ
+            </TabsTrigger>
+            <TabsTrigger value="comfyui" className="text-[#d4d4d4] data-[state=active]:text-white data-[state=active]:bg-[#094771]">
+              ComfyUI
+            </TabsTrigger>
+            <TabsTrigger value="ollama" className="text-[#d4d4d4] data-[state=active]:text-white data-[state=active]:bg-[#094771]">
+              <Brain className="h-4 w-4 mr-1.5" />
+              Ollama
+            </TabsTrigger>
+          </TabsList>
+
+          {/* データタブ */}
+          <TabsContent value="data" className="flex-1 overflow-y-auto mt-0 p-4 space-y-6">
+            {/* データフォルダ */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">データフォルダ</Label>
+              <div className="flex gap-2">
+                <Input
+                  value={dataFolderPath}
+                  readOnly
+                  className="bg-[#3c3c3c] border-[#555] text-[#888] text-sm h-9 flex-1"
+                />
+                <Button
+                  variant="outline"
+                  size="default"
+                  onClick={handleOpenDataFolder}
+                  className="shrink-0 h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white"
+                  title="フォルダを開く"
+                >
+                  <FolderOpen className="h-4 w-4" />
+                </Button>
+              </div>
+              <p className="text-xs text-[#888]">
+                テンプレート、辞書、スニペット、生成画像の保存先
+              </p>
+            </div>
+
+            {/* 辞書管理 */}
+            <div className="space-y-2">
+              <Label className="text-sm font-medium">辞書管理</Label>
               <Button
                 variant="outline"
-                size="default"
-                onClick={handleOpenDataFolder}
-                className="shrink-0 h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white"
-                title="フォルダを開く"
+                onClick={() => setDictionaryManagerOpen(true)}
+                className="w-full h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white justify-start"
               >
-                <FolderOpen className="h-4 w-4" />
+                <BookOpen className="h-4 w-4 mr-2" />
+                辞書管理を開く
               </Button>
+              <p className="text-xs text-[#888]">
+                オートコンプリート用の辞書を管理
+              </p>
             </div>
-            <p className="text-xs text-[#888]">
-              テンプレート、辞書、スニペット、生成画像の保存先
-            </p>
-          </div>
+          </TabsContent>
 
-          {/* 辞書管理 */}
-          <div className="space-y-2">
-            <Label className="text-sm font-medium">辞書管理</Label>
-            <Button
-              variant="outline"
-              onClick={() => setDictionaryManagerOpen(true)}
-              className="w-full h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white justify-start"
-            >
-              <BookOpen className="h-4 w-4 mr-2" />
-              辞書管理を開く
-            </Button>
-            <p className="text-xs text-[#888]">
-              オートコンプリート用の辞書を管理
-            </p>
-          </div>
-
-          {/* ComfyUI設定 */}
-          <div className="space-y-4">
+          {/* ComfyUIタブ */}
+          <TabsContent value="comfyui" className="flex-1 overflow-y-auto mt-0 p-4 space-y-4">
             <div className="flex items-center justify-between">
               <Label htmlFor="comfyui-enabled" className="text-sm font-medium">
-                ComfyUI連携
+                ComfyUI連携を有効化
               </Label>
               <Switch
                 id="comfyui-enabled"
@@ -450,10 +531,171 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                 )}
               </>
             )}
-          </div>
-        </div>
+          </TabsContent>
 
-        <DialogFooter>
+          {/* Ollamaタブ */}
+          <TabsContent value="ollama" className="flex-1 overflow-y-auto mt-0 p-4 space-y-4">
+            <div className="flex items-center justify-between">
+              <Label htmlFor="ollama-enabled" className="text-sm font-medium">
+                Ollamaエンハンサーを有効化
+              </Label>
+              <Switch
+                id="ollama-enabled"
+                checked={ollamaSettings.enabled}
+                onCheckedChange={(checked) => updateOllamaSettings({ enabled: checked })}
+              />
+            </div>
+
+            {ollamaSettings.enabled && (
+              <>
+                {/* URL設定 */}
+                <div className="space-y-2">
+                  <Label htmlFor="ollama-url" className="text-xs text-[#b0b0b0]">
+                    Ollama URL
+                  </Label>
+                  <div className="flex gap-2">
+                    <Input
+                      id="ollama-url"
+                      value={ollamaSettings.baseUrl}
+                      onChange={(e) => updateOllamaSettings({ baseUrl: e.target.value })}
+                      placeholder="http://localhost:11434"
+                      className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9"
+                    />
+                    <Button
+                      variant="outline"
+                      size="default"
+                      onClick={handleTestOllamaConnection}
+                      disabled={ollamaConnectionStatus === 'testing'}
+                      className="shrink-0 h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white"
+                    >
+                      {ollamaConnectionStatus === 'testing' ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : ollamaConnectionStatus === 'success' ? (
+                        <CheckCircle className="h-4 w-4 text-green-500" />
+                      ) : ollamaConnectionStatus === 'error' ? (
+                        <XCircle className="h-4 w-4 text-red-500" />
+                      ) : (
+                        'テスト'
+                      )}
+                    </Button>
+                  </div>
+                  {ollamaConnectionError && (
+                    <p className="text-xs text-red-500">{ollamaConnectionError}</p>
+                  )}
+                </div>
+
+                {/* モデル選択 */}
+                <div className="space-y-2">
+                  <Label className="text-xs text-[#b0b0b0]">
+                    モデル
+                  </Label>
+                  <Select
+                    value={ollamaSettings.model}
+                    onValueChange={(value) => updateOllamaSettings({ model: value })}
+                  >
+                    <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9">
+                      <SelectValue placeholder={isLoadingModels ? "読み込み中..." : "モデルを選択（接続テストで取得）"} />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#252526] border-[#333]">
+                      {ollamaModels.length === 0 ? (
+                        <SelectItem value="_none" disabled className="text-[#888]">
+                          接続テストでモデル一覧を取得してください
+                        </SelectItem>
+                      ) : (
+                        ollamaModels.map((model) => (
+                          <SelectItem
+                            key={model}
+                            value={model}
+                            className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+                          >
+                            {model}
+                          </SelectItem>
+                        ))
+                      )}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* エンハンサープリセット */}
+                <div className="space-y-2">
+                  <Label className="text-xs text-[#b0b0b0]">
+                    エンハンサープリセット
+                  </Label>
+                  <Select
+                    value={ollamaSettings.activePresetId || ''}
+                    onValueChange={(value) => updateOllamaSettings({ activePresetId: value })}
+                  >
+                    <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9">
+                      <SelectValue placeholder="プリセットを選択" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-[#252526] border-[#333]">
+                      {ollamaSettings.enhancerPresets.map((preset) => (
+                        <SelectItem
+                          key={preset.id}
+                          value={preset.id}
+                          className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+                        >
+                          <div className="flex flex-col">
+                            <span>{preset.name}</span>
+                            {preset.description && (
+                              <span className="text-[10px] text-[#888]">{preset.description}</span>
+                            )}
+                          </div>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                {/* システムプロンプト表示/編集 */}
+                {activePreset && (
+                  <div className="space-y-2">
+                    <Label className="text-xs text-[#b0b0b0]">
+                      システムプロンプト {activePreset.builtIn && '(読み取り専用)'}
+                    </Label>
+                    <Textarea
+                      value={activePreset.systemPrompt}
+                      readOnly={activePreset.builtIn}
+                      onChange={(e) => {
+                        if (!activePreset.builtIn) {
+                          const updated = ollamaSettings.enhancerPresets.map(p =>
+                            p.id === activePreset.id ? { ...p, systemPrompt: e.target.value } : p
+                          );
+                          updateOllamaSettings({ enhancerPresets: updated });
+                        }
+                      }}
+                      className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-xs h-32 resize-none font-mono"
+                      placeholder="システムプロンプトを入力..."
+                    />
+                  </div>
+                )}
+
+                {/* Temperature */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <Label className="text-xs text-[#b0b0b0]">
+                      Temperature
+                    </Label>
+                    <span className="text-xs text-[#888]">{ollamaSettings.temperature.toFixed(1)}</span>
+                  </div>
+                  <Slider
+                    value={[ollamaSettings.temperature]}
+                    onValueChange={([value]) => updateOllamaSettings({ temperature: value })}
+                    min={0}
+                    max={1}
+                    step={0.1}
+                    className="w-full"
+                  />
+                  <p className="text-xs text-[#888]">
+                    低い値: 一貫性重視 / 高い値: 創造性重視
+                  </p>
+                </div>
+              </>
+            )}
+          </TabsContent>
+        </Tabs>
+
+        <DialogFooter className="shrink-0">
           <Button
             variant="ghost"
             onClick={() => onOpenChange(false)}

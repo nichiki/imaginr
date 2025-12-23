@@ -5,6 +5,7 @@ import { getConfigPath } from './tauri-utils';
 
 const STORAGE_KEY = 'image-prompt-builder-state';
 const COMFYUI_SETTINGS_KEY = 'image-prompt-builder-comfyui';
+const OLLAMA_SETTINGS_KEY = 'image-prompt-builder-ollama';
 
 export interface AppState {
   leftPanelWidth: number;
@@ -233,4 +234,215 @@ export function createWorkflowConfig(
     samplerNodeId: '',
     overrides: [],
   };
+}
+
+// ============================================
+// Ollama設定
+// ============================================
+
+export interface EnhancerPreset {
+  id: string;
+  name: string;
+  systemPrompt: string;
+  description?: string;
+  builtIn: boolean;
+}
+
+export interface OllamaSettings {
+  enabled: boolean;
+  baseUrl: string;
+  model: string;
+  temperature: number;
+  enhancerPresets: EnhancerPreset[];
+  activePresetId: string | null;
+  customSystemPrompt?: string;
+}
+
+// 組み込みプリセット
+export const builtInEnhancerPresets: EnhancerPreset[] = [
+  {
+    id: 'clip-sdxl',
+    name: 'CLIP (SDXL)',
+    description: 'Stable Diffusion XL向け。タグ形式に変換',
+    systemPrompt: `You are a prompt optimizer for Stable Diffusion XL with CLIP encoder.
+Convert the given YAML prompt structure into an optimized comma-separated tag list.
+Rules:
+- Output only the optimized prompt, no explanations
+- Use common SD tags (masterpiece, best quality, etc.) if appropriate
+- Maintain important details from the YAML
+- Order tags by importance
+- Keep it concise but descriptive
+- Output in English`,
+    builtIn: true,
+  },
+  {
+    id: 'animagine-xl-4',
+    name: 'AnimagineXL 4.0',
+    description: 'AnimagineXL 4.0向け。特定のタグ順序に従う',
+    systemPrompt: `You are a prompt optimizer for AnimagineXL 4.0.
+Convert the given YAML prompt structure into a comma-separated tag list following AnimagineXL 4.0's specific format.
+
+Required tag order:
+1. Gender tag: 1girl, 1boy, 1other, multiple girls, etc.
+2. Character name (if specified, use underscores: hatsune_miku)
+3. Series/franchise name (if specified, use underscores)
+4. Rating: general, sensitive, nsfw, explicit (choose based on content)
+5. All other descriptive tags in any order
+6. End with quality tags: masterpiece, best quality, very aesthetic, absurdres
+
+Rules:
+- Output only the optimized prompt, no explanations
+- Use danbooru-style tags (underscores for multi-word tags)
+- Keep character and series names accurate
+- Output in English`,
+    builtIn: true,
+  },
+  {
+    id: 't5-flux',
+    name: 'T5 (Flux)',
+    description: 'Flux向け。自然言語形式に変換',
+    systemPrompt: `You are a prompt optimizer for Flux with T5 encoder.
+Convert the given YAML prompt structure into natural language description.
+Rules:
+- Output only the optimized prompt, no explanations
+- Use flowing, descriptive sentences
+- Maintain all important details from the YAML
+- Be specific about visual elements
+- Output in English`,
+    builtIn: true,
+  },
+];
+
+const defaultOllamaSettings: OllamaSettings = {
+  enabled: false,
+  baseUrl: 'http://localhost:11434',
+  model: '',
+  temperature: 0.7,
+  enhancerPresets: [...builtInEnhancerPresets],
+  activePresetId: 'clip-sdxl',
+  customSystemPrompt: '',
+};
+
+/**
+ * Load Ollama settings from localStorage (client-side cache)
+ */
+export function loadOllamaSettings(): OllamaSettings {
+  if (typeof window === 'undefined') return defaultOllamaSettings;
+
+  try {
+    const saved = localStorage.getItem(OLLAMA_SETTINGS_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      // 組み込みプリセットをマージ（更新された場合に反映）
+      const mergedPresets = mergeEnhancerPresets(
+        parsed.enhancerPresets || [],
+        builtInEnhancerPresets
+      );
+      return { ...defaultOllamaSettings, ...parsed, enhancerPresets: mergedPresets };
+    }
+  } catch (error) {
+    console.error('Failed to load Ollama settings:', error);
+  }
+  return defaultOllamaSettings;
+}
+
+/**
+ * Fetch Ollama settings from file (Tauri)
+ */
+export async function fetchOllamaSettings(): Promise<OllamaSettings> {
+  try {
+    const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
+    const { appDataDir, join } = await import('@tauri-apps/api/path');
+    const appData = await appDataDir();
+    const configPath = await join(appData, 'ollama-settings.json');
+
+    let settings: OllamaSettings;
+    if (await exists(configPath)) {
+      const content = await readTextFile(configPath);
+      settings = JSON.parse(content);
+    } else {
+      settings = defaultOllamaSettings;
+    }
+
+    // 組み込みプリセットをマージ
+    const mergedPresets = mergeEnhancerPresets(
+      settings.enhancerPresets || [],
+      builtInEnhancerPresets
+    );
+    settings = { ...defaultOllamaSettings, ...settings, enhancerPresets: mergedPresets };
+
+    // Update localStorage cache
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(OLLAMA_SETTINGS_KEY, JSON.stringify(settings));
+    }
+
+    return settings;
+  } catch (error) {
+    console.error('Failed to fetch Ollama settings:', error);
+    return loadOllamaSettings();
+  }
+}
+
+/**
+ * Save Ollama settings to file (Tauri)
+ */
+export async function saveOllamaSettingsAsync(settings: Partial<OllamaSettings>): Promise<OllamaSettings> {
+  try {
+    const current = await fetchOllamaSettings();
+    const newSettings = { ...current, ...settings };
+
+    const { writeTextFile, mkdir, exists } = await import('@tauri-apps/plugin-fs');
+    const { appDataDir, join } = await import('@tauri-apps/api/path');
+    const appData = await appDataDir();
+    const configPath = await join(appData, 'ollama-settings.json');
+
+    if (!(await exists(appData))) {
+      await mkdir(appData, { recursive: true });
+    }
+
+    await writeTextFile(configPath, JSON.stringify(newSettings, null, 2));
+
+    // Update localStorage cache
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(OLLAMA_SETTINGS_KEY, JSON.stringify(newSettings));
+    }
+
+    return newSettings;
+  } catch (error) {
+    console.error('Failed to save Ollama settings:', error);
+    throw error;
+  }
+}
+
+/**
+ * 組み込みプリセットとユーザープリセットをマージ
+ * 組み込みプリセットは常に最新版を使用
+ */
+function mergeEnhancerPresets(
+  userPresets: EnhancerPreset[],
+  builtIn: EnhancerPreset[]
+): EnhancerPreset[] {
+  // ユーザーが追加したプリセット（builtIn: false）を保持
+  const customPresets = userPresets.filter(p => !p.builtIn);
+  // 組み込みプリセットは常に最新版を使用
+  return [...builtIn, ...customPresets];
+}
+
+/**
+ * アクティブなプリセットを取得
+ */
+export function getActiveEnhancerPreset(settings: OllamaSettings): EnhancerPreset | null {
+  if (!settings.activePresetId) return null;
+  return settings.enhancerPresets.find(p => p.id === settings.activePresetId) || null;
+}
+
+/**
+ * エンハンサーで使用するシステムプロンプトを取得
+ */
+export function getEnhancerSystemPrompt(settings: OllamaSettings): string {
+  const preset = getActiveEnhancerPreset(settings);
+  if (preset) {
+    return preset.systemPrompt;
+  }
+  return settings.customSystemPrompt || '';
 }
