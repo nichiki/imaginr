@@ -37,7 +37,9 @@ export class OllamaClient {
    */
   async testConnection(): Promise<{ success: boolean; error?: string }> {
     try {
-      const response = await tauriFetch(`${this.baseUrl}/api/tags`);
+      const response = await tauriFetch(`${this.baseUrl}/api/tags`, {
+        headers: { Origin: 'http://localhost' },
+      });
       if (response.ok) {
         return { success: true };
       }
@@ -55,7 +57,9 @@ export class OllamaClient {
    */
   async listModels(): Promise<OllamaModel[]> {
     try {
-      const response = await tauriFetch(`${this.baseUrl}/api/tags`);
+      const response = await tauriFetch(`${this.baseUrl}/api/tags`, {
+        headers: { Origin: 'http://localhost' },
+      });
       if (!response.ok) {
         console.error('[Ollama] Failed to list models:', response.status);
         return [];
@@ -84,7 +88,10 @@ export class OllamaClient {
 
       const response = await tauriFetch(`${this.baseUrl}/api/generate`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+          'Content-Type': 'application/json',
+          Origin: 'http://localhost',
+        },
         body: JSON.stringify({
           model,
           prompt,
