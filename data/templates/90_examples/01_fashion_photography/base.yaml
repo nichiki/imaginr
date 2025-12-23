@@ -1,0 +1,42 @@
+# base
+
+subject: person
+
+demographics:
+  gender: woman
+  age: young adult
+  ethnicity: Japanese
+
+appearance:
+  hair:
+    length: long hair
+    style: straight hair
+    color: chestnut hair
+    extras:
+      - silky
+      - natural flow
+  eyes:
+    color: brown eyes
+  skin: smooth skin
+  build: slim
+  breast: medium breasts
+  makeup: natural makeup
+
+aesthetic:
+  - editorial photography
+  - fashion photography
+
+mood: energetic
+
+photography:
+  shot_with: shot on 35mm film
+  lens: 85mm f/1.4
+  film: Kodak Portra 400
+  effects: soft focus
+
+quality:
+  - high resolution, 8K UHD
+  - sharp focus
+  - highly detailed
+  - absurdres
+  

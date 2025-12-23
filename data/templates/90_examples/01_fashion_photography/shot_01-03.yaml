@@ -1,0 +1,24 @@
+# shot_01-03
+
+_base: 90_examples/01_fashion_photography/look_01.yaml
+
+pose:
+  base: sitting on white pedestal or cube
+  direction: from side
+
+outfit:
+  top:
+    type: avant-garde asymmetric top
+    color: sage green
+    material: structured cotton or wool
+    details: irregular shape, one shoulder, artistic cut
+  bottom:
+    type: sculptural skirt
+    color: sage green, matching
+    material: stiff fabric
+    details: architectural volume, A-line or bubble shape
+  footwear:
+    type: ankle boots
+    color: sage or olive
+    material: suede or leather
+    details: minimal, chunky heel

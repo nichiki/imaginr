@@ -1,0 +1,22 @@
+# shot-02-01
+
+_base: 90_examples/01_fashion_photography/look_02.yaml
+
+pose:
+  base: standing
+  direction: soft gaze, slightly down
+  action:
+    - lifting part of dress fabric to let light through
+
+expression:
+  type: peaceful, gentle
+  eyes: slightly down
+  mouth: relaxed, soft
+
+outfit:
+  dress:
+    type: tiered dress with puff sleeves
+    color: white
+    material: cotton or light fabric, fully opaque
+
+composition: three quarter

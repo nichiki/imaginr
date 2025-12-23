@@ -1,0 +1,28 @@
+# shot_01-02
+
+_base: 90_examples/01_fashion_photography/look_01.yaml
+
+pose:
+  base: standing
+  direction: looking away
+  action:
+    - hand in own hair
+
+expression:
+  type: confident
+  eyes: bedroom eyes
+  mouth: closed mouth
+
+outfit:
+  dress:
+    type: long draped dress
+    color: slate blue
+    material: fluid fabric, jersey or silk
+    details: asymmetric draping, sculptural folds, floor length
+  footwear:
+    type: minimal sandals
+    color: slate blue or nude
+    material: leather
+    details: barely there, strappy
+
+composition: rule of thirds

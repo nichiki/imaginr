@@ -1,0 +1,33 @@
+# shot_01-01
+
+_base: 90_examples/01_fashion_photography/look_01.yaml
+
+pose:
+  base: standing
+  direction: facing viewer
+  action:
+    - hands on hips
+
+expression:
+  type: confident
+  eyes: bedroom eyes
+  mouth: closed mouth
+
+outfit:
+  top:
+    type: geometric cut sculptural top
+    color: mauve
+    material: structured fabric
+    details: angular cuts, architectural shape, asymmetric
+  bottom:
+    type: wide leg trousers
+    color: mauve, matching
+    material: flowing fabric
+    details: high waisted, clean drape
+  footwear:
+    type: minimal heels
+    color: nude or mauve
+    material: leather
+    details: simple, sculptural
+
+composition: wide shot

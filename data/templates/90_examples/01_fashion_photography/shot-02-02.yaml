@@ -1,0 +1,27 @@
+# shot-02-02
+
+_base: 90_examples/01_fashion_photography/look_02.yaml
+
+pose:
+  base: standing
+  action:
+    - elegant posture
+
+expression:
+  type: innocent
+  eyes: toward camera
+  mouth: slightly parted, soft
+
+outfit:
+  bottom:
+    type: wide-leg pants
+    color: cream
+    material: flowing fabric
+    details: high-waisted, very wide leg, fluid drape
+  top:
+    type: sheer top
+    color: white
+    material: organza or sheer silk
+    details: delicate, slightly transparent, elegant neckline
+
+composition: three-quarter to full body

@@ -1,0 +1,13 @@
+# look_01
+
+_base: 90_examples/01_fashion_photography/base.yaml
+
+environment:
+  background: gallery wall with large abstract painting
+  setting: elegant
+
+lighting:
+  style: high-key
+  type: hard directional light
+  color: neutral
+  shadow: hard shadows

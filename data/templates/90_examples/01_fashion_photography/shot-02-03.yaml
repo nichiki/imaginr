@@ -1,0 +1,27 @@
+# shot-02-03
+
+_base: 90_examples/01_fashion_photography/look_02.yaml
+
+pose:
+  base: standing still
+  action:
+    - relaxed at sides
+    
+expression:
+  type: innsquinting at light
+  eyes: upward or toward light source
+  mouth: relaxed
+
+outfit:
+  top:
+    type: knit sweater
+    color: cream or off-white
+    material: soft cashmere or cotton knit
+    details: relaxed fit, cozy texture, visible knit texture
+  bottom:
+    type: long pleated skirt
+    color: white or cream
+    material: light fabric, satin or chiffon blend
+    details: elegant pleats, maxi length, flowing movement
+
+composition: three-quarter to full body
