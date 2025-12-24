@@ -49,6 +49,9 @@ interface GenerationPanelProps {
 
   // ワークフロー変更通知
   onWorkflowChange?: () => void;
+
+  // プリセット変更通知
+  onPresetChange?: () => void;
 }
 
 export function GenerationPanel({
@@ -66,6 +69,7 @@ export function GenerationPanel({
   overrideValues,
   onOverrideValuesChange,
   onWorkflowChange,
+  onPresetChange,
 }: GenerationPanelProps) {
   // ComfyUI設定
   const [comfySettings, setComfySettings] = useState<ComfyUISettings | null>(() => loadComfyUISettings());
@@ -106,11 +110,13 @@ export function GenerationPanel({
   }, [onWorkflowChange]);
 
   // プリセット変更
-  const handlePresetChange = useCallback((id: string) => {
+  const handlePresetChange = useCallback(async (id: string) => {
     setSelectedPresetId(id);
-    saveActiveEnhancerPresetId(id);
-    fetchOllamaSettings().then(setOllamaSettings);
-  }, []);
+    await saveActiveEnhancerPresetId(id);
+    const settings = await fetchOllamaSettings();
+    setOllamaSettings(settings);
+    onPresetChange?.();
+  }, [onPresetChange]);
 
   const workflows = useMemo(() => comfySettings?.workflows || [], [comfySettings?.workflows]);
   const presets = ollamaSettings?.enhancerPresets || [];

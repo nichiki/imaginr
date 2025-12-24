@@ -156,7 +156,8 @@ export default function Home() {
   const [enhancedPrompt, setEnhancedPrompt] = useState('');
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhanceError, setEnhanceError] = useState<string | null>(null);
-  const lastEnhancedYamlRef = useRef<string>('');
+  // キャッシュの有効性判定用（YAML + プリセットID）
+  const lastEnhancedConfigRef = useRef<{ yaml: string; presetId: string }>({ yaml: '', presetId: '' });
 
   // プロパティ上書き値（生成パネルで入力された値）
   const [overrideValues, setOverrideValues] = useState<Record<string, string | number>>({});
@@ -319,8 +320,10 @@ export default function Home() {
   );
 
   // mergedYamlが変更されたらエンハンスキャッシュをクリア
+  // プリセット変更時はクリアしない（Re-run/生成時に再エンハンスする）
   useEffect(() => {
-    if (mergedYaml !== lastEnhancedYamlRef.current) {
+    const lastConfig = lastEnhancedConfigRef.current;
+    if (mergedYaml !== lastConfig.yaml) {
       setEnhancedPrompt('');
       setEnhanceError(null);
     }
@@ -346,6 +349,11 @@ export default function Home() {
     try {
       const client = new OllamaClient(ollamaSettings.baseUrl);
       const systemPrompt = getEnhancerSystemPrompt(ollamaSettings);
+      const currentPresetId = ollamaSettings.activePresetId || '';
+      const currentPreset = ollamaSettings.enhancerPresets?.find(p => p.id === currentPresetId);
+      const presetName = currentPreset?.name || 'default';
+
+      console.log(`[Enhance] Using preset: "${presetName}" (${currentPresetId})`);
 
       const result = await client.generate(
         mergedYamlForPrompt,
@@ -361,7 +369,11 @@ export default function Home() {
 
       if (result.success) {
         setEnhancedPrompt(result.content);
-        lastEnhancedYamlRef.current = mergedYamlForPrompt;
+        lastEnhancedConfigRef.current = {
+          yaml: mergedYamlForPrompt,
+          presetId: currentPresetId,
+        };
+        console.log(`[Enhance] Completed with preset: "${presetName}"`);
       } else {
         setEnhanceError(result.error || 'Enhancement failed');
       }
@@ -393,11 +405,23 @@ export default function Home() {
 
       // エンハンスが有効な場合
       if (enhanceEnabled && ollamaSettings?.enabled) {
-        if (enhancedPrompt && lastEnhancedYamlRef.current === mergedYamlForPrompt) {
+        const currentPresetId = ollamaSettings.activePresetId || '';
+        const currentPreset = ollamaSettings.enhancerPresets?.find(p => p.id === currentPresetId);
+        const presetName = currentPreset?.name || 'default';
+        const lastConfig = lastEnhancedConfigRef.current;
+        const isCacheValid = enhancedPrompt &&
+          lastConfig.yaml === mergedYamlForPrompt &&
+          lastConfig.presetId === currentPresetId;
+
+        if (isCacheValid) {
           promptToUse = enhancedPrompt;
-          console.log('[Generate] Using cached enhanced prompt');
+          console.log(`[Generate] Using cached enhanced prompt (preset: "${presetName}")`);
         } else {
-          console.log('[Generate] Running enhancement first...');
+          const reason = !enhancedPrompt ? 'no cache' :
+            lastConfig.yaml !== mergedYamlForPrompt ? 'YAML changed' :
+            lastConfig.presetId !== currentPresetId ? `preset changed from "${lastConfig.presetId}" to "${currentPresetId}"` : 'unknown';
+          console.log(`[Generate] Running enhancement first (${reason})...`);
+          console.log(`[Generate] Using preset: "${presetName}" (${currentPresetId})`);
           const client = new OllamaClient(ollamaSettings.baseUrl);
           const systemPrompt = getEnhancerSystemPrompt(ollamaSettings);
 
@@ -411,8 +435,11 @@ export default function Home() {
           if (enhanceResult.success) {
             promptToUse = enhanceResult.content;
             setEnhancedPrompt(enhanceResult.content);
-            lastEnhancedYamlRef.current = mergedYamlForPrompt;
-            console.log('[Generate] Enhancement completed');
+            lastEnhancedConfigRef.current = {
+              yaml: mergedYamlForPrompt,
+              presetId: currentPresetId,
+            };
+            console.log(`[Generate] Enhancement completed with preset: "${presetName}"`);
           } else {
             console.warn('[Generate] Enhancement failed, using raw prompt');
           }
@@ -1330,6 +1357,7 @@ export default function Home() {
             overrideValues={overrideValues}
             onOverrideValuesChange={setOverrideValues}
             onWorkflowChange={() => fetchComfyUISettings().then(setComfySettings)}
+            onPresetChange={() => fetchOllamaSettings().then(setOllamaSettings)}
           />
         </div>
       </div>

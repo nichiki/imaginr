@@ -32,6 +32,19 @@ export interface ImageInfo {
   favorite?: boolean;
 }
 
+// Pagination types
+export interface PaginationParams {
+  limit?: number;      // Default: 50
+  offset?: number;     // Default: 0
+  sortOrder?: 'asc' | 'desc';  // Default: 'desc' (newest first)
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  hasMore: boolean;
+}
+
 export interface CreateImageInput {
   id: string;
   filename: string;
@@ -95,15 +108,38 @@ export async function getImage(id: string): Promise<ImageRecord | null> {
   return rows.length > 0 ? rows[0] : null;
 }
 
+const DEFAULT_PAGE_SIZE = 50;
+
 /**
- * Get all images (optionally including deleted)
+ * Get images with pagination (optionally including deleted)
  */
-export async function listImages(includeDeleted = false): Promise<ImageInfo[]> {
+export async function listImages(
+  includeDeleted = false,
+  pagination?: PaginationParams
+): Promise<PaginatedResult<ImageInfo>> {
   const db = await getDatabase();
 
-  const query = includeDeleted
-    ? 'SELECT id, filename, prompt, created_at, deleted_at, favorite FROM images ORDER BY created_at DESC'
-    : 'SELECT id, filename, prompt, created_at, deleted_at, favorite FROM images WHERE deleted_at IS NULL ORDER BY created_at DESC';
+  const limit = pagination?.limit ?? DEFAULT_PAGE_SIZE;
+  const offset = pagination?.offset ?? 0;
+  const sortOrder = pagination?.sortOrder ?? 'desc';
+  const orderClause = `ORDER BY created_at ${sortOrder === 'asc' ? 'ASC' : 'DESC'}`;
+  const deletedClause = includeDeleted ? '' : 'WHERE deleted_at IS NULL';
+
+  // Get total count
+  const countQuery = includeDeleted
+    ? 'SELECT COUNT(*) as count FROM images'
+    : 'SELECT COUNT(*) as count FROM images WHERE deleted_at IS NULL';
+  const countRows = await db.select<{ count: number }>(countQuery);
+  const total = countRows[0]?.count ?? 0;
+
+  // Get paginated items
+  const query = `
+    SELECT id, filename, prompt, created_at, deleted_at, favorite
+    FROM images
+    ${deletedClause}
+    ${orderClause}
+    LIMIT ? OFFSET ?
+  `;
 
   const rows = await db.select<{
     id: string;
@@ -112,9 +148,9 @@ export async function listImages(includeDeleted = false): Promise<ImageInfo[]> {
     created_at: string;
     deleted_at: string | null;
     favorite: number;
-  }>(query);
+  }>(query, [limit, offset]);
 
-  return rows.map((row) => ({
+  const items = rows.map((row) => ({
     id: row.id,
     filename: row.filename,
     createdAt: row.created_at,
@@ -122,6 +158,12 @@ export async function listImages(includeDeleted = false): Promise<ImageInfo[]> {
     deleted: !!row.deleted_at,
     favorite: row.favorite === 1,
   }));
+
+  return {
+    items,
+    total,
+    hasMore: offset + items.length < total,
+  };
 }
 
 /**
@@ -170,10 +212,18 @@ export async function toggleFavorite(id: string): Promise<boolean> {
 }
 
 /**
- * Full-text search with automatic prefix matching
+ * Full-text search with automatic prefix matching and pagination
  */
-export async function searchImages(query: string, includeDeleted = false): Promise<ImageInfo[]> {
+export async function searchImages(
+  query: string,
+  includeDeleted = false,
+  pagination?: PaginationParams
+): Promise<PaginatedResult<ImageInfo>> {
   const db = await getDatabase();
+
+  const limit = pagination?.limit ?? DEFAULT_PAGE_SIZE;
+  const offset = pagination?.offset ?? 0;
+  const sortOrder = pagination?.sortOrder ?? 'desc';
 
   // Build FTS query: add * to each word for prefix matching
   const ftsQuery = query
@@ -186,6 +236,17 @@ export async function searchImages(query: string, includeDeleted = false): Promi
 
   const deletedClause = includeDeleted ? '' : 'AND i.deleted_at IS NULL';
 
+  // Get total count for search results
+  const countRows = await db.select<{ count: number }>(`
+    SELECT COUNT(*) as count
+    FROM images i
+    JOIN images_fts f ON i.id = f.id
+    WHERE images_fts MATCH ?
+    ${deletedClause}
+  `, [ftsQuery]);
+  const total = countRows[0]?.count ?? 0;
+
+  // Get paginated search results
   const rows = await db.select<{
     id: string;
     filename: string;
@@ -199,10 +260,11 @@ export async function searchImages(query: string, includeDeleted = false): Promi
     JOIN images_fts f ON i.id = f.id
     WHERE images_fts MATCH ?
     ${deletedClause}
-    ORDER BY i.created_at DESC
-  `, [ftsQuery]);
+    ORDER BY i.created_at ${sortOrder === 'asc' ? 'ASC' : 'DESC'}
+    LIMIT ? OFFSET ?
+  `, [ftsQuery, limit, offset]);
 
-  return rows.map((row) => ({
+  const items = rows.map((row) => ({
     id: row.id,
     filename: row.filename,
     createdAt: row.created_at,
@@ -210,6 +272,12 @@ export async function searchImages(query: string, includeDeleted = false): Promi
     deleted: !!row.deleted_at,
     favorite: row.favorite === 1,
   }));
+
+  return {
+    items,
+    total,
+    hasMore: offset + items.length < total,
+  };
 }
 
 /**
@@ -241,6 +309,27 @@ export async function markMissingAsDeleted(missingIds: string[]): Promise<number
 
   let count = 0;
   for (const id of missingIds) {
+    const result = await db.execute(
+      'UPDATE images SET deleted_at = ? WHERE id = ? AND deleted_at IS NULL',
+      [now, id]
+    );
+    count += result.rowsAffected;
+  }
+
+  return count;
+}
+
+/**
+ * Bulk soft delete images
+ */
+export async function bulkDeleteImages(ids: string[]): Promise<number> {
+  if (ids.length === 0) return 0;
+
+  const db = await getDatabase();
+  const now = new Date().toISOString();
+
+  let count = 0;
+  for (const id of ids) {
     const result = await db.execute(
       'UPDATE images SET deleted_at = ? WHERE id = ? AND deleted_at IS NULL',
       [now, id]

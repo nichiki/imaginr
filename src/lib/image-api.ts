@@ -14,6 +14,19 @@ export interface ImageInfo {
   favorite?: boolean;
 }
 
+// Pagination types (re-exported for convenience)
+export interface PaginationParams {
+  limit?: number;
+  offset?: number;
+  sortOrder?: 'asc' | 'desc';
+}
+
+export interface PaginatedResult<T> {
+  items: T[];
+  total: number;
+  hasMore: boolean;
+}
+
 // Detailed image info (includes all metadata)
 export interface ImageDetail {
   id: string;
@@ -31,14 +44,26 @@ export interface ImageDetail {
 }
 
 // Tauri API implementation - uses Tauri plugins directly
-async function tauriList(includeDeleted = false): Promise<ImageInfo[]> {
+async function tauriList(
+  includeDeleted = false,
+  pagination?: PaginationParams
+): Promise<PaginatedResult<ImageInfo>> {
   const dbImages = await import('./db/tauri-images');
-  return dbImages.listImages(includeDeleted);
+  return dbImages.listImages(includeDeleted, pagination);
 }
 
-async function tauriSearch(query: string, includeDeleted = false): Promise<ImageInfo[]> {
+async function tauriSearch(
+  query: string,
+  includeDeleted = false,
+  pagination?: PaginationParams
+): Promise<PaginatedResult<ImageInfo>> {
   const dbImages = await import('./db/tauri-images');
-  return dbImages.searchImages(query, includeDeleted);
+  return dbImages.searchImages(query, includeDeleted, pagination);
+}
+
+async function tauriBulkDelete(ids: string[]): Promise<number> {
+  const dbImages = await import('./db/tauri-images');
+  return dbImages.bulkDeleteImages(ids);
 }
 
 async function tauriGetDetail(id: string): Promise<ImageDetail | null> {
@@ -159,8 +184,11 @@ async function tauriGetImagePath(filename: string): Promise<string> {
 
 // Unified API object
 export const imageAPI = {
-  async list(includeDeleted = false): Promise<ImageInfo[]> {
-    return tauriList(includeDeleted);
+  async list(
+    includeDeleted = false,
+    pagination?: PaginationParams
+  ): Promise<PaginatedResult<ImageInfo>> {
+    return tauriList(includeDeleted, pagination);
   },
 
   async getDetail(id: string): Promise<ImageDetail | null> {
@@ -174,11 +202,19 @@ export const imageAPI = {
   async delete(filename: string, hard = false): Promise<void> {
     return tauriDelete(filename, hard);
   },
+
+  async bulkDelete(ids: string[]): Promise<number> {
+    return tauriBulkDelete(ids);
+  },
 };
 
-// Helper to search images
-export async function searchImagesByQuery(query: string, includeDeleted = false): Promise<ImageInfo[]> {
-  return tauriSearch(query, includeDeleted);
+// Helper to search images with pagination
+export async function searchImagesByQuery(
+  query: string,
+  includeDeleted = false,
+  pagination?: PaginationParams
+): Promise<PaginatedResult<ImageInfo>> {
+  return tauriSearch(query, includeDeleted, pagination);
 }
 
 // Helper to get image URL

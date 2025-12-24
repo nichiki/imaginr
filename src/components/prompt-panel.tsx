@@ -1,14 +1,16 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useRef } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Copy, Check, AlertCircle, Loader2, X, Sparkles, Search, Settings } from 'lucide-react';
+import { Copy, Check, AlertCircle, Loader2, X, Sparkles, Search, Settings, ArrowDown, ArrowUp, CheckSquare, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { ImageGallery } from './image-gallery';
 import { ImageViewer, type ImageInfo } from './image-viewer';
-import { imageAPI, searchImagesByQuery } from '@/lib/image-api';
+import { imageAPI, searchImagesByQuery, type PaginationParams } from '@/lib/image-api';
+
+const PAGE_SIZE = 50;
 
 export type PromptTab = 'prompt' | 'gallery';
 export type PromptSubTab = 'yaml' | 'enhanced';
@@ -101,47 +103,91 @@ export function PromptPanel({
 
   // 画像ギャラリー
   const [images, setImages] = useState<ImageInfo[]>([]);
+  const [totalImages, setTotalImages] = useState(0);
   const [selectedImage, setSelectedImage] = useState<ImageInfo | null>(null);
   const [isLoadingImages, setIsLoadingImages] = useState(false);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
+  const [hasMore, setHasMore] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortOrder, setSortOrder] = useState<'desc' | 'asc'>('desc');
 
-  // 画像一覧を読み込む（検索クエリ対応）
-  const loadImages = useCallback(async (query?: string) => {
-    setIsLoadingImages(true);
+  // 選択モード
+  const [isSelectMode, setIsSelectMode] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [lastSelectedId, setLastSelectedId] = useState<string | null>(null);
+
+  // 画像一覧を読み込む（ページネーション対応）
+  const loadImages = useCallback(async (query?: string, append = false, offset = 0) => {
+    if (append) {
+      setIsLoadingMore(true);
+    } else {
+      setIsLoadingImages(true);
+    }
     try {
-      if (query) {
-        const results = await searchImagesByQuery(query);
-        setImages(results);
+      const pagination: PaginationParams = {
+        limit: PAGE_SIZE,
+        offset,
+        sortOrder,
+      };
+
+      const result = query
+        ? await searchImagesByQuery(query, false, pagination)
+        : await imageAPI.list(false, pagination);
+
+      if (append) {
+        setImages((prev) => [...prev, ...result.items]);
       } else {
-        const results = await imageAPI.list();
-        setImages(results);
+        setImages(result.items);
       }
+      setTotalImages(result.total);
+      setHasMore(result.hasMore);
     } catch (error) {
       console.error('Failed to load images:', error);
     } finally {
-      setIsLoadingImages(false);
+      if (append) {
+        setIsLoadingMore(false);
+      } else {
+        setIsLoadingImages(false);
+      }
     }
-  }, []);
+  }, [sortOrder]);
+
+  // 追加読み込み
+  const handleLoadMore = useCallback(() => {
+    if (isLoadingMore || !hasMore) return;
+    loadImages(searchQuery || undefined, true, images.length);
+  }, [isLoadingMore, hasMore, loadImages, searchQuery, images.length]);
 
   // 初回読み込み
   useEffect(() => {
     loadImages();
   }, [loadImages]);
 
-  // 検索クエリ変更時のデバウンス検索
+  // 検索クエリ変更時のデバウンス検索（リセット）
   useEffect(() => {
     const timer = setTimeout(() => {
-      loadImages(searchQuery || undefined);
+      loadImages(searchQuery || undefined, false, 0);
     }, 300);
     return () => clearTimeout(timer);
   }, [searchQuery, loadImages]);
 
-  // 生成後に画像を再読み込み
+  // ソート変更時のリセット
   useEffect(() => {
-    if (!isGenerating) {
-      loadImages(searchQuery || undefined);
+    loadImages(searchQuery || undefined, false, 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [sortOrder]);
+
+  // 生成後に最新を先頭に再読み込み
+  const prevIsGenerating = useRef(isGenerating);
+  useEffect(() => {
+    if (prevIsGenerating.current && !isGenerating) {
+      // 生成完了時: 新しい順の場合は最新を取得
+      if (sortOrder === 'desc') {
+        loadImages(searchQuery || undefined, false, 0);
+      }
     }
-  }, [isGenerating, loadImages, searchQuery]);
+    prevIsGenerating.current = isGenerating;
+  }, [isGenerating, loadImages, searchQuery, sortOrder]);
 
   // コピー
   const copyToClipboard = useCallback(async () => {
@@ -167,6 +213,7 @@ export function PromptPanel({
     try {
       await imageAPI.delete(image.filename);
       setImages((prev) => prev.filter((img) => img.id !== image.id));
+      setTotalImages((prev) => prev - 1);
       if (selectedImage?.id === image.id) {
         setSelectedImage(null);
       }
@@ -174,6 +221,76 @@ export function PromptPanel({
       console.error('Failed to delete image:', error);
     }
   }, [selectedImage]);
+
+  // 選択トグル（Shift+クリック対応）
+  const handleToggleSelect = useCallback((id: string, shiftKey: boolean) => {
+    if (shiftKey && lastSelectedId) {
+      // Shift+クリック: 範囲選択
+      const lastIndex = images.findIndex((img) => img.id === lastSelectedId);
+      const currentIndex = images.findIndex((img) => img.id === id);
+      if (lastIndex !== -1 && currentIndex !== -1) {
+        const start = Math.min(lastIndex, currentIndex);
+        const end = Math.max(lastIndex, currentIndex);
+        const rangeIds = images.slice(start, end + 1).map((img) => img.id);
+        setSelectedIds((prev) => {
+          const newSet = new Set(prev);
+          rangeIds.forEach((rid) => newSet.add(rid));
+          return newSet;
+        });
+      }
+    } else {
+      // 通常クリック: トグル
+      setSelectedIds((prev) => {
+        const newSet = new Set(prev);
+        if (newSet.has(id)) {
+          newSet.delete(id);
+        } else {
+          newSet.add(id);
+        }
+        return newSet;
+      });
+    }
+    setLastSelectedId(id);
+  }, [lastSelectedId, images]);
+
+  // 全選択
+  const handleSelectAll = useCallback(() => {
+    setSelectedIds(new Set(images.map((img) => img.id)));
+  }, [images]);
+
+  // 選択解除
+  const handleDeselectAll = useCallback(() => {
+    setSelectedIds(new Set());
+  }, []);
+
+  // 一括削除
+  const handleBulkDelete = useCallback(async () => {
+    if (selectedIds.size === 0) return;
+
+    const { showConfirm } = await import('@/lib/dialog');
+    if (!await showConfirm(`${selectedIds.size}件の画像を削除しますか？`)) return;
+
+    try {
+      const idsToDelete = Array.from(selectedIds);
+      await imageAPI.bulkDelete(idsToDelete);
+      setImages((prev) => prev.filter((img) => !selectedIds.has(img.id)));
+      setTotalImages((prev) => prev - selectedIds.size);
+      setSelectedIds(new Set());
+      setIsSelectMode(false);
+      if (selectedImage && selectedIds.has(selectedImage.id)) {
+        setSelectedImage(null);
+      }
+    } catch (error) {
+      console.error('Failed to bulk delete images:', error);
+    }
+  }, [selectedIds, selectedImage]);
+
+  // 選択モード終了時にリセット
+  const handleExitSelectMode = useCallback(() => {
+    setIsSelectMode(false);
+    setSelectedIds(new Set());
+    setLastSelectedId(null);
+  }, []);
 
   const canCopy = activeTab === 'prompt' &&
     (promptSubTab === 'enhanced' ? !!enhancedPrompt : (promptSubTab === 'yaml' && isYamlValid && !!mergedYaml));
@@ -208,27 +325,53 @@ export function PromptPanel({
                 )}
               </Button>
             )}
-            {/* 検索バー（Galleryタブ選択時のみ） */}
+            {/* 検索バー・ソート・選択ボタン（Galleryタブ選択時のみ） */}
             {activeTab === 'gallery' && comfyEnabled && (
-              <div className="relative ml-2">
-                <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-[#888]" />
-                <Input
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search"
-                  className="w-48 pl-7 pr-6 h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4] placeholder:text-[#888]"
-                />
-                {searchQuery && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0.5 top-1/2 -translate-y-1/2 h-5 w-5 p-0 text-[#888] hover:text-white"
-                    onClick={() => setSearchQuery('')}
-                  >
-                    <X className="h-3 w-3" />
-                  </Button>
-                )}
-              </div>
+              <>
+                <div className="relative ml-2">
+                  <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3 w-3 text-[#888]" />
+                  <Input
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search"
+                    className="w-40 pl-7 pr-6 h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4] placeholder:text-[#888]"
+                  />
+                  {searchQuery && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0.5 top-1/2 -translate-y-1/2 h-5 w-5 p-0 text-[#888] hover:text-white"
+                      onClick={() => setSearchQuery('')}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>
+                  )}
+                </div>
+                {/* ソートボタン */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="h-7 px-2 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
+                  onClick={() => setSortOrder((prev) => prev === 'desc' ? 'asc' : 'desc')}
+                  title={sortOrder === 'desc' ? '新しい順' : '古い順'}
+                >
+                  {sortOrder === 'desc' ? (
+                    <ArrowDown className="h-3.5 w-3.5" />
+                  ) : (
+                    <ArrowUp className="h-3.5 w-3.5" />
+                  )}
+                </Button>
+                {/* 選択ボタン */}
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className={`h-7 px-2 ${isSelectMode ? 'text-[#0e639c] bg-[#0e639c]/20' : 'text-[#888]'} hover:text-white hover:bg-[#3c3c3c]`}
+                  onClick={() => isSelectMode ? handleExitSelectMode() : setIsSelectMode(true)}
+                  title="選択モード"
+                >
+                  <CheckSquare className="h-3.5 w-3.5" />
+                </Button>
+              </>
             )}
           </div>
           <TabsList className="h-7 bg-[#3c3c3c]">
@@ -237,8 +380,8 @@ export function PromptPanel({
             </TabsTrigger>
             <TabsTrigger value="gallery" className="text-xs h-5 px-2 text-[#d4d4d4] data-[state=active]:text-white data-[state=active]:bg-[#094771]">
               Gallery
-              {images.length > 0 && (
-                <span className="ml-1 text-[10px] text-[#888]">({images.length})</span>
+              {totalImages > 0 && (
+                <span className="ml-1 text-[10px] text-[#888]">({totalImages})</span>
               )}
             </TabsTrigger>
           </TabsList>
@@ -315,7 +458,7 @@ export function PromptPanel({
         </TabsContent>
 
         {/* Gallery Tab */}
-        <TabsContent value="gallery" className="flex-1 m-0 overflow-hidden relative">
+        <TabsContent value="gallery" className="flex-1 m-0 overflow-hidden relative flex flex-col">
           {!comfyEnabled ? (
             <div className="p-4 flex flex-col items-center justify-center h-full gap-3 text-[#888]">
               <Settings className="h-8 w-8" />
@@ -324,13 +467,65 @@ export function PromptPanel({
             </div>
           ) : (
             <>
-              <div className="h-full overflow-auto">
+              {/* 選択モード操作バー */}
+              {isSelectMode && (
+                <div className="flex-shrink-0 px-3 py-2 bg-[#0e639c]/20 border-b border-[#0e639c]/40 flex items-center gap-2">
+                  <CheckSquare className="h-4 w-4 text-[#0e639c]" />
+                  <span className="text-xs text-[#d4d4d4]">
+                    選択: {selectedIds.size}件
+                  </span>
+                  <div className="flex-1" />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs text-[#d4d4d4] hover:text-white hover:bg-[#3c3c3c]"
+                    onClick={handleSelectAll}
+                  >
+                    全選択
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs text-[#d4d4d4] hover:text-white hover:bg-[#3c3c3c]"
+                    onClick={handleDeselectAll}
+                    disabled={selectedIds.size === 0}
+                  >
+                    選択解除
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 px-2 text-xs text-red-400 hover:text-red-300 hover:bg-red-900/30"
+                    onClick={handleBulkDelete}
+                    disabled={selectedIds.size === 0}
+                  >
+                    <Trash2 className="h-3 w-3 mr-1" />
+                    削除
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-6 w-6 p-0 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
+                    onClick={handleExitSelectMode}
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </Button>
+                </div>
+              )}
+
+              <div className="flex-1 overflow-hidden">
                 <ImageGallery
                   images={images}
                   isLoading={isLoadingImages}
                   searchQuery={searchQuery}
                   onSelectImage={setSelectedImage}
                   onDeleteImage={handleDeleteImage}
+                  onLoadMore={handleLoadMore}
+                  isLoadingMore={isLoadingMore}
+                  hasMore={hasMore}
+                  isSelectMode={isSelectMode}
+                  selectedIds={selectedIds}
+                  onToggleSelect={handleToggleSelect}
                 />
               </div>
 
