@@ -33,7 +33,8 @@ src/
 │   ├── yaml-editor.tsx       # Monacoエディタ + 補完機能
 │   ├── file-tree.tsx         # ファイルツリー（左ペイン）
 │   ├── snippet-panel.tsx     # スニペット管理（右ペイン）
-│   ├── preview-panel.tsx     # プレビュー + 画像ギャラリー（下ペイン）
+│   ├── prompt-panel.tsx      # プロンプト/ギャラリー（下ペイン中央）
+│   ├── generation-panel.tsx  # 生成パネル（下ペイン右）
 │   ├── variable-form.tsx     # 変数入力フォーム + プリセット管理
 │   ├── settings-dialog.tsx   # 設定ダイアログ（ComfyUI、データフォルダ）
 │   ├── image-viewer.tsx      # 画像拡大表示ダイアログ
@@ -109,19 +110,18 @@ npm run lint          # ESLint実行
 ## UIレイアウト
 
 ```
-┌─────────────────────────────────────────────┐
-│ Header                                      │
-├──────────┬──────────────────────┬───────────┤
-│ FileTree │     YamlEditor       │ Snippets  │
-│          │     (Monaco)         │  Panel    │
-├──────────┼──────────────────────┴───────────┤
-│ Variables│    PreviewPanel                  │
-│  Form    │ (Merged YAML / Prompt / Gallery) │
-└──────────┴──────────────────────────────────┘
+┌─────────────────────────────────────────────────────────┐
+│ Header                                                  │
+├──────────┬──────────────────────────────────┬───────────┤
+│ FileTree │         YamlEditor               │ Snippets  │
+│          │         (Monaco)                 │  Panel    │
+├──────────┼────────────────────────┬─────────┴───────────┤
+│ Variables│  PromptPanel           │ GenerationPanel     │
+│  Form    │ [Prompt] [Gallery]     │ Workflow / Generate │
+└──────────┴────────────────────────┴─────────────────────┘
 ```
 
-4ペインすべてリサイズ可能。状態はlocalStorageに永続化。
-変数パネルはテンプレートに変数がある場合のみ表示。
+全ペインリサイズ可能。状態はlocalStorageに永続化。
 ウィンドウ位置・サイズはwindow-stateプラグインで自動保存。
 
 ## ComfyUI連携

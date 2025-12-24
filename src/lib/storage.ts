@@ -12,6 +12,7 @@ export interface AppState {
   rightPanelWidth: number;
   previewHeight: number;
   variablePanelWidth: number;
+  generationPanelWidth: number;
   expandedFolders: string[] | null; // nullは未保存を示す
   selectedFile: string;
 }
@@ -21,6 +22,7 @@ const defaultState: AppState = {
   rightPanelWidth: 280,
   previewHeight: 280,
   variablePanelWidth: 280, // leftPanelWidthと同じ
+  generationPanelWidth: 200,
   expandedFolders: null, // 初回は全て開く
   selectedFile: '',
 };
@@ -219,6 +221,13 @@ export async function migrateLocalStorageToFile(): Promise<void> {
 export function getActiveWorkflow(settings: ComfyUISettings): WorkflowConfig | null {
   if (!settings.activeWorkflowId) return null;
   return settings.workflows.find(w => w.id === settings.activeWorkflowId) || null;
+}
+
+/**
+ * アクティブなワークフローIDを保存
+ */
+export async function saveActiveWorkflowId(workflowId: string): Promise<void> {
+  await saveComfyUISettingsAsync({ activeWorkflowId: workflowId });
 }
 
 // 新しいワークフロー設定を生成
@@ -444,4 +453,11 @@ export function getEnhancerSystemPrompt(settings: OllamaSettings): string {
     return preset.systemPrompt;
   }
   return settings.customSystemPrompt || '';
+}
+
+/**
+ * アクティブなエンハンサープリセットIDを保存
+ */
+export async function saveActiveEnhancerPresetId(presetId: string): Promise<void> {
+  await saveOllamaSettingsAsync({ activePresetId: presetId });
 }

@@ -3,13 +3,13 @@
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import { FileTree } from '@/components/file-tree';
 import { SnippetPanel } from '@/components/snippet-panel';
-import { PreviewPanel } from '@/components/preview-panel';
+import { PromptPanel, type PromptTab, type PromptSubTab } from '@/components/prompt-panel';
+import { GenerationPanel } from '@/components/generation-panel';
 import { YamlEditor, YamlEditorRef } from '@/components/yaml-editor';
 import { fileAPI, FileTreeItem, RenameResult } from '@/lib/file-api';
 import {
   resolveAndMergeAsync,
   objectToYaml,
-  generatePromptText,
   cleanYamlString,
   FileData,
 } from '@/lib/yaml-utils';
@@ -24,7 +24,22 @@ import {
   buildKeyDictionaryCache,
   KeyDictionaryEntry,
 } from '@/lib/key-dictionary-api';
-import { loadState, saveState } from '@/lib/storage';
+import {
+  loadState,
+  saveState,
+  fetchComfyUISettings,
+  loadComfyUISettings,
+  fetchOllamaSettings,
+  loadOllamaSettings,
+  getActiveWorkflow,
+  getEnhancerSystemPrompt,
+  type ComfyUISettings,
+  type OllamaSettings,
+} from '@/lib/storage';
+import { ComfyUIClient } from '@/lib/comfyui-api';
+import { OllamaClient } from '@/lib/ollama-api';
+import { imageAPI } from '@/lib/image-api';
+import { getComfyUIPath, joinPath } from '@/lib/tauri-utils';
 import { SettingsDialog } from '@/components/settings-dialog';
 import * as presetAPI from '@/lib/preset-api';
 import {
@@ -114,8 +129,6 @@ export default function Home() {
 
   // マージ結果（変数解決前）
   const [mergedYamlRaw, setMergedYamlRaw] = useState('');
-  const [promptTextRaw, setPromptTextRaw] = useState('');
-  const [lookName, setLookName] = useState<string | undefined>(undefined);
   const [isYamlValid, setIsYamlValid] = useState(true);
 
   // プレビューパネルの高さ
@@ -126,6 +139,27 @@ export default function Home() {
   const [rightPanelWidth, setRightPanelWidth] = useState(280);
   // 変数パネルの幅
   const [variablePanelWidth, setVariablePanelWidth] = useState(280);
+  // 生成パネルの幅
+  const [generationPanelWidth, setGenerationPanelWidth] = useState(200);
+
+  // ComfyUI/Ollama設定
+  const [comfySettings, setComfySettings] = useState<ComfyUISettings | null>(null);
+  const [ollamaSettings, setOllamaSettings] = useState<OllamaSettings | null>(null);
+
+  // エンハンス関連
+  const [enhanceEnabled, setEnhanceEnabled] = useState(false);
+  const [enhancedPrompt, setEnhancedPrompt] = useState('');
+  const [isEnhancing, setIsEnhancing] = useState(false);
+  const [enhanceError, setEnhanceError] = useState<string | null>(null);
+  const lastEnhancedYamlRef = useRef<string>('');
+
+  // 生成関連
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generationError, setGenerationError] = useState<string | null>(null);
+
+  // PromptPanelのタブ状態
+  const [promptActiveTab, setPromptActiveTab] = useState<PromptTab>('prompt');
+  const [promptSubTab, setPromptSubTab] = useState<PromptSubTab>('yaml');
 
   // 初期化済みフラグ
   const initialized = useRef(false);
@@ -133,7 +167,7 @@ export default function Home() {
   const yamlEditorRef = useRef<YamlEditorRef>(null);
 
   // リサイズ用のref
-  const resizeType = useRef<'preview' | 'left' | 'right' | 'variable' | null>(null);
+  const resizeType = useRef<'preview' | 'left' | 'right' | 'variable' | 'generation' | null>(null);
   const startPos = useRef(0);
   const startSize = useRef(0);
 
@@ -150,6 +184,7 @@ export default function Home() {
         setLeftPanelWidth(savedState.leftPanelWidth);
         setRightPanelWidth(savedState.rightPanelWidth);
         setVariablePanelWidth(savedState.variablePanelWidth);
+        setGenerationPanelWidth(savedState.generationPanelWidth);
 
         const tree = await fileAPI.listFiles();
         setFileTree(tree);
@@ -213,6 +248,18 @@ export default function Home() {
           console.error('Failed to load key dictionary:', e);
         }
 
+        // ComfyUI/Ollama設定を読み込み
+        setComfySettings(loadComfyUISettings());
+        fetchComfyUISettings().then(setComfySettings);
+        setOllamaSettings(loadOllamaSettings());
+        fetchOllamaSettings().then(setOllamaSettings);
+
+        // エンハンス有効状態を復元
+        const savedEnhanceEnabled = localStorage.getItem('image-prompt-builder-enhance-enabled');
+        if (savedEnhanceEnabled !== null) {
+          setEnhanceEnabled(savedEnhanceEnabled === 'true');
+        }
+
         initialized.current = true;
       } catch (error) {
         console.error('Failed to load files:', error);
@@ -241,11 +288,166 @@ export default function Home() {
     [mergedYamlRaw, variableValues]
   );
 
-  // 変数解決済みのプロンプトテキスト
-  const promptText = useMemo(
-    () => resolveVariables(promptTextRaw, variableValues),
-    [promptTextRaw, variableValues]
-  );
+  // mergedYamlが変更されたらエンハンスキャッシュをクリア
+  useEffect(() => {
+    if (mergedYaml !== lastEnhancedYamlRef.current) {
+      setEnhancedPrompt('');
+      setEnhanceError(null);
+    }
+  }, [mergedYaml]);
+
+  // エンハンス有効/無効切り替え
+  const handleEnhanceEnabledChange = useCallback((enabled: boolean) => {
+    setEnhanceEnabled(enabled);
+    localStorage.setItem('image-prompt-builder-enhance-enabled', String(enabled));
+  }, []);
+
+  // エンハンス実行（GenerationPanelから呼ばれる）
+  const handleEnhance = useCallback(async () => {
+    if (!ollamaSettings?.enabled || !ollamaSettings.model || !mergedYaml) return;
+
+    // Enhancedタブに切り替え
+    setPromptActiveTab('prompt');
+    setPromptSubTab('enhanced');
+
+    setIsEnhancing(true);
+    setEnhanceError(null);
+
+    try {
+      const client = new OllamaClient(ollamaSettings.baseUrl);
+      const systemPrompt = getEnhancerSystemPrompt(ollamaSettings);
+
+      const result = await client.generate(
+        mergedYaml,
+        ollamaSettings.model,
+        systemPrompt,
+        { temperature: ollamaSettings.temperature },
+        (progress) => {
+          if (progress.content) {
+            setEnhancedPrompt(progress.content);
+          }
+        }
+      );
+
+      if (result.success) {
+        setEnhancedPrompt(result.content);
+        lastEnhancedYamlRef.current = mergedYaml;
+      } else {
+        setEnhanceError(result.error || 'Enhancement failed');
+      }
+    } catch (error) {
+      setEnhanceError(error instanceof Error ? error.message : 'Unknown error');
+    } finally {
+      setIsEnhancing(false);
+    }
+  }, [ollamaSettings, mergedYaml]);
+
+  // 画像生成
+  const handleGenerate = useCallback(async () => {
+    if (!comfySettings?.enabled || !mergedYaml) return;
+
+    const activeWorkflow = getActiveWorkflow(comfySettings);
+    if (!activeWorkflow) {
+      setGenerationError('ワークフローが選択されていません');
+      return;
+    }
+
+    // Galleryタブに切り替え
+    setPromptActiveTab('gallery');
+
+    setIsGenerating(true);
+    setGenerationError(null);
+
+    try {
+      let promptToUse = mergedYaml;
+
+      // エンハンスが有効な場合
+      if (enhanceEnabled && ollamaSettings?.enabled) {
+        if (enhancedPrompt && lastEnhancedYamlRef.current === mergedYaml) {
+          promptToUse = enhancedPrompt;
+          console.log('[Generate] Using cached enhanced prompt');
+        } else {
+          console.log('[Generate] Running enhancement first...');
+          const client = new OllamaClient(ollamaSettings.baseUrl);
+          const systemPrompt = getEnhancerSystemPrompt(ollamaSettings);
+
+          const enhanceResult = await client.generate(
+            mergedYaml,
+            ollamaSettings.model,
+            systemPrompt,
+            { temperature: ollamaSettings.temperature }
+          );
+
+          if (enhanceResult.success) {
+            promptToUse = enhanceResult.content;
+            setEnhancedPrompt(enhanceResult.content);
+            lastEnhancedYamlRef.current = mergedYaml;
+            console.log('[Generate] Enhancement completed');
+          } else {
+            console.warn('[Generate] Enhancement failed, using raw prompt');
+          }
+        }
+      }
+
+      // ワークフローを取得
+      const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
+      const comfyuiDir = await getComfyUIPath();
+      const workflowPath = await joinPath(comfyuiDir, activeWorkflow.file);
+
+      if (!(await exists(workflowPath))) {
+        throw new Error(`Workflow file not found: ${activeWorkflow.file}`);
+      }
+
+      const content = await readTextFile(workflowPath);
+      const workflow: Record<string, unknown> = JSON.parse(content);
+
+      // 生成
+      const client = new ComfyUIClient(comfySettings.url);
+      const result = await client.generate(
+        workflow,
+        promptToUse,
+        activeWorkflow.promptNodeId,
+        activeWorkflow.samplerNodeId,
+        activeWorkflow.overrides
+      );
+
+      console.log('Generation result:', result);
+
+      if (result.success && result.images.length > 0) {
+        console.log('Saving images:', result.images);
+        for (const imageUrl of result.images) {
+          try {
+            console.log('Saving image from:', imageUrl);
+            await imageAPI.save(imageUrl, promptToUse, activeWorkflow.id);
+            console.log('Image saved successfully');
+          } catch (e) {
+            console.error('Failed to save image:', e);
+          }
+        }
+      } else if (!result.success) {
+        console.error('Generation failed:', result.error);
+        setGenerationError(result.error || 'Generation failed');
+      } else {
+        console.warn('Generation succeeded but no images returned');
+        setGenerationError('No images returned from ComfyUI');
+      }
+    } catch (error) {
+      setGenerationError(error instanceof Error ? error.message : 'Unknown error');
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [comfySettings, ollamaSettings, mergedYaml, enhanceEnabled, enhancedPrompt]);
+
+  // 生成可能かどうか
+  const canGenerate = useMemo(() => {
+    const activeWorkflow = comfySettings ? getActiveWorkflow(comfySettings) : null;
+    return comfySettings?.enabled && !!activeWorkflow && !!mergedYaml && !isGenerating && !isEnhancing;
+  }, [comfySettings, mergedYaml, isGenerating, isEnhancing]);
+
+  // エンハンス可能かどうか
+  const canEnhance = useMemo(() => {
+    return ollamaSettings?.enabled && !!ollamaSettings?.model && !!mergedYaml;
+  }, [ollamaSettings, mergedYaml]);
 
   // ファイルパス一覧（補完用）
   const allFilePaths = useMemo(() => {
@@ -277,8 +479,6 @@ export default function Home() {
   useEffect(() => {
     if (!selectedFile || !currentContent) {
       setMergedYamlRaw('');
-      setPromptTextRaw('');
-      setLookName(undefined);
       setIsYamlValid(true);
       setVariables([]);
       return;
@@ -299,8 +499,6 @@ export default function Home() {
         const isEmpty = Object.keys(merged).length === 0 && currentContent.trim() !== '';
         if (isEmpty) {
           setMergedYamlRaw('');
-          setPromptTextRaw('');
-          setLookName(undefined);
           setIsYamlValid(false);
           // 変数リストは維持（invalidでも前回の変数を表示し続ける）
           return;
@@ -331,17 +529,11 @@ export default function Home() {
           return next;
         });
 
-        const prompt = generatePromptText(merged);
-        const look = (merged.look as { name?: string })?.name;
         setMergedYamlRaw(yamlStr);
-        setPromptTextRaw(prompt);
-        setLookName(look);
         setIsYamlValid(true);
       } catch {
         if (cancelled) return;
         setMergedYamlRaw('');
-        setPromptTextRaw('');
-        setLookName(undefined);
         setIsYamlValid(false);
         // 変数リストは維持（invalidでも前回の変数を表示し続ける）
       }
@@ -826,6 +1018,16 @@ export default function Home() {
     document.body.style.userSelect = 'none';
   }, [variablePanelWidth]);
 
+  // 生成パネルリサイズハンドラ
+  const handleGenerationResizeStart = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    resizeType.current = 'generation';
+    startPos.current = e.clientX;
+    startSize.current = generationPanelWidth;
+    document.body.style.cursor = 'ew-resize';
+    document.body.style.userSelect = 'none';
+  }, [generationPanelWidth]);
+
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
       if (!resizeType.current) return;
@@ -847,6 +1049,11 @@ export default function Home() {
         const delta = e.clientX - startPos.current;
         const newWidth = Math.max(150, Math.min(400, startSize.current + delta));
         setVariablePanelWidth(newWidth);
+      } else if (resizeType.current === 'generation') {
+        // 生成パネルは左に動かすと広がる
+        const delta = startPos.current - e.clientX;
+        const newWidth = Math.max(150, Math.min(350, startSize.current + delta));
+        setGenerationPanelWidth(newWidth);
       }
     };
 
@@ -869,10 +1076,10 @@ export default function Home() {
   useEffect(() => {
     if (!initialized.current) return;
     const timer = setTimeout(() => {
-      saveState({ previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth });
+      saveState({ previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth, generationPanelWidth });
     }, 500);
     return () => clearTimeout(timer);
-  }, [previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth]);
+  }, [previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth, generationPanelWidth]);
 
   if (isLoading) {
     return (
@@ -1009,14 +1216,47 @@ export default function Home() {
           className="w-1 flex-shrink-0 bg-[#333] cursor-ew-resize hover:bg-[#007acc]"
           onMouseDown={handleVariableResizeStart}
         />
-        {/* Preview */}
+        {/* Prompt/Gallery Panel */}
         <div className="flex-1 min-w-0">
-          <PreviewPanel
+          <PromptPanel
             key={settingsKey}
+            activeTab={promptActiveTab}
+            onActiveTabChange={setPromptActiveTab}
+            promptSubTab={promptSubTab}
+            onPromptSubTabChange={setPromptSubTab}
             mergedYaml={mergedYaml}
-            promptText={promptText}
-            lookName={lookName}
             isYamlValid={isYamlValid}
+            enhancedPrompt={enhancedPrompt}
+            onEnhancedPromptChange={setEnhancedPrompt}
+            isEnhancing={isEnhancing}
+            enhanceError={enhanceError}
+            onClearEnhanceError={() => setEnhanceError(null)}
+            comfyEnabled={comfySettings?.enabled || false}
+            isGenerating={isGenerating}
+          />
+        </div>
+        {/* Generation Panel Resize Handle */}
+        <div
+          className="w-1 flex-shrink-0 bg-[#333] cursor-ew-resize hover:bg-[#007acc]"
+          onMouseDown={handleGenerationResizeStart}
+        />
+        {/* Generation Panel */}
+        <div
+          className="flex-shrink-0"
+          style={{ width: generationPanelWidth }}
+        >
+          <GenerationPanel
+            enhanceEnabled={enhanceEnabled}
+            onEnhanceEnabledChange={handleEnhanceEnabledChange}
+            onEnhance={handleEnhance}
+            hasEnhancedPrompt={!!enhancedPrompt}
+            isGenerating={isGenerating}
+            isEnhancing={isEnhancing}
+            onGenerate={handleGenerate}
+            generationError={generationError}
+            onClearError={() => setGenerationError(null)}
+            canGenerate={canGenerate}
+            canEnhance={canEnhance}
           />
         </div>
       </div>
