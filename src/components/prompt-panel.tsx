@@ -13,6 +13,52 @@ import { imageAPI, searchImagesByQuery } from '@/lib/image-api';
 export type PromptTab = 'prompt' | 'gallery';
 export type PromptSubTab = 'yaml' | 'enhanced';
 
+// YAMLのnegativeセクションを赤くハイライトするコンポーネント
+function YamlHighlight({ yaml }: { yaml: string }) {
+  if (!yaml) {
+    return <span className="text-[#888]">(YAMLを入力してください)</span>;
+  }
+
+  // negativeセクションを検出して分割
+  // パターン: 行頭の "negative:" から、次の行頭のトップレベルキー（インデントなしでアルファベット始まり）まで
+  // 1行形式: negative: hogehoge
+  // 複数行形式: negative:\n  - hogehoge\n  - fugafuga
+  const negativePattern = /^negative:.*(?:\n(?:[ \t].*|$))*/gm;
+  const parts: { text: string; isNegative: boolean }[] = [];
+  let lastIndex = 0;
+  let match;
+
+  while ((match = negativePattern.exec(yaml)) !== null) {
+    // negativeの前の部分
+    if (match.index > lastIndex) {
+      parts.push({ text: yaml.slice(lastIndex, match.index), isNegative: false });
+    }
+    // negativeセクション
+    parts.push({ text: match[0], isNegative: true });
+    lastIndex = match.index + match[0].length;
+  }
+
+  // 残りの部分
+  if (lastIndex < yaml.length) {
+    parts.push({ text: yaml.slice(lastIndex), isNegative: false });
+  }
+
+  // パーツがない場合は全体を通常表示
+  if (parts.length === 0) {
+    return <span className="text-[#d4d4d4]">{yaml}</span>;
+  }
+
+  return (
+    <>
+      {parts.map((part, index) => (
+        <span key={index} className={part.isNegative ? 'text-red-400/80' : 'text-[#d4d4d4]'}>
+          {part.text}
+        </span>
+      ))}
+    </>
+  );
+}
+
 interface PromptPanelProps {
   // タブ状態（親で制御）
   activeTab: PromptTab;
@@ -235,8 +281,8 @@ export function PromptPanel({
                   <span>YAML parse error - 構文を確認してください</span>
                 </div>
               ) : (
-                <pre className="p-3 text-xs font-mono text-[#d4d4d4] whitespace-pre-wrap">
-                  {mergedYaml || '(YAMLを入力してください)'}
+                <pre className="p-3 text-xs font-mono whitespace-pre-wrap">
+                  <YamlHighlight yaml={mergedYaml} />
                 </pre>
               )
             ) : (

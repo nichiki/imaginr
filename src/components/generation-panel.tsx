@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
+import { useState, useCallback, useEffect, useMemo } from 'react';
 import { Play, Loader2, AlertCircle, X, Sparkles } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
@@ -41,6 +42,13 @@ interface GenerationPanelProps {
   // 生成可能かどうか
   canGenerate: boolean;
   canEnhance: boolean;
+
+  // プロパティ上書き
+  overrideValues: Record<string, string | number>;
+  onOverrideValuesChange: (values: Record<string, string | number>) => void;
+
+  // ワークフロー変更通知
+  onWorkflowChange?: () => void;
 }
 
 export function GenerationPanel({
@@ -55,6 +63,9 @@ export function GenerationPanel({
   onClearError,
   canGenerate,
   canEnhance,
+  overrideValues,
+  onOverrideValuesChange,
+  onWorkflowChange,
 }: GenerationPanelProps) {
   // ComfyUI設定
   const [comfySettings, setComfySettings] = useState<ComfyUISettings | null>(() => loadComfyUISettings());
@@ -91,7 +102,8 @@ export function GenerationPanel({
     setSelectedWorkflowId(id);
     saveActiveWorkflowId(id);
     fetchComfyUISettings().then(setComfySettings);
-  }, []);
+    onWorkflowChange?.();
+  }, [onWorkflowChange]);
 
   // プリセット変更
   const handlePresetChange = useCallback((id: string) => {
@@ -100,10 +112,32 @@ export function GenerationPanel({
     fetchOllamaSettings().then(setOllamaSettings);
   }, []);
 
-  const workflows = comfySettings?.workflows || [];
+  const workflows = useMemo(() => comfySettings?.workflows || [], [comfySettings?.workflows]);
   const presets = ollamaSettings?.enhancerPresets || [];
   const isComfyEnabled = comfySettings?.enabled;
   const isOllamaEnabled = ollamaSettings?.enabled;
+
+  // 選択中ワークフローのoverridesを取得
+  const selectedWorkflow = useMemo(() => {
+    return workflows.find(wf => wf.id === selectedWorkflowId);
+  }, [workflows, selectedWorkflowId]);
+
+  const overrides = useMemo(() => selectedWorkflow?.overrides || [], [selectedWorkflow?.overrides]);
+
+  // override値の変更ハンドラ
+  const handleOverrideChange = useCallback((index: number, value: string) => {
+    const override = overrides[index];
+    if (!override) return;
+
+    const key = `${override.nodeId}.${override.property}`;
+    const numVal = Number(value);
+    const newValue = !isNaN(numVal) && value !== '' ? numVal : value;
+
+    onOverrideValuesChange({
+      ...overrideValues,
+      [key]: newValue,
+    });
+  }, [overrides, overrideValues, onOverrideValuesChange]);
 
   if (!isComfyEnabled) {
     return (
@@ -203,6 +237,27 @@ export function GenerationPanel({
                 onCheckedChange={onEnhanceEnabledChange}
                 className="data-[state=checked]:bg-[#094771]"
               />
+            </div>
+          )}
+
+          {/* プロパティ上書き */}
+          {overrides.length > 0 && (
+            <div className="flex flex-col gap-2 mt-2">
+              <span className="text-xs uppercase text-[#666] font-medium">Properties</span>
+              {overrides.map((override, index) => {
+                const key = `${override.nodeId}.${override.property}`;
+                const currentValue = overrideValues[key] ?? override.value;
+                return (
+                  <div key={key} className="flex flex-col gap-1">
+                    <label className="text-xs text-[#d4d4d4]">{override.property}</label>
+                    <Input
+                      value={String(currentValue)}
+                      onChange={(e) => handleOverrideChange(index, e.target.value)}
+                      className="h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
+                    />
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

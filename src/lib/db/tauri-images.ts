@@ -8,12 +8,14 @@ import yaml from 'js-yaml';
 export interface ImageRecord {
   id: string;
   filename: string;
-  prompt_yaml: string;
+  prompt: string;
   workflow_id: string | null;
   seed: number | null;
   width: number | null;
   height: number | null;
   file_size: number | null;
+  negative_prompt: string | null;
+  parameters: string | null;
   created_at: string;
   deleted_at: string | null;
   favorite: number;
@@ -33,12 +35,14 @@ export interface ImageInfo {
 export interface CreateImageInput {
   id: string;
   filename: string;
-  promptYaml: string;
+  prompt: string;
   workflowId?: string;
   seed?: number;
   width?: number;
   height?: number;
   fileSize?: number;
+  negativePrompt?: string;
+  parameters?: Record<string, unknown>;
 }
 
 /**
@@ -50,23 +54,25 @@ export async function createImage(input: CreateImageInput): Promise<ImageRecord>
 
   await db.execute(`
     INSERT INTO images (
-      id, filename, prompt_yaml, workflow_id, seed, width, height, file_size, created_at
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+      id, filename, prompt, workflow_id, seed, width, height, file_size, negative_prompt, parameters, created_at
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
   `, [
     input.id,
     input.filename,
-    input.promptYaml,
+    input.prompt,
     input.workflowId || null,
     input.seed || null,
     input.width || null,
     input.height || null,
     input.fileSize || null,
+    input.negativePrompt || null,
+    input.parameters ? JSON.stringify(input.parameters) : null,
     now
   ]);
 
-  // Extract and save attributes from YAML
+  // Extract and save attributes from YAML (if prompt is YAML format)
   try {
-    const parsed = yaml.load(input.promptYaml);
+    const parsed = yaml.load(input.prompt);
     if (parsed && typeof parsed === 'object') {
       const attrs = extractAttributes(parsed as Record<string, unknown>);
       await saveAttributesAsync(db, input.id, attrs);
@@ -96,13 +102,13 @@ export async function listImages(includeDeleted = false): Promise<ImageInfo[]> {
   const db = await getDatabase();
 
   const query = includeDeleted
-    ? 'SELECT id, filename, prompt_yaml, created_at, deleted_at, favorite FROM images ORDER BY created_at DESC'
-    : 'SELECT id, filename, prompt_yaml, created_at, deleted_at, favorite FROM images WHERE deleted_at IS NULL ORDER BY created_at DESC';
+    ? 'SELECT id, filename, prompt, created_at, deleted_at, favorite FROM images ORDER BY created_at DESC'
+    : 'SELECT id, filename, prompt, created_at, deleted_at, favorite FROM images WHERE deleted_at IS NULL ORDER BY created_at DESC';
 
   const rows = await db.select<{
     id: string;
     filename: string;
-    prompt_yaml: string;
+    prompt: string;
     created_at: string;
     deleted_at: string | null;
     favorite: number;
@@ -112,7 +118,7 @@ export async function listImages(includeDeleted = false): Promise<ImageInfo[]> {
     id: row.id,
     filename: row.filename,
     createdAt: row.created_at,
-    prompt: row.prompt_yaml,
+    prompt: row.prompt,
     deleted: !!row.deleted_at,
     favorite: row.favorite === 1,
   }));
@@ -183,12 +189,12 @@ export async function searchImages(query: string, includeDeleted = false): Promi
   const rows = await db.select<{
     id: string;
     filename: string;
-    prompt_yaml: string;
+    prompt: string;
     created_at: string;
     deleted_at: string | null;
     favorite: number;
   }>(`
-    SELECT i.id, i.filename, i.prompt_yaml, i.created_at, i.deleted_at, i.favorite
+    SELECT i.id, i.filename, i.prompt, i.created_at, i.deleted_at, i.favorite
     FROM images i
     JOIN images_fts f ON i.id = f.id
     WHERE images_fts MATCH ?
@@ -200,7 +206,7 @@ export async function searchImages(query: string, includeDeleted = false): Promi
     id: row.id,
     filename: row.filename,
     createdAt: row.created_at,
-    prompt: row.prompt_yaml,
+    prompt: row.prompt,
     deleted: !!row.deleted_at,
     favorite: row.favorite === 1,
   }));

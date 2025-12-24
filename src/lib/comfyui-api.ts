@@ -14,10 +14,25 @@ export interface GenerationProgress {
 export interface GenerationResult {
   success: boolean;
   images: string[];
+  seed?: number;
   error?: string;
 }
 
 type ProgressCallback = (progress: GenerationProgress) => void;
+
+export interface GenerationOptions {
+  workflow: Record<string, unknown>;
+  prompt: string;
+  promptNodeId: string;
+  promptProperty?: string;      // default: 'text'
+  samplerNodeId: string;
+  samplerProperty?: string;     // default: 'seed'
+  negativePrompt?: string;
+  negativeNodeId?: string;
+  negativeProperty?: string;    // default: 'text'
+  overrides?: NodeOverride[];
+  onProgress?: ProgressCallback;
+}
 
 export class ComfyUIClient {
   private baseUrl: string;
@@ -39,19 +54,41 @@ export class ComfyUIClient {
     });
   }
 
-  async generate(
-    workflow: Record<string, unknown>,
-    prompt: string,
-    promptNodeId: string,
-    samplerNodeId: string,
-    overrides: NodeOverride[] = [],
-    onProgress?: ProgressCallback
-  ): Promise<GenerationResult> {
+  async generate(options: GenerationOptions): Promise<GenerationResult> {
+    const {
+      workflow,
+      prompt,
+      promptNodeId,
+      promptProperty = 'text',
+      samplerNodeId,
+      samplerProperty = 'seed',
+      negativePrompt,
+      negativeNodeId,
+      negativeProperty = 'text',
+      overrides = [],
+      onProgress,
+    } = options;
+
     try {
       onProgress?.({ status: 'connecting' });
 
+      // シードを生成
+      const seed = this.generateRandomSeed();
+
       // プロンプトとシードをワークフローに埋め込む
-      const preparedWorkflow = this.prepareWorkflow(workflow, prompt, promptNodeId, samplerNodeId, overrides);
+      const preparedWorkflow = this.prepareWorkflow({
+        workflow,
+        prompt,
+        promptNodeId,
+        promptProperty,
+        samplerNodeId,
+        samplerProperty,
+        seed,
+        negativePrompt,
+        negativeNodeId,
+        negativeProperty,
+        overrides,
+      });
 
       // プロンプトをキュー
       onProgress?.({ status: 'queued' });
@@ -62,7 +99,7 @@ export class ComfyUIClient {
       const images = await this.waitForCompletion(promptId, onProgress);
 
       onProgress?.({ status: 'completed', progress: 100 });
-      return { success: true, images };
+      return { success: true, images, seed };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : 'Unknown error';
       onProgress?.({ status: 'error', error: errorMessage });
@@ -74,34 +111,63 @@ export class ComfyUIClient {
     return Math.floor(Math.random() * 4294967294) + 1;
   }
 
-  private prepareWorkflow(
-    workflow: Record<string, unknown>,
-    prompt: string,
-    promptNodeId: string,
-    samplerNodeId: string,
-    overrides: NodeOverride[] = []
-  ): Record<string, unknown> {
+  private prepareWorkflow(options: {
+    workflow: Record<string, unknown>;
+    prompt: string;
+    promptNodeId: string;
+    promptProperty: string;
+    samplerNodeId: string;
+    samplerProperty: string;
+    seed: number;
+    negativePrompt?: string;
+    negativeNodeId?: string;
+    negativeProperty: string;
+    overrides: NodeOverride[];
+  }): Record<string, unknown> {
+    const {
+      workflow,
+      prompt,
+      promptNodeId,
+      promptProperty,
+      samplerNodeId,
+      samplerProperty,
+      seed,
+      negativePrompt,
+      negativeNodeId,
+      negativeProperty,
+      overrides,
+    } = options;
+
     const copy = JSON.parse(JSON.stringify(workflow));
 
     // プロンプトを注入
     if (promptNodeId && copy[promptNodeId] && typeof copy[promptNodeId] === 'object') {
       const node = copy[promptNodeId] as Record<string, unknown>;
       if (node.inputs && typeof node.inputs === 'object') {
-        (node.inputs as Record<string, unknown>).text = prompt;
+        (node.inputs as Record<string, unknown>)[promptProperty] = prompt;
       }
     }
 
-    // サンプラーノードのシードをランダム化
+    // サンプラーノードのシードを設定
     if (samplerNodeId && copy[samplerNodeId] && typeof copy[samplerNodeId] === 'object') {
       const node = copy[samplerNodeId] as Record<string, unknown>;
       if (node.inputs && typeof node.inputs === 'object') {
-        (node.inputs as Record<string, unknown>).seed = this.generateRandomSeed();
+        (node.inputs as Record<string, unknown>)[samplerProperty] = seed;
+      }
+    }
+
+    // ネガティブプロンプトを注入
+    if (negativeNodeId && negativePrompt && copy[negativeNodeId] && typeof copy[negativeNodeId] === 'object') {
+      const node = copy[negativeNodeId] as Record<string, unknown>;
+      if (node.inputs && typeof node.inputs === 'object') {
+        (node.inputs as Record<string, unknown>)[negativeProperty] = negativePrompt;
       }
     }
 
     // overridesを適用
     for (const override of overrides) {
-      if (!override.nodeId || !override.property) continue;
+      // nodeId, property, valueのいずれかが空ならスキップ
+      if (!override.nodeId || !override.property || override.value === '') continue;
 
       const node = copy[override.nodeId];
       if (!node || typeof node !== 'object') continue;

@@ -321,3 +321,34 @@ export function generatePromptText(data: Record<string, unknown>): string {
 
   return cleanParts.join(', ');
 }
+
+/**
+ * ネガティブプロンプトの値を文字列に変換
+ * 配列の場合はカンマ区切りで結合
+ */
+export function formatNegativePrompt(negative: unknown): string {
+  if (Array.isArray(negative)) {
+    return negative.map(item => String(item).trim()).filter(Boolean).join(', ');
+  }
+  if (typeof negative === 'string') {
+    return negative.trim();
+  }
+  return '';
+}
+
+/**
+ * negativeキーを除外したデータを返す
+ * プロンプト生成やエンハンサーに送る際に使用
+ */
+export function excludeNegative(data: Record<string, unknown>): Record<string, unknown> {
+  const result = { ...data };
+  delete result.negative;
+  return result;
+}
+
+/**
+ * データからネガティブプロンプトを抽出
+ */
+export function extractNegativePrompt(data: Record<string, unknown>): string {
+  return formatNegativePrompt(data.negative);
+}

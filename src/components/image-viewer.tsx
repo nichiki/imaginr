@@ -9,7 +9,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
 import { X, ChevronLeft, ChevronRight, Download, Copy, Check, Loader2 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
-import { getImageDisplayUrl } from '@/lib/image-api';
+import { getImageDisplayUrl, imageAPI, type ImageDetail } from '@/lib/image-api';
 import { getImagesPath, joinPath } from '@/lib/tauri-utils';
 
 export interface ImageInfo {
@@ -29,18 +29,28 @@ interface ImageViewerProps {
 export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerProps) {
   const [copied, setCopied] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
+  const [detail, setDetail] = useState<ImageDetail | null>(null);
 
-  // 画像URLを取得
+  // 画像URLと詳細を取得
   useEffect(() => {
     if (!image) {
       setImageUrl(null);
+      setDetail(null);
       return;
     }
 
     let cancelled = false;
+
+    // 画像URL取得
     getImageDisplayUrl(image.filename).then((url) => {
       if (!cancelled) setImageUrl(url);
     });
+
+    // 詳細取得
+    imageAPI.getDetail(image.id).then((d) => {
+      if (!cancelled) setDetail(d);
+    });
+
     return () => { cancelled = true; };
   }, [image]);
 
@@ -184,11 +194,42 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
                   </>
                 )}
               </div>
-              {/* 右側：プロンプト */}
+              {/* 右側：詳細情報 */}
               <div className="w-[350px] flex-shrink-0 flex flex-col bg-[#252526]">
                 <div className="flex-1 overflow-auto p-3">
+                  {/* メタ情報 */}
+                  {detail && (detail.seed || detail.negativePrompt || detail.parameters) && (
+                    <div className="mb-4 space-y-3">
+                      {detail.seed && (
+                        <div>
+                          <span className="text-xs text-[#888]">Seed</span>
+                          <pre className="text-xs font-mono text-[#d4d4d4] whitespace-pre-wrap mt-1">
+                            {detail.seed}
+                          </pre>
+                        </div>
+                      )}
+                      {detail.parameters && Object.keys(detail.parameters).length > 0 && (
+                        <div>
+                          <span className="text-xs text-[#888]">Parameters</span>
+                          <pre className="text-xs font-mono text-[#d4d4d4] whitespace-pre-wrap mt-1">
+                            {Object.entries(detail.parameters).map(([key, value]) => `${key}: ${value}`).join('\n')}
+                          </pre>
+                        </div>
+                      )}
+                      {detail.negativePrompt && (
+                        <div>
+                          <span className="text-xs text-[#888]">Negative</span>
+                          <pre className="text-xs font-mono text-red-400/80 whitespace-pre-wrap mt-1">
+                            {detail.negativePrompt}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* プロンプト */}
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-[#888]">プロンプト (YAML)</span>
+                    <span className="text-xs text-[#888]">Prompt</span>
                     {image.prompt && (
                       <Button
                         variant="ghost"

@@ -10,9 +10,10 @@ interface WorkflowEditorProps {
   workflow: WorkflowConfig;
   onUpdate: (updates: Partial<WorkflowConfig>) => void;
   onRemove: () => void;
+  hideRemoveButton?: boolean;
 }
 
-export function WorkflowEditor({ workflow, onUpdate, onRemove }: WorkflowEditorProps) {
+export function WorkflowEditor({ workflow, onUpdate, onRemove, hideRemoveButton }: WorkflowEditorProps) {
   const handleAddOverride = () => {
     const newOverride: NodeOverride = { nodeId: '', property: '', value: '' };
     onUpdate({
@@ -33,18 +34,20 @@ export function WorkflowEditor({ workflow, onUpdate, onRemove }: WorkflowEditorP
 
   return (
     <div className="space-y-3 p-3 bg-[#1e1e1e] rounded border border-[#444]">
-      <div className="flex items-center justify-between">
-        <Label className="text-sm font-medium">ワークフロー設定</Label>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-6 px-2 text-red-400 hover:text-red-300 hover:bg-[#3c3c3c]"
-          onClick={onRemove}
-        >
-          <Trash2 className="h-3 w-3 mr-1" />
-          削除
-        </Button>
-      </div>
+      {!hideRemoveButton && (
+        <div className="flex items-center justify-between">
+          <Label className="text-sm font-medium">ワークフロー設定</Label>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-6 px-2 text-red-400 hover:text-red-300 hover:bg-[#3c3c3c]"
+            onClick={onRemove}
+          >
+            <Trash2 className="h-3 w-3 mr-1" />
+            削除
+          </Button>
+        </div>
+      )}
 
       <div className="space-y-2">
         <Label className="text-xs text-[#b0b0b0]">表示名</Label>
@@ -64,25 +67,64 @@ export function WorkflowEditor({ workflow, onUpdate, onRemove }: WorkflowEditorP
         />
       </div>
 
-      <div className="grid grid-cols-2 gap-2">
-        <div className="space-y-1">
-          <Label className="text-xs text-[#b0b0b0]">プロンプトノードID</Label>
+      {/* プロンプトノード設定 */}
+      <div className="space-y-2">
+        <Label className="text-xs text-[#b0b0b0]">プロンプトノード</Label>
+        <div className="grid grid-cols-2 gap-2">
           <Input
             value={workflow.promptNodeId}
             onChange={(e) => onUpdate({ promptNodeId: e.target.value })}
-            placeholder="例: 6"
+            placeholder="ノードID (例: 6)"
+            className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-8"
+          />
+          <Input
+            value={workflow.promptProperty || ''}
+            onChange={(e) => onUpdate({ promptProperty: e.target.value || undefined })}
+            placeholder="プロパティ (default: text)"
             className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-8"
           />
         </div>
-        <div className="space-y-1">
-          <Label className="text-xs text-[#b0b0b0]">サンプラーノードID</Label>
+      </div>
+
+      {/* サンプラーノード設定 */}
+      <div className="space-y-2">
+        <Label className="text-xs text-[#b0b0b0]">サンプラーノード</Label>
+        <div className="grid grid-cols-2 gap-2">
           <Input
             value={workflow.samplerNodeId}
             onChange={(e) => onUpdate({ samplerNodeId: e.target.value })}
-            placeholder="例: 3"
+            placeholder="ノードID (例: 3)"
+            className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-8"
+          />
+          <Input
+            value={workflow.samplerProperty || ''}
+            onChange={(e) => onUpdate({ samplerProperty: e.target.value || undefined })}
+            placeholder="プロパティ (default: seed)"
             className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-8"
           />
         </div>
+      </div>
+
+      {/* ネガティブプロンプトノード設定 */}
+      <div className="space-y-2">
+        <Label className="text-xs text-[#b0b0b0]">ネガティブプロンプトノード (任意)</Label>
+        <div className="grid grid-cols-2 gap-2">
+          <Input
+            value={workflow.negativeNodeId || ''}
+            onChange={(e) => onUpdate({ negativeNodeId: e.target.value || undefined })}
+            placeholder="ノードID (未設定時は無視)"
+            className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-8"
+          />
+          <Input
+            value={workflow.negativeProperty || ''}
+            onChange={(e) => onUpdate({ negativeProperty: e.target.value || undefined })}
+            placeholder="プロパティ (default: text)"
+            className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-8"
+          />
+        </div>
+        <p className="text-xs text-[#666]">
+          YAMLの「negative」キーの内容がこのノードに送られます
+        </p>
       </div>
 
       {/* オーバーライド設定 */}
@@ -111,7 +153,7 @@ export function WorkflowEditor({ workflow, onUpdate, onRemove }: WorkflowEditorP
                   value={override.nodeId}
                   onChange={(e) => handleUpdateOverride(index, { nodeId: e.target.value })}
                   placeholder="NodeID"
-                  className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-xs h-7 w-16"
+                  className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-xs h-7 flex-1"
                 />
                 <Input
                   value={override.property}
@@ -129,7 +171,7 @@ export function WorkflowEditor({ workflow, onUpdate, onRemove }: WorkflowEditorP
                     });
                   }}
                   placeholder="value"
-                  className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-xs h-7 w-20"
+                  className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-xs h-7 flex-1"
                 />
                 <Button
                   variant="ghost"

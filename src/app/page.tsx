@@ -7,11 +7,14 @@ import { PromptPanel, type PromptTab, type PromptSubTab } from '@/components/pro
 import { GenerationPanel } from '@/components/generation-panel';
 import { YamlEditor, YamlEditorRef } from '@/components/yaml-editor';
 import { fileAPI, FileTreeItem, RenameResult } from '@/lib/file-api';
+import yaml from 'js-yaml';
 import {
   resolveAndMergeAsync,
   objectToYaml,
   cleanYamlString,
   FileData,
+  excludeNegative,
+  extractNegativePrompt,
 } from '@/lib/yaml-utils';
 import { Snippet, snippetAPI } from '@/lib/snippet-api';
 import {
@@ -130,6 +133,8 @@ export default function Home() {
   // マージ結果（変数解決前）
   const [mergedYamlRaw, setMergedYamlRaw] = useState('');
   const [isYamlValid, setIsYamlValid] = useState(true);
+  // ネガティブプロンプト（マージ結果から抽出）
+  const [negativePrompt, setNegativePrompt] = useState('');
 
   // プレビューパネルの高さ
   const [previewHeight, setPreviewHeight] = useState(280);
@@ -152,6 +157,9 @@ export default function Home() {
   const [isEnhancing, setIsEnhancing] = useState(false);
   const [enhanceError, setEnhanceError] = useState<string | null>(null);
   const lastEnhancedYamlRef = useRef<string>('');
+
+  // プロパティ上書き値（生成パネルで入力された値）
+  const [overrideValues, setOverrideValues] = useState<Record<string, string | number>>({});
 
   // 生成関連
   const [isGenerating, setIsGenerating] = useState(false);
@@ -282,10 +290,32 @@ export default function Home() {
     filesRef.current = files;
   }, [files]);
 
-  // 変数解決済みのマージ結果（空の値を除去）
+  // 変数解決済みのマージ結果（表示用、negativeも含む）
   const mergedYaml = useMemo(
     () => cleanYamlString(resolveVariables(mergedYamlRaw, variableValues)),
     [mergedYamlRaw, variableValues]
+  );
+
+  // エンハンス・生成用（negativeを除外）
+  const mergedYamlForPrompt = useMemo(() => {
+    if (!mergedYaml) return '';
+    try {
+      const parsed = yaml.load(mergedYaml) as Record<string, unknown>;
+      if (!parsed || typeof parsed !== 'object') return mergedYaml;
+      const withoutNegative = excludeNegative(parsed);
+      const result = yaml.dump(withoutNegative, { indent: 2, lineWidth: -1 });
+      console.log('[mergedYamlForPrompt] Input has negative:', 'negative' in parsed);
+      console.log('[mergedYamlForPrompt] Output has negative:', result.includes('negative'));
+      return result;
+    } catch {
+      return mergedYaml;
+    }
+  }, [mergedYaml]);
+
+  // 変数解決済みのネガティブプロンプト
+  const resolvedNegativePrompt = useMemo(
+    () => resolveVariables(negativePrompt, variableValues),
+    [negativePrompt, variableValues]
   );
 
   // mergedYamlが変更されたらエンハンスキャッシュをクリア
@@ -304,7 +334,7 @@ export default function Home() {
 
   // エンハンス実行（GenerationPanelから呼ばれる）
   const handleEnhance = useCallback(async () => {
-    if (!ollamaSettings?.enabled || !ollamaSettings.model || !mergedYaml) return;
+    if (!ollamaSettings?.enabled || !ollamaSettings.model || !mergedYamlForPrompt) return;
 
     // Enhancedタブに切り替え
     setPromptActiveTab('prompt');
@@ -318,7 +348,7 @@ export default function Home() {
       const systemPrompt = getEnhancerSystemPrompt(ollamaSettings);
 
       const result = await client.generate(
-        mergedYaml,
+        mergedYamlForPrompt,
         ollamaSettings.model,
         systemPrompt,
         { temperature: ollamaSettings.temperature },
@@ -331,7 +361,7 @@ export default function Home() {
 
       if (result.success) {
         setEnhancedPrompt(result.content);
-        lastEnhancedYamlRef.current = mergedYaml;
+        lastEnhancedYamlRef.current = mergedYamlForPrompt;
       } else {
         setEnhanceError(result.error || 'Enhancement failed');
       }
@@ -340,11 +370,11 @@ export default function Home() {
     } finally {
       setIsEnhancing(false);
     }
-  }, [ollamaSettings, mergedYaml]);
+  }, [ollamaSettings, mergedYamlForPrompt]);
 
   // 画像生成
   const handleGenerate = useCallback(async () => {
-    if (!comfySettings?.enabled || !mergedYaml) return;
+    if (!comfySettings?.enabled || !mergedYamlForPrompt) return;
 
     const activeWorkflow = getActiveWorkflow(comfySettings);
     if (!activeWorkflow) {
@@ -359,11 +389,11 @@ export default function Home() {
     setGenerationError(null);
 
     try {
-      let promptToUse = mergedYaml;
+      let promptToUse = mergedYamlForPrompt;
 
       // エンハンスが有効な場合
       if (enhanceEnabled && ollamaSettings?.enabled) {
-        if (enhancedPrompt && lastEnhancedYamlRef.current === mergedYaml) {
+        if (enhancedPrompt && lastEnhancedYamlRef.current === mergedYamlForPrompt) {
           promptToUse = enhancedPrompt;
           console.log('[Generate] Using cached enhanced prompt');
         } else {
@@ -372,7 +402,7 @@ export default function Home() {
           const systemPrompt = getEnhancerSystemPrompt(ollamaSettings);
 
           const enhanceResult = await client.generate(
-            mergedYaml,
+            mergedYamlForPrompt,
             ollamaSettings.model,
             systemPrompt,
             { temperature: ollamaSettings.temperature }
@@ -381,7 +411,7 @@ export default function Home() {
           if (enhanceResult.success) {
             promptToUse = enhanceResult.content;
             setEnhancedPrompt(enhanceResult.content);
-            lastEnhancedYamlRef.current = mergedYaml;
+            lastEnhancedYamlRef.current = mergedYamlForPrompt;
             console.log('[Generate] Enhancement completed');
           } else {
             console.warn('[Generate] Enhancement failed, using raw prompt');
@@ -401,24 +431,54 @@ export default function Home() {
       const content = await readTextFile(workflowPath);
       const workflow: Record<string, unknown> = JSON.parse(content);
 
+      // overridesに生成パネルで入力された値を反映
+      const effectiveOverrides = activeWorkflow.overrides.map(override => {
+        const key = `${override.nodeId}.${override.property}`;
+        if (key in overrideValues) {
+          return { ...override, value: overrideValues[key] };
+        }
+        return override;
+      });
+
       // 生成
       const client = new ComfyUIClient(comfySettings.url);
-      const result = await client.generate(
+      const result = await client.generate({
         workflow,
-        promptToUse,
-        activeWorkflow.promptNodeId,
-        activeWorkflow.samplerNodeId,
-        activeWorkflow.overrides
-      );
+        prompt: promptToUse,
+        promptNodeId: activeWorkflow.promptNodeId,
+        promptProperty: activeWorkflow.promptProperty,
+        samplerNodeId: activeWorkflow.samplerNodeId,
+        samplerProperty: activeWorkflow.samplerProperty,
+        negativePrompt: resolvedNegativePrompt || undefined,
+        negativeNodeId: activeWorkflow.negativeNodeId,
+        negativeProperty: activeWorkflow.negativeProperty,
+        overrides: effectiveOverrides,
+      });
 
       console.log('Generation result:', result);
 
       if (result.success && result.images.length > 0) {
         console.log('Saving images:', result.images);
+
+        // パラメーターをオブジェクトに変換
+        const parametersObj: Record<string, unknown> = {};
+        for (const override of effectiveOverrides) {
+          if (override.nodeId && override.property && override.value !== '') {
+            parametersObj[override.property] = override.value;
+          }
+        }
+
         for (const imageUrl of result.images) {
           try {
             console.log('Saving image from:', imageUrl);
-            await imageAPI.save(imageUrl, promptToUse, activeWorkflow.id);
+            await imageAPI.save({
+              imageUrl,
+              prompt: promptToUse,
+              workflowId: activeWorkflow.id,
+              seed: result.seed,
+              negativePrompt: resolvedNegativePrompt || undefined,
+              parameters: Object.keys(parametersObj).length > 0 ? parametersObj : undefined,
+            });
             console.log('Image saved successfully');
           } catch (e) {
             console.error('Failed to save image:', e);
@@ -436,18 +496,18 @@ export default function Home() {
     } finally {
       setIsGenerating(false);
     }
-  }, [comfySettings, ollamaSettings, mergedYaml, enhanceEnabled, enhancedPrompt]);
+  }, [comfySettings, ollamaSettings, mergedYamlForPrompt, enhanceEnabled, enhancedPrompt, resolvedNegativePrompt, overrideValues]);
 
   // 生成可能かどうか
   const canGenerate = useMemo(() => {
     const activeWorkflow = comfySettings ? getActiveWorkflow(comfySettings) : null;
-    return comfySettings?.enabled && !!activeWorkflow && !!mergedYaml && !isGenerating && !isEnhancing;
-  }, [comfySettings, mergedYaml, isGenerating, isEnhancing]);
+    return comfySettings?.enabled && !!activeWorkflow && !!mergedYamlForPrompt && !isGenerating && !isEnhancing;
+  }, [comfySettings, mergedYamlForPrompt, isGenerating, isEnhancing]);
 
   // エンハンス可能かどうか
   const canEnhance = useMemo(() => {
-    return ollamaSettings?.enabled && !!ollamaSettings?.model && !!mergedYaml;
-  }, [ollamaSettings, mergedYaml]);
+    return ollamaSettings?.enabled && !!ollamaSettings?.model && !!mergedYamlForPrompt;
+  }, [ollamaSettings, mergedYamlForPrompt]);
 
   // ファイルパス一覧（補完用）
   const allFilePaths = useMemo(() => {
@@ -481,6 +541,7 @@ export default function Home() {
       setMergedYamlRaw('');
       setIsYamlValid(true);
       setVariables([]);
+      setNegativePrompt('');
       return;
     }
 
@@ -500,13 +561,20 @@ export default function Home() {
         if (isEmpty) {
           setMergedYamlRaw('');
           setIsYamlValid(false);
+          setNegativePrompt('');
           // 変数リストは維持（invalidでも前回の変数を表示し続ける）
           return;
         }
 
+        // ネガティブプロンプトを抽出
+        const negPrompt = extractNegativePrompt(merged);
+        setNegativePrompt(negPrompt);
+
+        // YAML文字列を生成（negativeも含む、表示用）
         const yamlStr = objectToYaml(merged);
 
         // マージ後のYAMLオブジェクトから変数を抽出（パス情報付き）
+        // ※ negativeも含めた元のmergedから抽出（negative内の変数も対応）
         const vars = extractVariablesWithPath(merged);
         setVariables(vars);
 
@@ -535,6 +603,7 @@ export default function Home() {
         if (cancelled) return;
         setMergedYamlRaw('');
         setIsYamlValid(false);
+        setNegativePrompt('');
         // 変数リストは維持（invalidでも前回の変数を表示し続ける）
       }
     })();
@@ -1246,6 +1315,7 @@ export default function Home() {
           style={{ width: generationPanelWidth }}
         >
           <GenerationPanel
+            key={settingsKey}
             enhanceEnabled={enhanceEnabled}
             onEnhanceEnabledChange={handleEnhanceEnabledChange}
             onEnhance={handleEnhance}
@@ -1257,6 +1327,9 @@ export default function Home() {
             onClearError={() => setGenerationError(null)}
             canGenerate={canGenerate}
             canEnhance={canEnhance}
+            overrideValues={overrideValues}
+            onOverrideValuesChange={setOverrideValues}
+            onWorkflowChange={() => fetchComfyUISettings().then(setComfySettings)}
           />
         </div>
       </div>

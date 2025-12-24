@@ -14,6 +14,22 @@ export interface ImageInfo {
   favorite?: boolean;
 }
 
+// Detailed image info (includes all metadata)
+export interface ImageDetail {
+  id: string;
+  filename: string;
+  createdAt: string;
+  prompt?: string;
+  workflowId?: string;
+  seed?: number;
+  width?: number;
+  height?: number;
+  negativePrompt?: string;
+  parameters?: Record<string, unknown>;
+  deleted?: boolean;
+  favorite?: boolean;
+}
+
 // Tauri API implementation - uses Tauri plugins directly
 async function tauriList(includeDeleted = false): Promise<ImageInfo[]> {
   const dbImages = await import('./db/tauri-images');
@@ -25,7 +41,38 @@ async function tauriSearch(query: string, includeDeleted = false): Promise<Image
   return dbImages.searchImages(query, includeDeleted);
 }
 
-async function tauriSave(imageUrl: string, prompt: string, workflowId?: string): Promise<ImageInfo> {
+async function tauriGetDetail(id: string): Promise<ImageDetail | null> {
+  const dbImages = await import('./db/tauri-images');
+  const record = await dbImages.getImage(id);
+  if (!record) return null;
+
+  return {
+    id: record.id,
+    filename: record.filename,
+    createdAt: record.created_at,
+    prompt: record.prompt,
+    workflowId: record.workflow_id || undefined,
+    seed: record.seed || undefined,
+    width: record.width || undefined,
+    height: record.height || undefined,
+    negativePrompt: record.negative_prompt || undefined,
+    parameters: record.parameters ? JSON.parse(record.parameters) : undefined,
+    deleted: !!record.deleted_at,
+    favorite: record.favorite === 1,
+  };
+}
+
+export interface SaveImageOptions {
+  imageUrl: string;
+  prompt: string;
+  workflowId?: string;
+  seed?: number;
+  negativePrompt?: string;
+  parameters?: Record<string, unknown>;
+}
+
+async function tauriSave(options: SaveImageOptions): Promise<ImageInfo> {
+  const { imageUrl, prompt, workflowId, seed, negativePrompt, parameters } = options;
   const { fetch: tauriFetch } = await import('@tauri-apps/plugin-http');
   const { writeFile, mkdir, exists } = await import('@tauri-apps/plugin-fs');
   const dbImages = await import('./db/tauri-images');
@@ -63,16 +110,19 @@ async function tauriSave(imageUrl: string, prompt: string, workflowId?: string):
   const imageRecord = await dbImages.createImage({
     id,
     filename,
-    promptYaml: prompt || '',
+    prompt: prompt || '',
     workflowId,
+    seed,
     fileSize: data.length,
+    negativePrompt,
+    parameters,
   });
 
   return {
     id: imageRecord.id,
     filename: imageRecord.filename,
     createdAt: imageRecord.created_at,
-    prompt: imageRecord.prompt_yaml,
+    prompt: imageRecord.prompt,
     deleted: !!imageRecord.deleted_at,
     favorite: imageRecord.favorite === 1,
   };
@@ -113,8 +163,12 @@ export const imageAPI = {
     return tauriList(includeDeleted);
   },
 
-  async save(imageUrl: string, prompt: string, workflowId?: string): Promise<ImageInfo> {
-    return tauriSave(imageUrl, prompt, workflowId);
+  async getDetail(id: string): Promise<ImageDetail | null> {
+    return tauriGetDetail(id);
+  },
+
+  async save(options: SaveImageOptions): Promise<ImageInfo> {
+    return tauriSave(options);
   },
 
   async delete(filename: string, hard = false): Promise<void> {

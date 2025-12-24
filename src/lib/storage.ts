@@ -66,7 +66,11 @@ export interface WorkflowConfig {
   file: string;           // ファイル名 (data/comfyui/ 以下)
   name: string;           // 表示名
   promptNodeId: string;   // プロンプトを挿入するノードID
+  promptProperty?: string; // プロンプトプロパティ名 (default: 'text')
   samplerNodeId: string;  // シードをランダム化するサンプラーノードID
+  samplerProperty?: string; // サンプラープロパティ名 (default: 'seed')
+  negativeNodeId?: string;  // ネガティブプロンプトを挿入するノードID (任意)
+  negativeProperty?: string; // ネガティブプロンプトプロパティ名 (default: 'text')
   overrides: NodeOverride[]; // ノードプロパティの上書き設定
 }
 

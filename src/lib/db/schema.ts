@@ -4,7 +4,7 @@
 
 import type { UnifiedDatabase } from './index';
 
-const SCHEMA_VERSION = 4;
+const SCHEMA_VERSION = 5;
 
 // Async version for UnifiedDatabase interface
 export async function initializeSchemaAsync(db: UnifiedDatabase): Promise<void> {
@@ -37,6 +37,9 @@ async function runMigrationsAsync(db: UnifiedDatabase, fromVersion: number): Pro
   }
   if (fromVersion < 4) {
     await migrateToV4Async(db);
+  }
+  if (fromVersion < 5) {
+    await migrateToV5Async(db);
   }
 
   // Update schema version
@@ -178,6 +181,74 @@ async function migrateToV4Async(db: UnifiedDatabase): Promise<void> {
   `);
 
   await db.execute('CREATE INDEX IF NOT EXISTS idx_keydict_parent ON key_dictionary(parent_key)');
+}
+
+async function migrateToV5Async(db: UnifiedDatabase): Promise<void> {
+  // Check if prompt_yaml column exists (it might have been renamed already)
+  const tableInfo = await db.select<{ name: string }>(`PRAGMA table_info(images)`);
+  const hasPromptYaml = tableInfo.some(col => col.name === 'prompt_yaml');
+  const hasPrompt = tableInfo.some(col => col.name === 'prompt');
+
+  // Rename prompt_yaml to prompt (it's no longer always YAML)
+  if (hasPromptYaml && !hasPrompt) {
+    await db.execute(`ALTER TABLE images RENAME COLUMN prompt_yaml TO prompt`);
+  }
+
+  // Add negative_prompt and parameters columns to images table
+  // negative_prompt: stores the negative prompt text
+  // parameters: stores generation parameters as JSON (overrides like width, height, steps, etc.)
+  const hasNegativePrompt = tableInfo.some(col => col.name === 'negative_prompt');
+  const hasParameters = tableInfo.some(col => col.name === 'parameters');
+
+  if (!hasNegativePrompt) {
+    await db.execute(`ALTER TABLE images ADD COLUMN negative_prompt TEXT`);
+  }
+  if (!hasParameters) {
+    await db.execute(`ALTER TABLE images ADD COLUMN parameters TEXT`);
+  }
+
+  // Recreate FTS table to use new column name (prompt instead of prompt_yaml)
+  // Always recreate to ensure consistency
+  await db.execute(`DROP TRIGGER IF EXISTS images_ai`);
+  await db.execute(`DROP TRIGGER IF EXISTS images_ad`);
+  await db.execute(`DROP TRIGGER IF EXISTS images_au`);
+  await db.execute(`DROP TABLE IF EXISTS images_fts`);
+
+  await db.execute(`
+    CREATE VIRTUAL TABLE images_fts USING fts5(
+      id,
+      prompt,
+      content='images',
+      content_rowid='rowid'
+    )
+  `);
+
+  // Rebuild FTS index from current data
+  await db.execute(`INSERT INTO images_fts(rowid, id, prompt) SELECT rowid, id, prompt FROM images`);
+
+  // Recreate FTS sync triggers
+  await db.execute(`
+    CREATE TRIGGER images_ai AFTER INSERT ON images BEGIN
+      INSERT INTO images_fts(rowid, id, prompt)
+      VALUES (new.rowid, new.id, new.prompt);
+    END
+  `);
+
+  await db.execute(`
+    CREATE TRIGGER images_ad AFTER DELETE ON images BEGIN
+      INSERT INTO images_fts(images_fts, rowid, id, prompt)
+      VALUES('delete', old.rowid, old.id, old.prompt);
+    END
+  `);
+
+  await db.execute(`
+    CREATE TRIGGER images_au AFTER UPDATE ON images BEGIN
+      INSERT INTO images_fts(images_fts, rowid, id, prompt)
+      VALUES('delete', old.rowid, old.id, old.prompt);
+      INSERT INTO images_fts(rowid, id, prompt)
+      VALUES (new.rowid, new.id, new.prompt);
+    END
+  `);
 }
 
 
