@@ -320,7 +320,17 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
 
           // 辞書から値を検索（コンテキストを考慮）
           const contextPath = getContextPath(model, position.lineNumber);
-          const dictEntries = lookupDictionary(contextPath, currentKey);
+
+          // YAPS仕様: "base" キーは親キーのエイリアス
+          // 例: pose.base の値は pose の値辞書を使う
+          let lookupKey = currentKey;
+          let lookupContextPath = contextPath;
+          if (currentKey === 'base' && contextPath.length > 0) {
+            lookupKey = contextPath[contextPath.length - 1];
+            lookupContextPath = contextPath.slice(0, -1);
+          }
+
+          const dictEntries = lookupDictionary(lookupContextPath, lookupKey);
 
           if (dictEntries.length > 0) {
             // コロン直後でスペースがない場合のみスペースを追加

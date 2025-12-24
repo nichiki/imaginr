@@ -49,8 +49,15 @@ function getDictionaryEntries(
   const parts = yamlPath.split('.');
   if (parts.length === 0) return [];
 
-  const key = parts[parts.length - 1]; // 最後のキー (例: "style")
-  const contextPath = parts.slice(0, -1); // コンテキストパス (例: ["outfit", "jacket"])
+  let key = parts[parts.length - 1]; // 最後のキー (例: "style")
+  let contextPath = parts.slice(0, -1); // コンテキストパス (例: ["outfit", "jacket"])
+
+  // YAPS仕様: "base" キーは親キーのエイリアス
+  // 例: pose.base の値は pose の値辞書を使う
+  if (key === 'base' && contextPath.length > 0) {
+    key = contextPath[contextPath.length - 1];
+    contextPath = contextPath.slice(0, -1);
+  }
 
   return lookupDictionary(dictionaryCache, contextPath, key);
 }
