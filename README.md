@@ -23,6 +23,7 @@ Prompt Builder for AI Image Generation
 
 - [チュートリアル](docs/tutorial.md) - 初めての方向け、基本的な使い方を学ぶ
 - [マニュアル](docs/manual.md) - 機能リファレンス、設計思想、ComfyUI連携
+- [YAPS仕様書](docs/YAPS.md) - プロンプト構造化スキーマの詳細仕様
 
 ### 基本的な流れ
 

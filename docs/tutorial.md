@@ -388,3 +388,9 @@ environment:
 - よく変える部分を変数にしてみましょう
 
 Happy prompting!
+
+---
+
+## 参考資料
+
+- [YAPS仕様書](YAPS.md) - 構造化スキーマの詳細（上級者向け）
