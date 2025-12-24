@@ -19,6 +19,11 @@ import {
   buildDictionaryCache,
   DictionaryEntry,
 } from '@/lib/dictionary-api';
+import {
+  initializeFromBundledKeyFile,
+  buildKeyDictionaryCache,
+  KeyDictionaryEntry,
+} from '@/lib/key-dictionary-api';
 import { loadState, saveState } from '@/lib/storage';
 import { SettingsDialog } from '@/components/settings-dialog';
 import * as presetAPI from '@/lib/preset-api';
@@ -96,6 +101,8 @@ export default function Home() {
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   // 辞書キャッシュ（補完用）
   const [dictionaryCache, setDictionaryCache] = useState<Map<string, DictionaryEntry[]>>(new Map());
+  // キー辞書キャッシュ（補完用）
+  const [keyDictionaryCache, setKeyDictionaryCache] = useState<Map<string, KeyDictionaryEntry[]>>(new Map());
 
   // 変数関連
   const [variables, setVariables] = useState<VariableDefinition[]>([]);
@@ -191,6 +198,19 @@ export default function Home() {
           setDictionaryCache(cache);
         } catch (e) {
           console.error('Failed to load dictionary:', e);
+        }
+
+        // キー辞書を読み込み（初回起動時はバンドルファイルからインポート）
+        try {
+          await initializeFromBundledKeyFile();
+          const keyCache = await buildKeyDictionaryCache();
+          console.log('Key dictionary cache loaded:', keyCache.size, 'parent keys');
+          for (const [key, entries] of keyCache) {
+            console.log(`  ${key}: ${entries.length} entries`);
+          }
+          setKeyDictionaryCache(keyCache);
+        } catch (e) {
+          console.error('Failed to load key dictionary:', e);
         }
 
         initialized.current = true;
@@ -928,6 +948,7 @@ export default function Home() {
             fileList={allFilePaths}
             snippets={snippets}
             dictionaryCache={dictionaryCache}
+            keyDictionaryCache={keyDictionaryCache}
             onDictionaryChange={async () => {
               try {
                 const dictData = await dictionaryAPI.list();

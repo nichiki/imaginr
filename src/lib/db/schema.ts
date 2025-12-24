@@ -4,7 +4,7 @@
 
 import type { UnifiedDatabase } from './index';
 
-const SCHEMA_VERSION = 3;
+const SCHEMA_VERSION = 4;
 
 // Async version for UnifiedDatabase interface
 export async function initializeSchemaAsync(db: UnifiedDatabase): Promise<void> {
@@ -34,6 +34,9 @@ async function runMigrationsAsync(db: UnifiedDatabase, fromVersion: number): Pro
   }
   if (fromVersion < 3) {
     await migrateToV3Async(db);
+  }
+  if (fromVersion < 4) {
+    await migrateToV4Async(db);
   }
 
   // Update schema version
@@ -157,6 +160,24 @@ async function migrateToV3Async(db: UnifiedDatabase): Promise<void> {
   `);
 
   await db.execute('CREATE INDEX IF NOT EXISTS idx_dict_context_key ON dictionary(context, key)');
+}
+
+async function migrateToV4Async(db: UnifiedDatabase): Promise<void> {
+  // Key dictionary table - stores key suggestions for YAML editor
+  // Separate from value dictionary for clean separation of concerns
+  await db.execute(`
+    CREATE TABLE IF NOT EXISTS key_dictionary (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      parent_key TEXT NOT NULL,
+      child_key TEXT NOT NULL,
+      description TEXT,
+      sort_order INTEGER DEFAULT 0,
+      created_at TEXT NOT NULL DEFAULT (datetime('now')),
+      UNIQUE(parent_key, child_key)
+    )
+  `);
+
+  await db.execute('CREATE INDEX IF NOT EXISTS idx_keydict_parent ON key_dictionary(parent_key)');
 }
 
 

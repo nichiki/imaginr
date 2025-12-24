@@ -5,6 +5,8 @@ import Editor, { OnMount, OnChange } from '@monaco-editor/react';
 import type { editor, languages, Position, IDisposable } from 'monaco-editor';
 import type { Snippet } from '@/lib/snippet-api';
 import type { DictionaryEntry } from '@/lib/dictionary-api';
+import type { KeyDictionaryEntry } from '@/lib/key-dictionary-api';
+import { lookupKeysFromCache } from '@/lib/key-dictionary-api';
 import { DictionaryQuickAddDialog } from './dictionary-quick-add-dialog';
 
 interface YamlEditorProps {
@@ -13,6 +15,7 @@ interface YamlEditorProps {
   fileList?: string[];
   snippets?: Snippet[];
   dictionaryCache?: Map<string, DictionaryEntry[]>;
+  keyDictionaryCache?: Map<string, KeyDictionaryEntry[]>;
   onDictionaryChange?: () => void;
 }
 
@@ -21,7 +24,7 @@ export interface YamlEditorRef {
 }
 
 const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function YamlEditor(
-  { value, onChange, fileList = [], snippets = [], dictionaryCache, onDictionaryChange },
+  { value, onChange, fileList = [], snippets = [], dictionaryCache, keyDictionaryCache, onDictionaryChange },
   ref
 ) {
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
@@ -30,6 +33,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
   const fileListRef = useRef<string[]>(fileList);
   const snippetsRef = useRef<Snippet[]>(snippets);
   const dictionaryCacheRef = useRef<Map<string, DictionaryEntry[]> | undefined>(dictionaryCache);
+  const keyDictionaryCacheRef = useRef<Map<string, KeyDictionaryEntry[]> | undefined>(keyDictionaryCache);
 
   // Dictionary quick add dialog state
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -55,6 +59,11 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
   useEffect(() => {
     dictionaryCacheRef.current = dictionaryCache;
   }, [dictionaryCache]);
+
+  // keyDictionaryCacheが変更されたらrefを更新
+  useEffect(() => {
+    keyDictionaryCacheRef.current = keyDictionaryCache;
+  }, [keyDictionaryCache]);
 
   // クリーンアップ: コンポーネントアンマウント時にdisposablesを解放
   useEffect(() => {
@@ -195,31 +204,73 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         const keyMatch = textUntilPosition.match(/^\s*(\w+)$/);
         if (keyMatch) {
           const typedKey = keyMatch[1].toLowerCase();
-          // キーに対応するスニペットを検索
-          const matchingSnippets = snippetsRef.current.filter(
-            (s) =>
-              s.key.toLowerCase().includes(typedKey) ||
-              s.category.toLowerCase().includes(typedKey)
-          );
+          const suggestions: languages.CompletionItem[] = [];
 
-          if (matchingSnippets.length > 0) {
-            return {
-              suggestions: matchingSnippets.map((snippet) => ({
-                  label: `${snippet.key}: ${snippet.label}`,
-                  kind: monaco.languages.CompletionItemKind.Snippet,
-                  insertText: `${snippet.key}:\n  ${snippet.content.replace(/\n/g, '\n  ')}`,
-                  insertTextRules:
-                    monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
-                  documentation: snippet.description,
-                  detail: snippet.category,
-                  range: {
-                    startLineNumber: position.lineNumber,
-                    startColumn: position.column - typedKey.length,
-                    endLineNumber: position.lineNumber,
-                    endColumn: position.column,
-                  },
-                })),
-            };
+          // キー辞書から候補を検索
+          const keyCache = keyDictionaryCacheRef.current;
+          if (keyCache) {
+            const contextPath = getContextPath(model, position.lineNumber);
+            const parentKey = contextPath[contextPath.length - 1] || '*';
+            const keyEntries = lookupKeysFromCache(keyCache, parentKey);
+
+            const matchingKeys = keyEntries.filter(
+              (entry) =>
+                entry.childKey.toLowerCase().includes(typedKey) ||
+                (entry.description && entry.description.toLowerCase().includes(typedKey))
+            );
+
+            for (const entry of matchingKeys) {
+              suggestions.push({
+                label: entry.description
+                  ? `${entry.childKey}（${entry.description}）`
+                  : entry.childKey,
+                kind: monaco.languages.CompletionItemKind.Property,
+                insertText: `${entry.childKey}: `,
+                detail: parentKey === '*' ? 'root' : parentKey,
+                sortText: `0_${entry.sortOrder.toString().padStart(3, '0')}_${entry.childKey}`,
+                range: {
+                  startLineNumber: position.lineNumber,
+                  startColumn: position.column - typedKey.length,
+                  endLineNumber: position.lineNumber,
+                  endColumn: position.column,
+                },
+              });
+            }
+          }
+
+          // キーに対応するスニペットを検索
+          // スニペットは key または category でフィルタ（keyがない場合はcategoryをフォールバック）
+          const matchingSnippets = snippetsRef.current.filter((s) => {
+            const snippetKey = (s.key || s.category || '').toLowerCase();
+            const snippetCategory = (s.category || '').toLowerCase();
+            return (
+              snippetKey.includes(typedKey) || snippetCategory.includes(typedKey)
+            );
+          });
+
+          for (const snippet of matchingSnippets) {
+            // keyがない場合はcategoryを使用
+            const snippetKey = snippet.key || snippet.category;
+            suggestions.push({
+              label: `${snippetKey}: ${snippet.label}`,
+              kind: monaco.languages.CompletionItemKind.Snippet,
+              insertText: `${snippetKey}:\n  ${snippet.content.replace(/\n/g, '\n  ')}`,
+              insertTextRules:
+                monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
+              documentation: snippet.description,
+              detail: snippet.category,
+              sortText: `1_${snippetKey}`,
+              range: {
+                startLineNumber: position.lineNumber,
+                startColumn: position.column - typedKey.length,
+                endLineNumber: position.lineNumber,
+                endColumn: position.column,
+              },
+            });
+          }
+
+          if (suggestions.length > 0) {
+            return { suggestions };
           }
         }
 

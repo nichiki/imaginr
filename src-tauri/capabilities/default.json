@@ -19,6 +19,12 @@
     "fs:allow-mkdir",
     "fs:allow-exists",
     "fs:allow-stat",
+    {
+      "identifier": "fs:allow-exists",
+      "allow": [
+        { "path": "$RESOURCE/**" }
+      ]
+    },
     "fs:allow-app-read-recursive",
     "fs:allow-app-write-recursive",
     "fs:allow-appdata-read-recursive",

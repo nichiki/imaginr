@@ -1,0 +1,357 @@
+# Key Dictionary for YAPS - Yet Another Prompt Schema
+# Provides key suggestions for YAML editor autocomplete
+
+entries:
+  # ========================================
+  # Root level keys
+  # ========================================
+  - parent: "*"
+    description: ルートレベルで使用可能なキー
+    children:
+      - key: subject
+        description: 被写体
+      - key: demographics
+        description: 人物属性
+      - key: pose
+        description: ポーズ・姿勢
+      - key: expression
+        description: 表情
+      - key: appearance
+        description: 外見・容姿
+      - key: outfit
+        description: 服装
+      - key: environment
+        description: 環境・背景
+      - key: aesthetic
+        description: 画風・スタイル
+      - key: mood
+        description: 雰囲気
+      - key: effects
+        description: 視覚エフェクト
+      - key: lighting
+        description: 照明
+      - key: composition
+        description: 構図
+      - key: photography
+        description: 撮影技法
+      - key: quality
+        description: 品質タグ
+      - key: negative
+        description: ネガティブプロンプト
+      - key: interaction
+        description: 複数人の相互作用
+
+  # ========================================
+  # Demographics
+  # ========================================
+  - parent: demographics
+    children:
+      - key: ethnicity
+        description: 人種・民族
+      - key: race
+        description: ファンタジー種族
+      - key: age
+        description: 年齢層
+
+  # ========================================
+  # Pose
+  # ========================================
+  - parent: pose
+    children:
+      - key: base
+        description: 全体のポーズ
+      - key: facing
+        description: 向き・視線方向
+      - key: action
+        description: 動作
+      - key: head
+        description: 頭の動き
+      - key: arms
+        description: 腕の動き
+      - key: hands
+        description: 手の形
+      - key: legs
+        description: 脚の動き
+
+  # ========================================
+  # Expression
+  # ========================================
+  - parent: expression
+    children:
+      - key: emotion
+        description: 感情
+      - key: face
+        description: 表情名
+      - key: eyes
+        description: 目の状態
+      - key: mouth
+        description: 口の状態
+
+  # ========================================
+  # Appearance
+  # ========================================
+  - parent: appearance
+    children:
+      - key: hair
+        description: 髪
+      - key: eyes
+        description: 目の色・形
+      - key: skin
+        description: 肌
+      - key: face
+        description: 顔の形
+      - key: makeup
+        description: メイク
+      - key: build
+        description: 体格
+      - key: proportions
+        description: 頭身
+      - key: breast
+        description: 胸
+      - key: hips
+        description: 腰
+      - key: waist
+        description: ウエスト
+      - key: legs
+        description: 脚
+      - key: extras
+        description: 追加要素
+
+  # ========================================
+  # Appearance > Hair
+  # ========================================
+  - parent: hair
+    children:
+      - key: length
+        description: 長さ
+      - key: style
+        description: スタイル
+      - key: color
+        description: 色
+      - key: bangs
+        description: 前髪
+      - key: extras
+        description: 装飾
+
+  # ========================================
+  # Outfit
+  # ========================================
+  - parent: outfit
+    children:
+      - key: base
+        description: 全体のスタイル
+      - key: costume
+        description: コスチューム
+      - key: style
+        description: 系統
+      - key: top
+        description: トップス
+      - key: bottom
+        description: ボトムス
+      - key: dress
+        description: ドレス
+      - key: outerwear
+        description: アウター
+      - key: legwear
+        description: レッグウェア
+      - key: footwear
+        description: フットウェア
+      - key: headwear
+        description: 帽子類
+      - key: swimwear
+        description: 水着
+      - key: underwear
+        description: 下着
+      - key: accessories
+        description: アクセサリー
+      - key: props
+        description: 持ち物
+
+  # ========================================
+  # Outfit item attributes (top, bottom, dress, etc.)
+  # ========================================
+  - parent: top
+    children:
+      - key: type
+        description: アイテムの種類
+      - key: color
+        description: 色
+      - key: material
+        description: 素材
+      - key: pattern
+        description: 柄
+      - key: fit
+        description: フィット感
+      - key: state
+        description: 状態
+      - key: neckline
+        description: ネックライン
+      - key: sleeve
+        description: 袖
+
+  - parent: bottom
+    children:
+      - key: type
+        description: アイテムの種類
+      - key: color
+        description: 色
+      - key: material
+        description: 素材
+      - key: pattern
+        description: 柄
+      - key: fit
+        description: フィット感
+      - key: state
+        description: 状態
+      - key: length
+        description: 丈
+
+  - parent: dress
+    children:
+      - key: type
+        description: アイテムの種類
+      - key: color
+        description: 色
+      - key: color_scheme
+        description: 配色
+      - key: material
+        description: 素材
+      - key: pattern
+        description: 柄
+      - key: fit
+        description: フィット感
+      - key: state
+        description: 状態
+      - key: neckline
+        description: ネックライン
+      - key: sleeve
+        description: 袖
+      - key: length
+        description: 丈
+
+  - parent: outerwear
+    children:
+      - key: type
+        description: アイテムの種類
+      - key: color
+        description: 色
+      - key: material
+        description: 素材
+      - key: pattern
+        description: 柄
+      - key: fit
+        description: フィット感
+      - key: state
+        description: 状態
+
+  - parent: legwear
+    children:
+      - key: type
+        description: アイテムの種類
+      - key: color
+        description: 色
+      - key: material
+        description: 素材
+      - key: pattern
+        description: 柄
+
+  - parent: footwear
+    children:
+      - key: type
+        description: アイテムの種類
+      - key: color
+        description: 色
+      - key: material
+        description: 素材
+
+  - parent: swimwear
+    children:
+      - key: type
+        description: アイテムの種類
+      - key: color
+        description: 色
+      - key: pattern
+        description: 柄
+
+  - parent: underwear
+    children:
+      - key: type
+        description: アイテムの種類
+      - key: color
+        description: 色
+      - key: material
+        description: 素材
+
+  # ========================================
+  # Environment
+  # ========================================
+  - parent: environment
+    children:
+      - key: world
+        description: 世界観
+      - key: background
+        description: 背景タイプ
+      - key: location
+        description: 場所
+      - key: time
+        description: 時間帯
+      - key: weather
+        description: 天気
+      - key: season
+        description: 季節
+      - key: crowd
+        description: 群衆
+      - key: props
+        description: 背景の小物
+
+  # ========================================
+  # Aesthetic
+  # ========================================
+  - parent: aesthetic
+    children:
+      - key: style
+        description: 画風
+      - key: medium
+        description: 画材
+      - key: color_scheme
+        description: 色調
+
+  # ========================================
+  # Lighting
+  # ========================================
+  - parent: lighting
+    children:
+      - key: base
+        description: 雰囲気
+      - key: source
+        description: 光源
+      - key: technique
+        description: 技法
+      - key: color
+        description: 色温度
+      - key: shadow
+        description: 影
+
+  # ========================================
+  # Composition
+  # ========================================
+  - parent: composition
+    children:
+      - key: shot
+        description: 切り取り範囲
+      - key: angle
+        description: カメラアングル
+      - key: method
+        description: 構図技法
+
+  # ========================================
+  # Photography
+  # ========================================
+  - parent: photography
+    children:
+      - key: camera
+        description: カメラ種類
+      - key: lens
+        description: レンズ
+      - key: film
+        description: フィルム感
