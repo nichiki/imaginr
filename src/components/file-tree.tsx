@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { FileTreeItem, RenameResult } from '@/lib/file-api';
 import { cn } from '@/lib/utils';
-import { ChevronRight, FileIcon, FolderIcon, FolderPlus, Plus, Trash2, Pencil } from 'lucide-react';
+import { ChevronRight, FileIcon, FolderIcon, FolderPlus, Plus, Trash2, Pencil, Columns2 } from 'lucide-react';
 import {
   DndContext,
   DragEndEvent,
@@ -35,6 +35,7 @@ interface FileTreeProps {
   items: FileTreeItem[];
   selectedFile: string;
   onSelectFile: (path: string) => void;
+  onSelectFileSplit?: (path: string) => void;
   expandedFolders: Set<string>;
   onToggleFolder: (path: string) => void;
   onCreateFile: (path: string) => void;
@@ -50,6 +51,7 @@ export function FileTree({
   items,
   selectedFile,
   onSelectFile,
+  onSelectFileSplit,
   expandedFolders,
   onToggleFolder,
   onCreateFile,
@@ -278,6 +280,7 @@ export function FileTree({
                 item={item}
                 selectedFile={selectedFile}
                 onSelectFile={onSelectFile}
+                onSelectFileSplit={onSelectFileSplit}
                 expandedFolders={expandedFolders}
                 toggleFolder={onToggleFolder}
                 onCreateFile={openCreateDialog}
@@ -523,6 +526,7 @@ interface FileTreeNodeProps {
   item: FileTreeItem;
   selectedFile: string;
   onSelectFile: (path: string) => void;
+  onSelectFileSplit?: (path: string) => void;
   expandedFolders: Set<string>;
   toggleFolder: (path: string) => void;
   onCreateFile: (folder: string) => void;
@@ -537,6 +541,7 @@ function FileTreeNode({
   item,
   selectedFile,
   onSelectFile,
+  onSelectFileSplit,
   expandedFolders,
   toggleFolder,
   onCreateFile,
@@ -555,6 +560,7 @@ function FileTreeNode({
         item={item}
         selectedFile={selectedFile}
         onSelectFile={onSelectFile}
+        onSelectFileSplit={onSelectFileSplit}
         expandedFolders={expandedFolders}
         toggleFolder={toggleFolder}
         onCreateFile={onCreateFile}
@@ -573,6 +579,7 @@ function FileTreeNode({
       item={item}
       isSelected={isSelected}
       onSelectFile={onSelectFile}
+      onSelectFileSplit={onSelectFileSplit}
       onDeleteFile={onDeleteFile}
       onRename={onRename}
       paddingLeft={paddingLeft}
@@ -584,6 +591,7 @@ interface FolderNodeProps {
   item: FileTreeItem;
   selectedFile: string;
   onSelectFile: (path: string) => void;
+  onSelectFileSplit?: (path: string) => void;
   expandedFolders: Set<string>;
   toggleFolder: (path: string) => void;
   onCreateFile: (folder: string) => void;
@@ -599,6 +607,7 @@ function FolderNode({
   item,
   selectedFile,
   onSelectFile,
+  onSelectFileSplit,
   expandedFolders,
   toggleFolder,
   onCreateFile,
@@ -704,6 +713,7 @@ function FolderNode({
           item={child}
           selectedFile={selectedFile}
           onSelectFile={onSelectFile}
+          onSelectFileSplit={onSelectFileSplit}
           expandedFolders={expandedFolders}
           toggleFolder={toggleFolder}
           onCreateFile={onCreateFile}
@@ -722,6 +732,7 @@ interface FileNodeProps {
   item: FileTreeItem;
   isSelected: boolean;
   onSelectFile: (path: string) => void;
+  onSelectFileSplit?: (path: string) => void;
   onDeleteFile: (path: string) => void;
   onRename: (path: string, name: string, type: 'file' | 'folder') => void;
   paddingLeft: number;
@@ -731,6 +742,7 @@ function FileNode({
   item,
   isSelected,
   onSelectFile,
+  onSelectFileSplit,
   onDeleteFile,
   onRename,
   paddingLeft,
@@ -739,6 +751,15 @@ function FileNode({
     id: `drag-${item.path}`,
     data: { item },
   });
+
+  const handleClick = (e: React.MouseEvent) => {
+    // Cmd+click (Mac) or Ctrl+click (Windows/Linux) で分割側に開く
+    if ((e.metaKey || e.ctrlKey) && onSelectFileSplit) {
+      onSelectFileSplit(item.path);
+    } else {
+      onSelectFile(item.path);
+    }
+  };
 
   return (
     <div className={cn(isDragging && 'opacity-50')}>
@@ -753,7 +774,7 @@ function FileNode({
               isSelected ? 'bg-[#094771] text-white' : 'text-[#d4d4d4] hover:bg-[#2a2d2e]'
             )}
             style={{ paddingLeft: paddingLeft + 18 }}
-            onClick={() => onSelectFile(item.path)}
+            onClick={handleClick}
             title={item.name}
           >
             <FileIcon className="h-4 w-4 text-[#888] flex-shrink-0" />
@@ -761,6 +782,15 @@ function FileNode({
           </div>
         </ContextMenuTrigger>
         <ContextMenuContent className="bg-[#252526] border-[#333]">
+          {onSelectFileSplit && (
+            <ContextMenuItem
+              onClick={() => onSelectFileSplit(item.path)}
+              className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+            >
+              <Columns2 className="h-4 w-4 mr-2" />
+              右に分割して開く
+            </ContextMenuItem>
+          )}
           <ContextMenuItem
             onClick={() => onRename(item.path, item.name, 'file')}
             className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"

@@ -110,6 +110,12 @@ export default function Home() {
   const [openTabs, setOpenTabs] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState<string>('');
   const [dirtyFiles, setDirtyFiles] = useState<Set<string>>(new Set());
+  // 分割エディタ
+  const [splitView, setSplitView] = useState(false);
+  const [rightTabs, setRightTabs] = useState<string[]>([]);
+  const [activeRightTab, setActiveRightTab] = useState<string>('');
+  const [splitRatio, setSplitRatio] = useState(0.5);
+  const [focusedPane, setFocusedPane] = useState<'left' | 'right'>('left');
   // ローディング状態
   const [isLoading, setIsLoading] = useState(true);
   // 保存中状態
@@ -177,7 +183,7 @@ export default function Home() {
   const yamlEditorRef = useRef<YamlEditorRef>(null);
 
   // リサイズ用のref
-  const resizeType = useRef<'preview' | 'left' | 'right' | 'variable' | 'generation' | null>(null);
+  const resizeType = useRef<'preview' | 'left' | 'right' | 'variable' | 'generation' | 'split' | null>(null);
   const startPos = useRef(0);
   const startSize = useRef(0);
 
@@ -245,6 +251,39 @@ export default function Home() {
         setOpenTabs(validTabs);
         setActiveTab(validActive);
 
+        // 分割エディタの状態を復元
+        if (savedState.splitView && savedState.rightTabs && savedState.rightTabs.length > 0) {
+          // 右ペインのタブを読み込み
+          const rightFilesData: FileData = {};
+          for (const path of savedState.rightTabs) {
+            if (filesData[path]) {
+              // 既に読み込み済み
+              rightFilesData[path] = filesData[path];
+            } else {
+              try {
+                rightFilesData[path] = await fileAPI.readFile(path);
+              } catch {
+                console.error(`Failed to read file for right pane: ${path}`);
+              }
+            }
+          }
+          // 読み込み成功したタブのみ
+          const validRightTabs = savedState.rightTabs.filter(
+            (path) => path in rightFilesData || path in filesData
+          );
+          if (validRightTabs.length > 0) {
+            setFiles((prev) => ({ ...prev, ...rightFilesData }));
+            setSplitView(true);
+            setRightTabs(validRightTabs);
+            setActiveRightTab(
+              validRightTabs.includes(savedState.activeRightTab || '')
+                ? savedState.activeRightTab!
+                : validRightTabs[0]
+            );
+            setSplitRatio(savedState.splitRatio || 0.5);
+          }
+        }
+
         // スニペットを読み込み
         try {
           const snippetData = await snippetAPI.list();
@@ -298,22 +337,35 @@ export default function Home() {
     loadFiles();
   }, []);
 
-  // アクティブタブの内容
+  // 現在フォーカスしているペインのアクティブファイル
+  const currentFilePath = useMemo(
+    () => (focusedPane === 'right' && splitView ? activeRightTab : activeTab),
+    [focusedPane, splitView, activeTab, activeRightTab]
+  );
+
+  // フォーカスしているペインのアクティブタブの内容
   const currentContent = useMemo(
-    () => files[activeTab] || '',
-    [files, activeTab]
+    () => files[currentFilePath] || '',
+    [files, currentFilePath]
   );
 
-  // アクティブタブが未保存かどうか
-  const isActiveTabDirty = useMemo(
-    () => dirtyFiles.has(activeTab),
-    [dirtyFiles, activeTab]
+  // フォーカスしているペインのファイル名（プロンプトパネル表示用）
+  const currentFileName = useMemo(() => {
+    if (!currentFilePath) return '';
+    const parts = currentFilePath.split('/');
+    return parts[parts.length - 1] || '';
+  }, [currentFilePath]);
+
+  // フォーカスしているペインのアクティブタブが未保存かどうか
+  const isCurrentFileDirty = useMemo(
+    () => dirtyFiles.has(currentFilePath),
+    [dirtyFiles, currentFilePath]
   );
 
-  // アクティブタブの変数値
+  // フォーカスしているペインのアクティブタブの変数値
   const currentVariableValues = useMemo(
-    () => variableValuesMap[activeTab] || {},
-    [variableValuesMap, activeTab]
+    () => variableValuesMap[currentFilePath] || {},
+    [variableValuesMap, currentFilePath]
   );
 
   // filesのrefを保持（useEffect内で最新値を参照するため）
@@ -595,7 +647,7 @@ export default function Home() {
   // マージ結果とプロンプトテキスト（非同期で計算）
   // マージ後のYAMLから変数を抽出
   useEffect(() => {
-    if (!activeTab || !currentContent) {
+    if (!currentFilePath || !currentContent) {
       setMergedYamlRaw('');
       setIsYamlValid(true);
       setVariables([]);
@@ -609,8 +661,8 @@ export default function Home() {
       try {
         // 参照ファイル用のキャッシュ（メイン状態とは別管理）
         // 現在のファイルは生のコンテンツを使用（変数解決前）
-        const tempCache: FileData = { ...filesRef.current, [activeTab]: currentContent };
-        const merged = await resolveAndMergeAsync(activeTab, tempCache, readFileForMerge);
+        const tempCache: FileData = { ...filesRef.current, [currentFilePath]: currentContent };
+        const merged = await resolveAndMergeAsync(currentFilePath, tempCache, readFileForMerge);
 
         if (cancelled) return;
 
@@ -638,7 +690,7 @@ export default function Home() {
 
         // 新しい変数があればデフォルト値で初期化（タブごとに管理）
         setVariableValuesMap((prev) => {
-          const currentValues = prev[activeTab] || {};
+          const currentValues = prev[currentFilePath] || {};
           const next = { ...currentValues };
           for (const v of vars) {
             if (!(v.name in next)) {
@@ -653,7 +705,7 @@ export default function Home() {
               delete next[key];
             }
           }
-          return { ...prev, [activeTab]: next };
+          return { ...prev, [currentFilePath]: next };
         });
 
         setMergedYamlRaw(yamlStr);
@@ -670,7 +722,7 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [activeTab, currentContent, readFileForMerge]);
+  }, [currentFilePath, currentContent, readFileForMerge]);
 
   // ファイル選択ハンドラ（タブを開く）
   const handleFileSelect = useCallback(async (path: string) => {
@@ -762,6 +814,100 @@ export default function Home() {
       saveState({ openTabs: newTabs });
     }
   }, []);
+
+  // 右ペインのタブ並び替えハンドラ
+  const handleReorderRightTabs = useCallback((newTabs: string[]) => {
+    setRightTabs(newTabs);
+    if (initialized.current) {
+      saveState({ rightTabs: newTabs });
+    }
+  }, []);
+
+  // 右に分割して開くハンドラ
+  const handleSplitRight = useCallback(async (path: string) => {
+    // ファイル内容を確認（既に読み込み済みなら何もしない）
+    if (!files[path]) {
+      const content = await fileAPI.readFile(path);
+      setFiles((prev) => ({ ...prev, [path]: content }));
+    }
+    // 左ペインから削除
+    const newLeftTabs = openTabs.filter((t) => t !== path);
+    setOpenTabs(newLeftTabs);
+    if (path === activeTab) {
+      setActiveTab(newLeftTabs[0] || '');
+    }
+    // 右ペインに追加
+    setSplitView(true);
+    setRightTabs((prev) => (prev.includes(path) ? prev : [...prev, path]));
+    setActiveRightTab(path);
+    setFocusedPane('right');
+    if (initialized.current) {
+      saveState({
+        openTabs: newLeftTabs,
+        activeTab: path === activeTab ? newLeftTabs[0] || '' : activeTab,
+        splitView: true,
+        rightTabs: rightTabs.includes(path) ? rightTabs : [...rightTabs, path],
+        activeRightTab: path,
+      });
+    }
+  }, [files, openTabs, activeTab, rightTabs]);
+
+  // 分割側にファイルを開くハンドラ（Cmd+クリック用）
+  const handleSelectFileSplit = useCallback(async (path: string) => {
+    // ファイル内容を読み込み
+    if (!files[path]) {
+      const content = await fileAPI.readFile(path);
+      setFiles((prev) => ({ ...prev, [path]: content }));
+    }
+    // 分割ビューを有効化
+    setSplitView(true);
+    // 右ペインに追加
+    setRightTabs((prev) => (prev.includes(path) ? prev : [...prev, path]));
+    setActiveRightTab(path);
+    setFocusedPane('right');
+    if (initialized.current) {
+      saveState({
+        splitView: true,
+        rightTabs: rightTabs.includes(path) ? rightTabs : [...rightTabs, path],
+        activeRightTab: path,
+      });
+    }
+  }, [files, rightTabs]);
+
+  // 右ペインでタブを選択
+  const handleSelectRightTab = useCallback((path: string) => {
+    setActiveRightTab(path);
+    setFocusedPane('right');
+    if (initialized.current) {
+      saveState({ activeRightTab: path });
+    }
+  }, []);
+
+  // 右ペインのタブを閉じる
+  const handleCloseRightTab = useCallback(async (path: string) => {
+    // 未保存の確認
+    if (dirtyFiles.has(path)) {
+      const { showConfirm } = await import('@/lib/dialog');
+      const result = await showConfirm('未保存の変更があります。保存せずに閉じますか？');
+      if (!result) return;
+    }
+    const newTabs = rightTabs.filter((t) => t !== path);
+    setRightTabs(newTabs);
+    // 最後のタブを閉じたら分割終了
+    if (newTabs.length === 0) {
+      setSplitView(false);
+      setFocusedPane('left');
+      if (initialized.current) {
+        saveState({ splitView: false, rightTabs: [], activeRightTab: '' });
+      }
+    } else {
+      const newActive = path === activeRightTab ? newTabs[0] : activeRightTab;
+      setActiveRightTab(newActive);
+      if (initialized.current) {
+        saveState({ rightTabs: newTabs, activeRightTab: newActive });
+      }
+    }
+  }, [rightTabs, activeRightTab, dirtyFiles]);
 
   // フォルダ開閉ハンドラ
   const handleToggleFolder = useCallback((path: string) => {
@@ -1212,23 +1358,23 @@ export default function Home() {
     (values: VariableValues) => {
       setVariableValuesMap((prev) => ({
         ...prev,
-        [activeTab]: values,
+        [currentFilePath]: values,
       }));
     },
-    [activeTab]
+    [currentFilePath]
   );
 
-  // ファイル保存ハンドラ
+  // ファイル保存ハンドラ（フォーカスしているペインのファイルを保存）
   const handleSave = useCallback(async () => {
-    if (!activeTab || !dirtyFiles.has(activeTab)) return;
+    if (!currentFilePath || !dirtyFiles.has(currentFilePath)) return;
 
     setIsSaving(true);
     try {
-      await fileAPI.writeFile(activeTab, files[activeTab]);
+      await fileAPI.writeFile(currentFilePath, files[currentFilePath]);
       // 未保存フラグを削除
       setDirtyFiles((prev) => {
         const next = new Set(prev);
-        next.delete(activeTab);
+        next.delete(currentFilePath);
         return next;
       });
     } catch (error) {
@@ -1236,7 +1382,7 @@ export default function Home() {
     } finally {
       setIsSaving(false);
     }
-  }, [activeTab, files, dirtyFiles]);
+  }, [currentFilePath, files, dirtyFiles]);
 
   // Ctrl+S で保存
   useEffect(() => {
@@ -1333,6 +1479,14 @@ export default function Home() {
         const delta = startPos.current - e.clientX;
         const newWidth = Math.max(150, Math.min(350, startSize.current + delta));
         setGenerationPanelWidth(newWidth);
+      } else if (resizeType.current === 'split') {
+        // 分割ハンドル: 左右の比率を変更
+        const editorContainer = document.getElementById('editor-container');
+        if (editorContainer) {
+          const rect = editorContainer.getBoundingClientRect();
+          const ratio = (e.clientX - rect.left) / rect.width;
+          setSplitRatio(Math.max(0.2, Math.min(0.8, ratio)));
+        }
       }
     };
 
@@ -1355,10 +1509,10 @@ export default function Home() {
   useEffect(() => {
     if (!initialized.current) return;
     const timer = setTimeout(() => {
-      saveState({ previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth, generationPanelWidth });
+      saveState({ previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth, generationPanelWidth, splitRatio });
     }, 500);
     return () => clearTimeout(timer);
-  }, [previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth, generationPanelWidth]);
+  }, [previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth, generationPanelWidth, splitRatio]);
 
   if (isLoading) {
     return (
@@ -1377,7 +1531,7 @@ export default function Home() {
           <span className="text-xs text-[#888]">
             Ctrl+S: 保存
           </span>
-          {isActiveTabDirty && (
+          {isCurrentFileDirty && (
             <span className="text-xs text-amber-400">● 未保存</span>
           )}
           {isSaving && (
@@ -1404,8 +1558,9 @@ export default function Home() {
         >
           <FileTree
             items={fileTree}
-            selectedFile={activeTab}
+            selectedFile={focusedPane === 'left' ? activeTab : activeRightTab}
             onSelectFile={handleFileSelect}
+            onSelectFileSplit={handleSelectFileSplit}
             expandedFolders={expandedFolders}
             onToggleFolder={handleToggleFolder}
             onCreateFile={handleCreateFile}
@@ -1424,52 +1579,130 @@ export default function Home() {
           onMouseDown={handleLeftResizeStart}
         />
 
-        {/* Editor with Tab Bar */}
-        <div className="flex-1 min-w-0 bg-[#1e1e1e] flex flex-col">
-          {/* Tab Bar */}
-          <TabBar
-            tabs={openTabs}
-            activeTab={activeTab}
-            dirtyTabs={dirtyFiles}
-            onSelectTab={setActiveTab}
-            onCloseTab={handleCloseTab}
-            onReorderTabs={handleReorderTabs}
-          />
+        {/* Editor with Tab Bar (Split Support) */}
+        <div id="editor-container" className="flex-1 min-w-0 bg-[#1e1e1e] flex">
+          {/* Left Pane */}
+          <div
+            className="flex flex-col min-w-0"
+            style={{ width: splitView ? `${splitRatio * 100}%` : '100%' }}
+            onClick={() => setFocusedPane('left')}
+          >
+            {/* Tab Bar */}
+            <TabBar
+              tabs={openTabs}
+              activeTab={activeTab}
+              dirtyTabs={dirtyFiles}
+              onSelectTab={(path) => {
+                setActiveTab(path);
+                setFocusedPane('left');
+              }}
+              onCloseTab={handleCloseTab}
+              onReorderTabs={handleReorderTabs}
+              onSplitRight={handleSplitRight}
+              paneId="left"
+            />
 
-          {/* Editor or Empty Placeholder */}
-          <div className="flex-1 min-h-0">
-            {activeTab ? (
-              <YamlEditor
-                key={activeTab}
-                ref={yamlEditorRef}
-                value={currentContent}
-                onChange={handleEditorChange}
-                fileList={allFilePaths}
-                snippets={snippets}
-                dictionaryCache={dictionaryCache}
-                keyDictionaryCache={keyDictionaryCache}
-                onDictionaryChange={async () => {
-                  try {
-                    const dictData = await dictionaryAPI.list();
-                    const cache = buildDictionaryCache(dictData);
-                    setDictionaryCache(cache);
-                  } catch (e) {
-                    console.error('Failed to reload dictionary:', e);
-                  }
-                }}
-              />
-            ) : (
-              <div className="flex items-center justify-center h-full text-gray-500">
-                <div className="text-center">
-                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                  <p>ファイルを開いてください</p>
-                  <p className="text-sm mt-2 opacity-75">
-                    左のファイルツリーからファイルを選択
-                  </p>
+            {/* Editor or Empty Placeholder */}
+            <div className="flex-1 min-h-0">
+              {activeTab ? (
+                <YamlEditor
+                  key={activeTab}
+                  ref={focusedPane === 'left' ? yamlEditorRef : undefined}
+                  value={currentContent}
+                  onChange={handleEditorChange}
+                  fileList={allFilePaths}
+                  snippets={snippets}
+                  dictionaryCache={dictionaryCache}
+                  keyDictionaryCache={keyDictionaryCache}
+                  onDictionaryChange={async () => {
+                    try {
+                      const dictData = await dictionaryAPI.list();
+                      const cache = buildDictionaryCache(dictData);
+                      setDictionaryCache(cache);
+                    } catch (e) {
+                      console.error('Failed to reload dictionary:', e);
+                    }
+                  }}
+                />
+              ) : (
+                <div className="flex items-center justify-center h-full text-gray-500">
+                  <div className="text-center">
+                    <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                    <p>ファイルを開いてください</p>
+                    <p className="text-sm mt-2 opacity-75">
+                      左のファイルツリーからファイルを選択
+                    </p>
+                  </div>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
+
+          {/* Split Resize Handle */}
+          {splitView && (
+            <div
+              className="w-1 flex-shrink-0 bg-[#333] cursor-ew-resize hover:bg-[#007acc]"
+              onMouseDown={(e) => {
+                resizeType.current = 'split';
+                startPos.current = e.clientX;
+                document.body.style.cursor = 'ew-resize';
+              }}
+            />
+          )}
+
+          {/* Right Pane */}
+          {splitView && (
+            <div
+              className="flex flex-col min-w-0 flex-1"
+              onClick={() => setFocusedPane('right')}
+            >
+              {/* Tab Bar */}
+              <TabBar
+                tabs={rightTabs}
+                activeTab={activeRightTab}
+                dirtyTabs={dirtyFiles}
+                onSelectTab={handleSelectRightTab}
+                onCloseTab={handleCloseRightTab}
+                onReorderTabs={handleReorderRightTabs}
+                paneId="right"
+              />
+
+              {/* Editor or Empty Placeholder */}
+              <div className="flex-1 min-h-0">
+                {activeRightTab ? (
+                  <YamlEditor
+                    key={activeRightTab}
+                    ref={focusedPane === 'right' ? yamlEditorRef : undefined}
+                    value={files[activeRightTab] || ''}
+                    onChange={(value) => {
+                      setFiles((prev) => ({ ...prev, [activeRightTab]: value }));
+                      setDirtyFiles((prev) => new Set(prev).add(activeRightTab));
+                    }}
+                    fileList={allFilePaths}
+                    snippets={snippets}
+                    dictionaryCache={dictionaryCache}
+                    keyDictionaryCache={keyDictionaryCache}
+                    onDictionaryChange={async () => {
+                      try {
+                        const dictData = await dictionaryAPI.list();
+                        const cache = buildDictionaryCache(dictData);
+                        setDictionaryCache(cache);
+                      } catch (e) {
+                        console.error('Failed to reload dictionary:', e);
+                      }
+                    }}
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-500">
+                    <div className="text-center">
+                      <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                      <p>ファイルを開いてください</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Right Resize Handle */}
@@ -1507,7 +1740,7 @@ export default function Home() {
           style={{ width: variablePanelWidth }}
         >
           <VariableForm
-            templatePath={activeTab}
+            templatePath={currentFilePath}
             variables={variables}
             values={currentVariableValues}
             onChange={handleVariableValuesChange}
@@ -1528,6 +1761,7 @@ export default function Home() {
             onActiveTabChange={setPromptActiveTab}
             promptSubTab={promptSubTab}
             onPromptSubTabChange={setPromptSubTab}
+            currentFileName={currentFileName}
             mergedYaml={mergedYaml}
             isYamlValid={isYamlValid}
             enhancedPrompt={enhancedPrompt}
@@ -1551,6 +1785,7 @@ export default function Home() {
         >
           <GenerationPanel
             key={settingsKey}
+            currentFileName={currentFileName}
             enhanceEnabled={enhanceEnabled}
             onEnhanceEnabledChange={handleEnhanceEnabledChange}
             onEnhance={handleEnhance}

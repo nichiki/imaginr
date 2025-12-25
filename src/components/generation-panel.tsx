@@ -26,6 +26,9 @@ import {
 } from '@/lib/storage';
 
 interface GenerationPanelProps {
+  // 現在のファイル名
+  currentFileName?: string;
+
   // エンハンス制御
   enhanceEnabled: boolean;
   onEnhanceEnabledChange: (enabled: boolean) => void;
@@ -55,6 +58,7 @@ interface GenerationPanelProps {
 }
 
 export function GenerationPanel({
+  currentFileName,
   enhanceEnabled,
   onEnhanceEnabledChange,
   onEnhance,
@@ -149,10 +153,15 @@ export function GenerationPanel({
   if (!isComfyEnabled) {
     return (
       <div className="h-full bg-[#252526] flex flex-col">
-        <div className="h-11 px-3 flex items-center border-b border-[#333] flex-shrink-0">
-          <span className="text-xs uppercase text-[#888] font-medium">
+        <div className="h-11 px-3 flex items-center gap-2 border-b border-[#333] flex-shrink-0 min-w-0">
+          <span className="text-xs uppercase text-[#888] font-medium flex-shrink-0">
             Generate
           </span>
+          {currentFileName && (
+            <span className="text-xs text-[#569cd6] truncate" title={currentFileName}>
+              {currentFileName}
+            </span>
+          )}
         </div>
         <div className="flex-1 flex items-center justify-center p-4">
           <p className="text-xs text-[#666] text-center">
@@ -167,10 +176,15 @@ export function GenerationPanel({
   return (
     <div className="h-full bg-[#252526] flex flex-col">
       {/* Header */}
-      <div className="h-11 px-3 flex items-center border-b border-[#333] flex-shrink-0">
-        <span className="text-xs uppercase text-[#888] font-medium">
+      <div className="h-11 px-3 flex items-center gap-2 border-b border-[#333] flex-shrink-0 min-w-0">
+        <span className="text-xs uppercase text-[#888] font-medium flex-shrink-0">
           Generate
         </span>
+        {currentFileName && (
+          <span className="text-xs text-[#569cd6] truncate" title={currentFileName}>
+            {currentFileName}
+          </span>
+        )}
       </div>
 
       {/* Content */}

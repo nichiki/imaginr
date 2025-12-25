@@ -17,7 +17,13 @@ import {
   horizontalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
-import { X } from 'lucide-react';
+import { X, Columns2 } from 'lucide-react';
+import {
+  ContextMenu,
+  ContextMenuContent,
+  ContextMenuItem,
+  ContextMenuTrigger,
+} from '@/components/ui/context-menu';
 
 interface TabBarProps {
   tabs: string[];
@@ -26,6 +32,8 @@ interface TabBarProps {
   onSelectTab: (path: string) => void;
   onCloseTab: (path: string) => void;
   onReorderTabs: (tabs: string[]) => void;
+  onSplitRight?: (path: string) => void;
+  paneId?: 'left' | 'right';
 }
 
 interface SortableTabProps {
@@ -34,6 +42,8 @@ interface SortableTabProps {
   isDirty: boolean;
   onSelect: () => void;
   onClose: (e: React.MouseEvent) => void;
+  onSplitRight?: () => void;
+  showSplitOption: boolean;
 }
 
 function getFileName(path: string): string {
@@ -41,7 +51,7 @@ function getFileName(path: string): string {
   return parts[parts.length - 1] || path;
 }
 
-function SortableTab({ path, isActive, isDirty, onSelect, onClose }: SortableTabProps) {
+function SortableTab({ path, isActive, isDirty, onSelect, onClose, onSplitRight, showSplitOption }: SortableTabProps) {
   const {
     attributes,
     listeners,
@@ -59,38 +69,60 @@ function SortableTab({ path, isActive, isDirty, onSelect, onClose }: SortableTab
   };
 
   return (
-    <div
-      ref={setNodeRef}
-      style={style}
-      {...attributes}
-      {...listeners}
-      className={`
-        group flex items-center gap-1 px-3 py-1.5 text-sm cursor-pointer select-none
-        border-r border-[#3c3c3c] min-w-0 max-w-[200px]
-        ${isActive
-          ? 'bg-[#1e1e1e] text-white'
-          : 'bg-[#2d2d2d] text-gray-400 hover:bg-[#3c3c3c] hover:text-white'
-        }
-        ${isDragging ? 'opacity-50' : ''}
-      `}
-      onClick={onSelect}
-      title={path}
-    >
-      <span className="truncate">
-        {isDirty && <span className="text-orange-400 mr-1">●</span>}
-        {getFileName(path)}
-      </span>
-      <button
-        className={`
-          flex-shrink-0 p-0.5 rounded hover:bg-[#4c4c4c]
-          ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
-        `}
-        onClick={onClose}
-        title="閉じる"
-      >
-        <X size={14} />
-      </button>
-    </div>
+    <ContextMenu>
+      <ContextMenuTrigger asChild>
+        <div
+          ref={setNodeRef}
+          style={style}
+          {...attributes}
+          {...listeners}
+          className={`
+            group flex items-center gap-1 px-3 py-1.5 text-sm cursor-pointer select-none
+            border-r border-[#3c3c3c] min-w-0 max-w-[200px]
+            ${isActive
+              ? 'bg-[#1e1e1e] text-white'
+              : 'bg-[#2d2d2d] text-gray-400 hover:bg-[#3c3c3c] hover:text-white'
+            }
+            ${isDragging ? 'opacity-50' : ''}
+          `}
+          onClick={onSelect}
+          title={path}
+        >
+          <span className="truncate">
+            {isDirty && <span className="text-orange-400 mr-1">●</span>}
+            {getFileName(path)}
+          </span>
+          <button
+            className={`
+              flex-shrink-0 p-0.5 rounded hover:bg-[#4c4c4c]
+              ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
+            `}
+            onClick={onClose}
+            title="閉じる"
+          >
+            <X size={14} />
+          </button>
+        </div>
+      </ContextMenuTrigger>
+      <ContextMenuContent className="bg-[#252526] border-[#333]">
+        {showSplitOption && onSplitRight && (
+          <ContextMenuItem
+            onClick={onSplitRight}
+            className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+          >
+            <Columns2 className="h-4 w-4 mr-2" />
+            右に分割して開く
+          </ContextMenuItem>
+        )}
+        <ContextMenuItem
+          onClick={(e) => onClose(e as unknown as React.MouseEvent)}
+          className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+        >
+          <X className="h-4 w-4 mr-2" />
+          閉じる
+        </ContextMenuItem>
+      </ContextMenuContent>
+    </ContextMenu>
   );
 }
 
@@ -101,6 +133,8 @@ export function TabBar({
   onSelectTab,
   onCloseTab,
   onReorderTabs,
+  onSplitRight,
+  paneId = 'left',
 }: TabBarProps) {
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -134,6 +168,13 @@ export function TabBar({
     [onCloseTab]
   );
 
+  const handleSplitRight = useCallback(
+    (path: string) => () => {
+      onSplitRight?.(path);
+    },
+    [onSplitRight]
+  );
+
   if (tabs.length === 0) {
     return null;
   }
@@ -154,6 +195,8 @@ export function TabBar({
               isDirty={dirtyTabs.has(path)}
               onSelect={() => onSelectTab(path)}
               onClose={handleClose(path)}
+              onSplitRight={handleSplitRight(path)}
+              showSplitOption={paneId === 'left' && !!onSplitRight}
             />
           ))}
         </SortableContext>

@@ -68,6 +68,9 @@ interface PromptPanelProps {
   promptSubTab: PromptSubTab;
   onPromptSubTabChange: (subTab: PromptSubTab) => void;
 
+  // 現在のファイル名（分割ビュー時の表示用）
+  currentFileName?: string;
+
   // Raw（Merged YAML）
   mergedYaml: string;
   isYamlValid: boolean;
@@ -89,6 +92,7 @@ export function PromptPanel({
   onActiveTabChange,
   promptSubTab,
   onPromptSubTabChange,
+  currentFileName,
   mergedYaml,
   isYamlValid,
   enhancedPrompt,
@@ -304,6 +308,11 @@ export function PromptPanel({
             <span className="text-xs uppercase text-[#888] font-medium">
               {activeTab === 'prompt' ? 'Prompt' : 'Gallery'}
             </span>
+            {activeTab === 'prompt' && currentFileName && (
+              <span className="text-xs text-[#569cd6] truncate max-w-[200px]" title={currentFileName}>
+                {currentFileName}
+              </span>
+            )}
             {activeTab === 'prompt' && (
               <Button
                 variant="ghost"

@@ -17,6 +17,11 @@ export interface AppState {
   // タブ管理
   openTabs: string[];     // 開いているタブ一覧（順序保持）
   activeTab: string;      // アクティブタブのパス
+  // 分割エディタ
+  splitView: boolean;         // 分割ビューが有効か
+  rightTabs: string[];        // 右ペインのタブ
+  activeRightTab: string;     // 右ペインのアクティブタブ
+  splitRatio: number;         // 分割比率（左ペインの割合、0-1）
   // 後方互換性のため残す（マイグレーション用）
   selectedFile?: string;
 }
@@ -30,6 +35,10 @@ const defaultState: AppState = {
   expandedFolders: null, // 初回は全て開く
   openTabs: [],
   activeTab: '',
+  splitView: false,
+  rightTabs: [],
+  activeRightTab: '',
+  splitRatio: 0.5,
 };
 
 export function loadState(): AppState {
