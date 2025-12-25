@@ -13,7 +13,7 @@ export interface AppState {
   previewHeight: number;
   variablePanelWidth: number;
   generationPanelWidth: number;
-  expandedFolders: string[] | null; // nullは未保存を示す
+  expandedFolders: string[] | null; // nullは旧バージョンからのマイグレーション用（全て開く）
   // タブ管理
   openTabs: string[];     // 開いているタブ一覧（順序保持）
   activeTab: string;      // アクティブタブのパス
@@ -31,8 +31,8 @@ const defaultState: AppState = {
   rightPanelWidth: 280,
   previewHeight: 280,
   variablePanelWidth: 280, // leftPanelWidthと同じ
-  generationPanelWidth: 200,
-  expandedFolders: null, // 初回は全て開く
+  generationPanelWidth: 280, // rightPanelWidthと同じ
+  expandedFolders: [], // 初回は全て閉じる
   openTabs: [],
   activeTab: '',
   splitView: false,

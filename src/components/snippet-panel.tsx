@@ -52,7 +52,7 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
         // 無視
       }
     }
-    return new Set(['pose', 'lighting', 'expression']);
+    return new Set(); // 初回は全て閉じる
   });
   const [isLoading, setIsLoading] = useState(true);
 

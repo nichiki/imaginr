@@ -205,11 +205,12 @@ export default function Home() {
         const tree = await fileAPI.listFiles();
         setFileTree(tree);
 
-        // フォルダの開閉状態: 保存されていればそれを使用、なければ全て開く
+        // フォルダの開閉状態: 保存されていればそれを使用
+        // デフォルトは全て閉じる（expandedFolders: []）
+        // null は旧バージョンからのマイグレーション用（全て開く）
         if (savedState.expandedFolders !== null) {
           setExpandedFolders(new Set(savedState.expandedFolders));
         } else {
-          // 初回起動時: デフォルトで全フォルダを開く
           setExpandedFolders(new Set(collectAllFolders(tree)));
         }
 
