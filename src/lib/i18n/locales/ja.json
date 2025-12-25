@@ -76,7 +76,9 @@
     "createFolderFailed": "フォルダの作成に失敗しました",
     "deleteFileFailed": "ファイルの削除に失敗しました",
     "deleteFolderFailed": "フォルダの削除に失敗しました",
-    "moveFailed": "ファイルの移動に失敗しました"
+    "moveFailed": "ファイルの移動に失敗しました",
+    "folderNamePlaceholder": "フォルダ名",
+    "fileNamePlaceholder": "ファイル名（拡張子不要）"
   },
   "tabBar": {
     "close": "閉じる",
@@ -198,7 +200,7 @@
   },
   "settings": {
     "title": "設定",
-    "data": "データ",
+    "general": "基本設定",
     "dataFolder": "データフォルダ",
     "dataFolderDescription": "テンプレート、辞書、スニペット、生成画像",
     "addWorkflow": "追加...",

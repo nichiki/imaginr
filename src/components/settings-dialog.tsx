@@ -30,14 +30,14 @@ import {
   Upload,
   FolderOpen,
   BookOpen,
-  Brain,
   Settings2,
+  Image as ImageIcon,
+  Sparkles,
   ChevronRight,
   ChevronDown,
   Plus,
   Trash2,
   Copy,
-  Globe,
 } from 'lucide-react';
 import { DictionaryManagerDialog } from './dictionary-manager-dialog';
 import { WorkflowEditor } from './workflow-editor';
@@ -465,8 +465,8 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
           <div className="w-56 border-r border-[#333] flex flex-col shrink-0">
             <ScrollArea className="flex-1">
               <div className="p-2 space-y-0.5">
-                {/* データ */}
-                {renderTreeItem(t('settings.data'), 'data', undefined, <FolderOpen className="h-4 w-4 shrink-0" />)}
+                {/* 基本設定 (General) */}
+                {renderTreeItem(t('settings.general'), 'data', undefined, <Settings2 className="h-4 w-4 shrink-0" />)}
 
                 {/* ComfyUI */}
                 <div>
@@ -494,8 +494,8 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         <ChevronRight className="h-3 w-3" />
                       )}
                     </span>
-                    <Settings2 className="h-4 w-4 shrink-0" />
-                    <span className="flex-1">ComfyUI</span>
+                    <ImageIcon className="h-4 w-4 shrink-0" />
+                    <span className="flex-1">{t('settings.comfyui.title')}</span>
                   </button>
 
                   {expandedSections.comfyui && settings.enabled && (
@@ -540,8 +540,8 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         <ChevronRight className="h-3 w-3" />
                       )}
                     </span>
-                    <Brain className="h-4 w-4 shrink-0" />
-                    <span className="flex-1">Ollama</span>
+                    <Sparkles className="h-4 w-4 shrink-0" />
+                    <span className="flex-1">{t('settings.ollama.title')}</span>
                   </button>
 
                   {expandedSections.ollama && ollamaSettings.enabled && (
@@ -576,15 +576,14 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
           <div className="flex-1 overflow-hidden">
             <ScrollArea className="h-full">
               <div className="p-4">
-                {/* データ設定 */}
+                {/* 基本設定 */}
                 {selection.type === 'data' && (
                   <div className="space-y-6">
-                    <h3 className="text-sm font-medium text-[#d4d4d4]">{t('settings.title')}</h3>
+                    <h3 className="text-sm font-medium text-[#d4d4d4]">{t('settings.general')}</h3>
 
                     {/* 言語設定 */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium flex items-center gap-2">
-                        <Globe className="h-4 w-4" />
+                      <Label className="text-sm font-medium">
                         {t('settings.language')}
                       </Label>
                       <Select

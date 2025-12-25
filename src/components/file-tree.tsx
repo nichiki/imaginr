@@ -113,7 +113,7 @@ export function FileTree({
       setFileNameError(error);
       return;
     }
-    const fileName = newFileName.endsWith('.yaml') ? newFileName : `${newFileName}.yaml`;
+    const fileName = `${newFileName}.yaml`;
     const path = createInFolder ? `${createInFolder}/${fileName}` : fileName;
     onCreateFile(path);
     setIsCreateDialogOpen(false);
@@ -153,7 +153,9 @@ export function FileTree({
 
   const openRenameDialog = (path: string, name: string, type: 'file' | 'folder') => {
     setRenameTarget({ path, name, type });
-    setNewRenameName(name);
+    // ファイルの場合は拡張子を除去して表示
+    const displayName = type === 'file' ? name.replace(/\.(yaml|yml)$/, '') : name;
+    setNewRenameName(displayName);
     setReferences([]);
     setShowReferenceWarning(false);
     setRenameError('');
@@ -162,7 +164,9 @@ export function FileTree({
 
   const handleRenameSubmit = async () => {
     if (!renameTarget || !newRenameName.trim() || !onRenameFile) return;
-    if (newRenameName === renameTarget.name) {
+    // ファイルの場合は拡張子を付けて比較
+    const fullNewName = renameTarget.type === 'file' ? `${newRenameName}.yaml` : newRenameName;
+    if (fullNewName === renameTarget.name) {
       setIsRenameDialogOpen(false);
       return;
     }
@@ -197,9 +201,12 @@ export function FileTree({
   const executeRename = async (updateReferences: boolean) => {
     if (!renameTarget || !newRenameName.trim() || !onRenameFile) return;
 
+    // ファイルの場合は拡張子を付ける
+    const fullNewName = renameTarget.type === 'file' ? `${newRenameName}.yaml` : newRenameName;
+
     setIsRenaming(true);
     try {
-      await onRenameFile(renameTarget.path, newRenameName, updateReferences);
+      await onRenameFile(renameTarget.path, fullNewName, updateReferences);
       setIsRenameDialogOpen(false);
       setShowReferenceWarning(false);
     } catch (error) {
@@ -303,17 +310,20 @@ export function FileTree({
               <DialogTitle className="text-white">{t('fileTree.newFile')}</DialogTitle>
             </DialogHeader>
             <div className="py-4">
-              <Input
-                placeholder="filename.yaml"
-                value={newFileName}
-                onChange={(e) => {
-                  setNewFileName(e.target.value);
-                  setFileNameError('');
-                }}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreateFile()}
-                className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
-                autoFocus
-              />
+              <div className="flex items-center gap-1">
+                <Input
+                  placeholder={t('fileTree.fileNamePlaceholder')}
+                  value={newFileName}
+                  onChange={(e) => {
+                    setNewFileName(e.target.value);
+                    setFileNameError('');
+                  }}
+                  onKeyDown={(e) => e.key === 'Enter' && handleCreateFile()}
+                  className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] flex-1"
+                  autoFocus
+                />
+                <span className="text-[#888] text-sm">.yaml</span>
+              </div>
               {fileNameError && (
                 <p className="text-xs text-red-400 mt-2">{fileNameError}</p>
               )}
@@ -349,7 +359,7 @@ export function FileTree({
             </DialogHeader>
             <div className="py-4">
               <Input
-                placeholder="folder name"
+                placeholder={t('fileTree.folderNamePlaceholder')}
                 value={newFolderName}
                 onChange={(e) => {
                   setNewFolderName(e.target.value);
@@ -402,18 +412,23 @@ export function FileTree({
             <div className="py-4">
               {!showReferenceWarning ? (
                 <>
-                  <Input
-                    placeholder={renameTarget?.type === 'folder' ? 'folder name' : 'filename.yaml'}
-                    value={newRenameName}
-                    onChange={(e) => {
-                      setNewRenameName(e.target.value);
-                      setRenameError('');
-                    }}
-                    onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()}
-                    className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
-                    autoFocus
-                    disabled={isCheckingReferences || isRenaming}
-                  />
+                  <div className="flex items-center gap-1">
+                    <Input
+                      placeholder={renameTarget?.type === 'folder' ? t('fileTree.folderNamePlaceholder') : t('fileTree.fileNamePlaceholder')}
+                      value={newRenameName}
+                      onChange={(e) => {
+                        setNewRenameName(e.target.value);
+                        setRenameError('');
+                      }}
+                      onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()}
+                      className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] flex-1"
+                      autoFocus
+                      disabled={isCheckingReferences || isRenaming}
+                    />
+                    {renameTarget?.type === 'file' && (
+                      <span className="text-[#888] text-sm">.yaml</span>
+                    )}
+                  </div>
                   {renameError && (
                     <p className="text-xs text-red-400 mt-2">{renameError}</p>
                   )}

@@ -76,7 +76,9 @@
     "createFolderFailed": "Failed to create folder",
     "deleteFileFailed": "Failed to delete file",
     "deleteFolderFailed": "Failed to delete folder",
-    "moveFailed": "Failed to move file"
+    "moveFailed": "Failed to move file",
+    "folderNamePlaceholder": "folder name",
+    "fileNamePlaceholder": "filename (no extension)"
   },
   "tabBar": {
     "close": "Close",
@@ -198,7 +200,7 @@
   },
   "settings": {
     "title": "Settings",
-    "data": "Data",
+    "general": "General",
     "dataFolder": "Data Folder",
     "dataFolderDescription": "Templates, dictionary, snippets, and generated images",
     "addWorkflow": "Add...",
