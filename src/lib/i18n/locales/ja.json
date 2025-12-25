@@ -58,6 +58,7 @@
     "newFile": "新規ファイル",
     "newFolder": "新規フォルダ",
     "splitRight": "右に分割して開く",
+    "duplicate": "複製",
     "deleteFolder": "フォルダを削除",
     "inFolder": "フォルダ: {{folder}}",
     "renameFile": "ファイル名を変更",
@@ -77,6 +78,7 @@
     "createFolderFailed": "フォルダの作成に失敗しました",
     "deleteFileFailed": "ファイルの削除に失敗しました",
     "deleteFolderFailed": "フォルダの削除に失敗しました",
+    "duplicateFailed": "ファイルの複製に失敗しました",
     "moveFailed": "ファイルの移動に失敗しました",
     "folderNamePlaceholder": "フォルダ名",
     "fileNamePlaceholder": "ファイル名（拡張子不要）"

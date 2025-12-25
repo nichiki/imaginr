@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileTreeItem, RenameResult } from '@/lib/file-api';
 import { cn } from '@/lib/utils';
-import { ChevronRight, FileIcon, FolderIcon, FolderPlus, Plus, Trash2, Pencil, Columns2 } from 'lucide-react';
+import { ChevronRight, FileIcon, FolderIcon, FolderPlus, Plus, Trash2, Pencil, Columns2, Copy } from 'lucide-react';
 import {
   DndContext,
   DragEndEvent,
@@ -46,6 +46,7 @@ interface FileTreeProps {
   onMoveFile?: (from: string, to: string) => void;
   onRenameFile?: (path: string, newName: string, updateReferences: boolean) => Promise<RenameResult>;
   onFindReferences?: (path: string) => Promise<string[]>;
+  onDuplicateFile?: (path: string) => void;
 }
 
 export function FileTree({
@@ -62,6 +63,7 @@ export function FileTree({
   onMoveFile,
   onRenameFile,
   onFindReferences,
+  onDuplicateFile,
 }: FileTreeProps) {
   const { t } = useTranslation();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -297,6 +299,7 @@ export function FileTree({
                 onDeleteFile={onDeleteFile}
                 onDeleteFolder={onDeleteFolder}
                 onRename={openRenameDialog}
+                onDuplicate={onDuplicateFile}
                 depth={0}
               />
             ))}
@@ -551,6 +554,7 @@ interface FileTreeNodeProps {
   onDeleteFile: (path: string) => void;
   onDeleteFolder: (path: string) => void;
   onRename: (path: string, name: string, type: 'file' | 'folder') => void;
+  onDuplicate?: (path: string) => void;
   depth: number;
 }
 
@@ -566,6 +570,7 @@ function FileTreeNode({
   onDeleteFile,
   onDeleteFolder,
   onRename,
+  onDuplicate,
   depth,
 }: FileTreeNodeProps) {
   const isSelected = item.path === selectedFile;
@@ -585,6 +590,7 @@ function FileTreeNode({
         onDeleteFile={onDeleteFile}
         onDeleteFolder={onDeleteFolder}
         onRename={onRename}
+        onDuplicate={onDuplicate}
         depth={depth}
         paddingLeft={paddingLeft}
       />
@@ -599,6 +605,7 @@ function FileTreeNode({
       onSelectFileSplit={onSelectFileSplit}
       onDeleteFile={onDeleteFile}
       onRename={onRename}
+      onDuplicate={onDuplicate}
       paddingLeft={paddingLeft}
     />
   );
@@ -616,6 +623,7 @@ interface FolderNodeProps {
   onDeleteFile: (path: string) => void;
   onDeleteFolder: (path: string) => void;
   onRename: (path: string, name: string, type: 'file' | 'folder') => void;
+  onDuplicate?: (path: string) => void;
   depth: number;
   paddingLeft: number;
 }
@@ -632,6 +640,7 @@ function FolderNode({
   onDeleteFile,
   onDeleteFolder,
   onRename,
+  onDuplicate,
   depth,
   paddingLeft,
 }: FolderNodeProps) {
@@ -739,6 +748,7 @@ function FolderNode({
           onDeleteFile={onDeleteFile}
           onDeleteFolder={onDeleteFolder}
           onRename={onRename}
+          onDuplicate={onDuplicate}
           depth={depth + 1}
         />
       ))}
@@ -753,6 +763,7 @@ interface FileNodeProps {
   onSelectFileSplit?: (path: string) => void;
   onDeleteFile: (path: string) => void;
   onRename: (path: string, name: string, type: 'file' | 'folder') => void;
+  onDuplicate?: (path: string) => void;
   paddingLeft: number;
 }
 
@@ -763,6 +774,7 @@ function FileNode({
   onSelectFileSplit,
   onDeleteFile,
   onRename,
+  onDuplicate,
   paddingLeft,
 }: FileNodeProps) {
   const { t } = useTranslation();
@@ -808,6 +820,15 @@ function FileNode({
             >
               <Columns2 className="h-4 w-4 mr-2" />
               {t('fileTree.splitRight')}
+            </ContextMenuItem>
+          )}
+          {onDuplicate && (
+            <ContextMenuItem
+              onClick={() => onDuplicate(item.path)}
+              className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+            >
+              <Copy className="h-4 w-4 mr-2" />
+              {t('fileTree.duplicate')}
             </ContextMenuItem>
           )}
           <ContextMenuItem

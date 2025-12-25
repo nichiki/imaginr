@@ -36,6 +36,7 @@ export interface FileAPI {
   moveFile(from: string, to: string): Promise<string>; // returns new path
   findReferences(path: string): Promise<string[]>; // find files that reference this path
   renameFile(path: string, newName: string, updateReferences?: boolean): Promise<RenameResult>;
+  duplicateFile(path: string): Promise<string>; // returns new path
 }
 
 // Tauri版の実装（Tauri FS API経由）
@@ -255,6 +256,36 @@ class TauriFileAPI implements FileAPI {
     }
 
     return { newPath, updatedFiles };
+  }
+
+  async duplicateFile(path: string): Promise<string> {
+    // Read original file content
+    const content = await this.readFile(path);
+
+    // Generate unique copy name
+    const ext = path.endsWith('.yaml') ? '.yaml' : path.endsWith('.yml') ? '.yml' : '';
+    const baseName = path.replace(/\.(yaml|yml)$/, '');
+    const parentPath = path.includes('/') ? path.substring(0, path.lastIndexOf('/')) : '';
+
+    let copyNum = 0;
+    let newPath = '';
+
+    do {
+      const suffix = copyNum === 0 ? '_copy' : `_copy${copyNum + 1}`;
+      const newName = `${baseName.includes('/') ? baseName.substring(baseName.lastIndexOf('/') + 1) : baseName}${suffix}${ext}`;
+      newPath = parentPath ? `${parentPath}/${newName}` : newName;
+
+      const fullPath = await this.getFullPath(newPath);
+      if (!(await exists(fullPath))) {
+        break;
+      }
+      copyNum++;
+    } while (copyNum < 100); // Safety limit
+
+    // Create the duplicate file
+    await this.createFile(newPath, content);
+
+    return newPath;
   }
 }
 

@@ -1043,6 +1043,22 @@ export default function Home() {
     }
   }, [openTabs, activeTab, t]);
 
+  // ファイル複製ハンドラ
+  const handleDuplicateFile = useCallback(async (path: string) => {
+    try {
+      const newPath = await fileAPI.duplicateFile(path);
+      // ファイルツリーを再読み込み
+      const tree = await fileAPI.listFiles();
+      setFileTree(tree);
+      // 複製したファイルを開く
+      handleFileSelect(newPath);
+    } catch (error) {
+      console.error('Failed to duplicate file:', error);
+      const { showError } = await import('@/lib/dialog');
+      await showError(t('fileTree.duplicateFailed'));
+    }
+  }, [handleFileSelect, t]);
+
   // ファイル/フォルダ移動ハンドラ
   const handleMoveFile = useCallback(async (from: string, to: string) => {
     try {
@@ -1650,6 +1666,7 @@ export default function Home() {
             onMoveFile={handleMoveFile}
             onRenameFile={handleRenameFile}
             onFindReferences={handleFindReferences}
+            onDuplicateFile={handleDuplicateFile}
           />
         </div>
 

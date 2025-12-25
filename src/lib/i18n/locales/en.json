@@ -58,6 +58,7 @@
     "newFile": "New File",
     "newFolder": "New Folder",
     "splitRight": "Open in Split View",
+    "duplicate": "Duplicate",
     "deleteFolder": "Delete Folder",
     "inFolder": "In folder: {{folder}}",
     "renameFile": "Rename File",
@@ -77,6 +78,7 @@
     "createFolderFailed": "Failed to create folder",
     "deleteFileFailed": "Failed to delete file",
     "deleteFolderFailed": "Failed to delete folder",
+    "duplicateFailed": "Failed to duplicate file",
     "moveFailed": "Failed to move file",
     "folderNamePlaceholder": "folder name",
     "fileNamePlaceholder": "filename (no extension)"
