@@ -184,7 +184,9 @@
     "descriptionExample": "日本語の説明など",
     "detectedContext": "カーソル位置から検出: {{context}}.{{key}}",
     "manage": "辞書管理",
-    "manageDescription": "オートコンプリート辞書を管理"
+    "manageDescription": "オートコンプリート辞書を管理",
+    "noValues": "値がありません",
+    "addValue": "値を追加"
   },
   "settings": {
     "title": "設定",

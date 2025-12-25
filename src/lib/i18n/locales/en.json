@@ -184,7 +184,9 @@
     "descriptionExample": "e.g. Japanese description",
     "detectedContext": "Detected from cursor: {{context}}.{{key}}",
     "manage": "Manage Dictionary",
-    "manageDescription": "Manage autocomplete dictionary"
+    "manageDescription": "Manage autocomplete dictionary",
+    "noValues": "No values",
+    "addValue": "Add Value"
   },
   "settings": {
     "title": "Settings",

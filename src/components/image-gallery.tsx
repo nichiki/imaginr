@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Trash2, Loader2, Play, Search } from 'lucide-react';
@@ -124,6 +125,7 @@ export function ImageGallery({
   selectedIds,
   onToggleSelect,
 }: ImageGalleryProps) {
+  const { t } = useTranslation();
   const scrollContainerRef = useRef<HTMLDivElement>(null);
 
   const handleDelete = (image: ImageInfo, e: React.MouseEvent) => {
@@ -163,12 +165,12 @@ export function ImageGallery({
             {searchQuery ? (
               <>
                 <Search className="h-8 w-8" />
-                <span className="text-sm">検索結果がありません</span>
+                <span className="text-sm">{t('prompt.noSearchResults')}</span>
               </>
             ) : (
               <>
                 <Play className="h-8 w-8" />
-                <span className="text-sm">「生成」ボタンで画像を生成</span>
+                <span className="text-sm">{t('prompt.generateImages')}</span>
               </>
             )}
           </div>
@@ -196,7 +198,7 @@ export function ImageGallery({
             {/* End of list indicator */}
             {!hasMore && images.length > 0 && (
               <div className="p-3 text-center text-xs text-[#666]">
-                — すべて表示しました —
+                {t('common.allShown')}
               </div>
             )}
           </>

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -31,6 +32,7 @@ export function DictionaryQuickAddDialog({
   suggestedKey = '',
   onSuccess,
 }: DictionaryQuickAddDialogProps) {
+  const { t } = useTranslation();
   const [value, setValue] = useState(initialValue);
   const [description, setDescription] = useState('');
   const [context, setContext] = useState(suggestedContext);
@@ -51,7 +53,7 @@ export function DictionaryQuickAddDialog({
 
   const handleSave = async () => {
     if (!value.trim() || !context.trim() || !key.trim()) {
-      setError('すべての必須項目を入力してください');
+      setError(t('dictionary.allFieldsRequired'));
       return;
     }
 
@@ -70,9 +72,9 @@ export function DictionaryQuickAddDialog({
     } catch (e) {
       console.error('Failed to add dictionary entry:', e);
       if (e instanceof Error && e.message.includes('UNIQUE constraint failed')) {
-        setError('この値は既に登録されています');
+        setError(t('dictionary.alreadyExists'));
       } else {
-        setError('辞書への追加に失敗しました');
+        setError(t('dictionary.addFailed'));
       }
     } finally {
       setIsSaving(false);
@@ -83,18 +85,18 @@ export function DictionaryQuickAddDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-sm bg-[#252526] border-[#454545]">
         <DialogHeader>
-          <DialogTitle className="text-[#cccccc]">辞書に追加</DialogTitle>
+          <DialogTitle className="text-[#cccccc]">{t('dictionary.addToDictionary')}</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-4 py-2">
           <div>
             <Label className="text-xs text-[#888] mb-1 block">
-              値 <span className="text-red-400">*</span>
+              {t('dictionary.value')} <span className="text-red-400">*</span>
             </Label>
             <Input
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              placeholder="追加する値"
+              placeholder={t('dictionary.valuePlaceholder')}
               className="bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
               autoFocus
             />
@@ -102,12 +104,12 @@ export function DictionaryQuickAddDialog({
 
           <div>
             <Label className="text-xs text-[#888] mb-1 block">
-              説明（任意）
+              {t('dictionary.description')}
             </Label>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="日本語の説明など"
+              placeholder={t('dictionary.descriptionExample')}
               className="bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
             />
           </div>
@@ -115,23 +117,23 @@ export function DictionaryQuickAddDialog({
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs text-[#888] mb-1 block">
-                コンテキスト <span className="text-red-400">*</span>
+                {t('dictionary.contextLabel').split('（')[0]} <span className="text-red-400">*</span>
               </Label>
               <Input
                 value={context}
                 onChange={(e) => setContext(e.target.value)}
-                placeholder="* または hair など"
+                placeholder={t('dictionary.contextPlaceholder')}
                 className="bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
               />
             </div>
             <div>
               <Label className="text-xs text-[#888] mb-1 block">
-                キー <span className="text-red-400">*</span>
+                {t('dictionary.keyName')} <span className="text-red-400">*</span>
               </Label>
               <Input
                 value={key}
                 onChange={(e) => setKey(e.target.value)}
-                placeholder="color, style など"
+                placeholder={t('dictionary.keyPlaceholder')}
                 className="bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
               />
             </div>
@@ -139,7 +141,7 @@ export function DictionaryQuickAddDialog({
 
           {suggestedContext && suggestedKey && (
             <p className="text-xs text-[#888]">
-              カーソル位置から検出: {suggestedContext}.{suggestedKey}
+              {t('dictionary.detectedContext', { context: suggestedContext, key: suggestedKey })}
             </p>
           )}
 
@@ -156,7 +158,7 @@ export function DictionaryQuickAddDialog({
             disabled={isSaving}
             className="text-[#cccccc]"
           >
-            キャンセル
+            {t('common.cancel')}
           </Button>
           <Button
             size="sm"
@@ -164,7 +166,7 @@ export function DictionaryQuickAddDialog({
             disabled={isSaving || !value.trim() || !context.trim() || !key.trim()}
             className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
           >
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : '追加'}
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : t('common.add')}
           </Button>
         </DialogFooter>
       </DialogContent>

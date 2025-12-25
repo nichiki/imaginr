@@ -9,6 +9,7 @@ import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 import { Button } from '@/components/ui/button';
 import { X, ChevronLeft, ChevronRight, Download, Copy, Check, Loader2 } from 'lucide-react';
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { getImageDisplayUrl, imageAPI, type ImageDetail } from '@/lib/image-api';
 import { getImagesPath, joinPath } from '@/lib/tauri-utils';
 
@@ -27,6 +28,7 @@ interface ImageViewerProps {
 }
 
 export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerProps) {
+  const { t, i18n } = useTranslation();
   const [copied, setCopied] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [detail, setDetail] = useState<ImageDetail | null>(null);
@@ -128,14 +130,14 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
         showCloseButton={false}
       >
         <VisuallyHidden>
-          <DialogTitle>画像プレビュー</DialogTitle>
+          <DialogTitle>{t('imageViewer.title')}</DialogTitle>
         </VisuallyHidden>
         {image && (
           <div className="flex flex-col h-full">
             {/* ヘッダー */}
             <div className="flex items-center justify-between p-2 bg-[#252526] border-b border-[#333]">
               <div className="text-xs text-[#888]">
-                {new Date(image.createdAt).toLocaleString('ja-JP')}
+                {new Date(image.createdAt).toLocaleString(i18n.language === 'ja' ? 'ja-JP' : 'en-US')}
               </div>
               <div className="flex gap-1">
                 <Button
@@ -143,7 +145,7 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
                   size="sm"
                   className="h-7 w-7 p-0 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
                   onClick={handleDownload}
-                  title="ダウンロード"
+                  title={t('common.download')}
                 >
                   <Download className="h-4 w-4" />
                 </Button>
@@ -152,7 +154,7 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
                   size="sm"
                   className="h-7 w-7 p-0 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
                   onClick={onClose}
-                  title="閉じる"
+                  title={t('common.close')}
                 >
                   <X className="h-4 w-4" />
                 </Button>
@@ -202,7 +204,7 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
                     <div className="mb-4 space-y-3">
                       {detail.seed && (
                         <div>
-                          <span className="text-xs text-[#888]">Seed</span>
+                          <span className="text-xs text-[#888]">{t('imageViewer.seed')}</span>
                           <pre className="text-xs font-mono text-[#d4d4d4] whitespace-pre-wrap mt-1">
                             {detail.seed}
                           </pre>
@@ -210,7 +212,7 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
                       )}
                       {detail.parameters && Object.keys(detail.parameters).length > 0 && (
                         <div>
-                          <span className="text-xs text-[#888]">Parameters</span>
+                          <span className="text-xs text-[#888]">{t('imageViewer.parameters')}</span>
                           <pre className="text-xs font-mono text-[#d4d4d4] whitespace-pre-wrap mt-1">
                             {Object.entries(detail.parameters).map(([key, value]) => `${key}: ${value}`).join('\n')}
                           </pre>
@@ -218,7 +220,7 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
                       )}
                       {detail.negativePrompt && (
                         <div>
-                          <span className="text-xs text-[#888]">Negative</span>
+                          <span className="text-xs text-[#888]">{t('imageViewer.negative')}</span>
                           <pre className="text-xs font-mono text-red-400/80 whitespace-pre-wrap mt-1">
                             {detail.negativePrompt}
                           </pre>
@@ -229,31 +231,31 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
 
                   {/* プロンプト */}
                   <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs text-[#888]">Prompt</span>
+                    <span className="text-xs text-[#888]">{t('imageViewer.prompt')}</span>
                     {image.prompt && (
                       <Button
                         variant="ghost"
                         size="sm"
                         className="h-6 px-2 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
                         onClick={copyPrompt}
-                        title="コピー"
+                        title={t('common.copy')}
                       >
                         {copied ? (
                           <>
                             <Check className="h-3 w-3 mr-1 text-green-500" />
-                            <span className="text-xs text-green-500">コピーしました</span>
+                            <span className="text-xs text-green-500">{t('common.copied')}</span>
                           </>
                         ) : (
                           <>
                             <Copy className="h-3 w-3 mr-1" />
-                            <span className="text-xs">コピー</span>
+                            <span className="text-xs">{t('common.copy')}</span>
                           </>
                         )}
                       </Button>
                     )}
                   </div>
                   <pre className="text-xs font-mono text-[#d4d4d4] whitespace-pre-wrap">
-                    {image.prompt || '(プロンプトなし)'}
+                    {image.prompt || t('gallery.noPrompt')}
                   </pre>
                 </div>
               </div>

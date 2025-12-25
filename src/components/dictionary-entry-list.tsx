@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
@@ -23,6 +24,7 @@ export function DictionaryEntryList({
   onUpdate,
   onDelete,
 }: DictionaryEntryListProps) {
+  const { t } = useTranslation();
   const [isAdding, setIsAdding] = useState(false);
   const [newValue, setNewValue] = useState('');
   const [newDescription, setNewDescription] = useState('');
@@ -102,7 +104,7 @@ export function DictionaryEntryList({
       <div className="flex-1 overflow-y-auto">
         {entries.length === 0 && !isAdding ? (
           <div className="p-4 text-center text-[#888] text-sm">
-            値がありません
+            {t('dictionary.noValues')}
           </div>
         ) : (
           <div className="divide-y divide-[#333]">
@@ -117,14 +119,14 @@ export function DictionaryEntryList({
                     <Input
                       value={editValue}
                       onChange={(e) => setEditValue(e.target.value)}
-                      placeholder="値"
+                      placeholder={t('dictionary.value')}
                       className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
                       autoFocus
                     />
                     <Input
                       value={editDescription}
                       onChange={(e) => setEditDescription(e.target.value)}
-                      placeholder="説明（任意）"
+                      placeholder={t('dictionary.description')}
                       className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
                     />
                     <div className="flex justify-end gap-1">
@@ -194,7 +196,7 @@ export function DictionaryEntryList({
             <Input
               value={newValue}
               onChange={(e) => setNewValue(e.target.value)}
-              placeholder="値"
+              placeholder={t('dictionary.value')}
               className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
               autoFocus
               onKeyDown={(e) => {
@@ -208,7 +210,7 @@ export function DictionaryEntryList({
             <Input
               value={newDescription}
               onChange={(e) => setNewDescription(e.target.value)}
-              placeholder="説明（任意）"
+              placeholder={t('dictionary.description')}
               className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
               onKeyDown={(e) => {
                 if (e.key === 'Enter' && newValue.trim()) {
@@ -226,7 +228,7 @@ export function DictionaryEntryList({
                 disabled={isSaving}
                 className="h-6 px-2 text-xs text-[#888]"
               >
-                キャンセル
+                {t('common.cancel')}
               </Button>
               <Button
                 size="sm"
@@ -234,7 +236,7 @@ export function DictionaryEntryList({
                 disabled={isSaving || !newValue.trim()}
                 className="h-6 px-2 text-xs bg-[#0e639c] hover:bg-[#1177bb] text-white"
               >
-                追加
+                {t('common.add')}
               </Button>
             </div>
           </div>
@@ -246,7 +248,7 @@ export function DictionaryEntryList({
             className="w-full h-7 text-xs text-[#cccccc] hover:bg-[#3c3c3c]"
           >
             <Plus className="h-3 w-3 mr-1" />
-            値を追加
+            {t('dictionary.addValue')}
           </Button>
         )}
       </div>

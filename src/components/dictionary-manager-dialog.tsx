@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -25,6 +26,7 @@ export function DictionaryManagerDialog({
   onOpenChange,
   onDictionaryChange,
 }: DictionaryManagerDialogProps) {
+  const { t } = useTranslation();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedContext, setSelectedContext] = useState<string | null>(null);
   const [selectedKey, setSelectedKey] = useState<string | null>(null);
@@ -87,7 +89,7 @@ export function DictionaryManagerDialog({
     } catch (e) {
       console.error('Failed to add entry:', e);
       const { showError } = await import('@/lib/dialog');
-      await showError('値の追加に失敗しました');
+      await showError(t('dictionary.addFailed'));
     }
   };
 
@@ -101,13 +103,13 @@ export function DictionaryManagerDialog({
     } catch (e) {
       console.error('Failed to update entry:', e);
       const { showError } = await import('@/lib/dialog');
-      await showError('値の更新に失敗しました');
+      await showError(t('dictionary.updateFailed'));
     }
   };
 
   const handleDeleteEntry = async (id: number) => {
     const { showConfirm } = await import('@/lib/dialog');
-    if (!await showConfirm('この値を削除しますか？')) return;
+    if (!await showConfirm(t('dictionary.confirmDelete'))) return;
 
     try {
       await dictAPI.deleteEntry(id);
@@ -119,7 +121,7 @@ export function DictionaryManagerDialog({
     } catch (e) {
       console.error('Failed to delete entry:', e);
       const { showError } = await import('@/lib/dialog');
-      await showError('値の削除に失敗しました');
+      await showError(t('dictionary.deleteFailed'));
     }
   };
 
@@ -139,7 +141,7 @@ export function DictionaryManagerDialog({
     } catch (e) {
       console.error('Failed to create new key:', e);
       const { showError } = await import('@/lib/dialog');
-      await showError('キーの作成に失敗しました');
+      await showError(t('dictionary.createKeyFailed'));
     }
   };
 
@@ -157,12 +159,12 @@ export function DictionaryManagerDialog({
       if (filePath) {
         await writeTextFile(filePath, yamlContent);
         const { showInfo } = await import('@/lib/dialog');
-        await showInfo('辞書をエクスポートしました');
+        await showInfo(t('dictionary.exportSuccess'));
       }
     } catch (e) {
       console.error('Failed to export dictionary:', e);
       const { showError } = await import('@/lib/dialog');
-      await showError('エクスポートに失敗しました');
+      await showError(t('dictionary.exportFailed'));
     }
   };
 
@@ -183,8 +185,8 @@ export function DictionaryManagerDialog({
       // Ask for import mode
       const { showConfirm } = await import('@/lib/dialog');
       const replaceMode = await showConfirm(
-        'インポート方法を選択してください:\n\n「OK」= 既存データを全て置き換え\n「キャンセル」= 既存データにマージ',
-        { okLabel: '置き換え', cancelLabel: 'マージ' }
+        t('dictionary.importMethod'),
+        { okLabel: t('common.replace'), cancelLabel: t('common.merge') }
       );
 
       const result = await dictAPI.importFromYaml(content, replaceMode ? 'replace' : 'merge');
@@ -193,12 +195,12 @@ export function DictionaryManagerDialog({
 
       const { showInfo } = await import('@/lib/dialog');
       await showInfo(
-        `インポート完了:\n追加: ${result.added}件\n更新: ${result.updated}件\nスキップ: ${result.skipped}件`
+        t('dictionary.importResult', { added: result.added, updated: result.updated, skipped: result.skipped })
       );
     } catch (e) {
       console.error('Failed to import dictionary:', e);
       const { showError } = await import('@/lib/dialog');
-      await showError('インポートに失敗しました: ' + (e instanceof Error ? e.message : ''));
+      await showError(t('dictionary.importFailed') + ': ' + (e instanceof Error ? e.message : ''));
     }
   };
 
@@ -222,7 +224,7 @@ export function DictionaryManagerDialog({
         <DialogContent className="!max-w-5xl w-[90vw] h-[80vh] flex flex-col p-0 gap-0 bg-[#252526] border-[#454545]">
           <DialogHeader className="px-4 py-3 border-b border-[#454545]">
             <div className="flex items-center justify-between">
-              <DialogTitle className="text-[#cccccc]">辞書管理</DialogTitle>
+              <DialogTitle className="text-[#cccccc]">{t('dictionary.title')}</DialogTitle>
               <div className="flex items-center gap-2 mr-8">
                 <Button
                   variant="ghost"
@@ -231,7 +233,7 @@ export function DictionaryManagerDialog({
                   className="h-7 text-xs text-[#cccccc] hover:bg-[#3c3c3c]"
                 >
                   <Upload className="h-3 w-3 mr-1" />
-                  インポート
+                  {t('common.import')}
                 </Button>
                 <Button
                   variant="ghost"
@@ -240,7 +242,7 @@ export function DictionaryManagerDialog({
                   className="h-7 text-xs text-[#cccccc] hover:bg-[#3c3c3c]"
                 >
                   <Download className="h-3 w-3 mr-1" />
-                  エクスポート
+                  {t('common.export')}
                 </Button>
               </div>
             </div>
@@ -251,7 +253,7 @@ export function DictionaryManagerDialog({
             <div className="relative">
               <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-4 w-4 text-[#888]" />
               <Input
-                placeholder="検索..."
+                placeholder={t('common.search')}
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-8 h-8 bg-[#3c3c3c] border-[#454545] text-[#cccccc] text-sm"
@@ -265,7 +267,7 @@ export function DictionaryManagerDialog({
             <div className="w-[280px] min-w-[250px] border-r border-[#454545] flex flex-col">
               <div className="flex-1 overflow-y-auto">
                 {isLoading ? (
-                  <div className="p-4 text-center text-[#888] text-sm">読み込み中...</div>
+                  <div className="p-4 text-center text-[#888] text-sm">{t('common.loading')}</div>
                 ) : (
                   <DictionaryContextTree
                     nodes={filteredTree}
@@ -283,7 +285,7 @@ export function DictionaryManagerDialog({
                   className="w-full h-7 text-xs text-[#cccccc] hover:bg-[#3c3c3c]"
                 >
                   <Plus className="h-3 w-3 mr-1" />
-                  新規キー
+                  {t('dictionary.createNewKey')}
                 </Button>
               </div>
             </div>
@@ -301,7 +303,7 @@ export function DictionaryManagerDialog({
                 />
               ) : (
                 <div className="flex-1 flex items-center justify-center text-[#888] text-sm">
-                  左のツリーからキーを選択してください
+                  {t('dictionary.selectKeyFromTree')}
                 </div>
               )}
             </div>
@@ -313,12 +315,12 @@ export function DictionaryManagerDialog({
       <Dialog open={showNewKeyDialog} onOpenChange={setShowNewKeyDialog}>
         <DialogContent className="max-w-sm bg-[#252526] border-[#454545]">
           <DialogHeader>
-            <DialogTitle className="text-[#cccccc]">新規キーを作成</DialogTitle>
+            <DialogTitle className="text-[#cccccc]">{t('dictionary.createNewKey')}</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
             <div>
               <label className="text-xs text-[#888] mb-1 block">
-                コンテキスト（例: hair, outfit, *）
+                {t('dictionary.contextLabel')}
               </label>
               <Input
                 value={newKeyContext}
@@ -329,12 +331,12 @@ export function DictionaryManagerDialog({
             </div>
             <div>
               <label className="text-xs text-[#888] mb-1 block">
-                キー名（例: style, color）
+                {t('dictionary.keyLabel')}
               </label>
               <Input
                 value={newKeyName}
                 onChange={(e) => setNewKeyName(e.target.value)}
-                placeholder="キー名"
+                placeholder={t('dictionary.keyName')}
                 className="bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
               />
             </div>
@@ -345,7 +347,7 @@ export function DictionaryManagerDialog({
                 onClick={() => setShowNewKeyDialog(false)}
                 className="text-[#cccccc]"
               >
-                キャンセル
+                {t('common.cancel')}
               </Button>
               <Button
                 size="sm"
@@ -353,7 +355,7 @@ export function DictionaryManagerDialog({
                 disabled={!newKeyContext.trim() || !newKeyName.trim()}
                 className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
               >
-                作成
+                {t('common.create')}
               </Button>
             </div>
           </div>

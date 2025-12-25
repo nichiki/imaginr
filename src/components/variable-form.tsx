@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
@@ -84,12 +85,14 @@ function AutocompleteInput({
   onChange,
   placeholder,
   suggestions,
+  clearTitle,
 }: {
   id: string;
   value: string;
   onChange: (value: string) => void;
   placeholder: string;
   suggestions: DictionaryEntry[];
+  clearTitle: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -221,7 +224,7 @@ function AutocompleteInput({
             handleClear();
           }}
           className="absolute right-1.5 top-1/2 -translate-y-1/2 p-0.5 text-[#888] hover:text-[#d4d4d4] rounded"
-          title="Clear"
+          title={clearTitle}
         >
           <X className="h-3.5 w-3.5" />
         </button>
@@ -262,11 +265,15 @@ function MultiSelectCheckboxes({
   value,
   onChange,
   suggestions,
+  noOptionsText,
+  addCustomPlaceholder,
 }: {
   id: string;
   value: string[];
   onChange: (value: string[]) => void;
   suggestions: DictionaryEntry[];
+  noOptionsText: string;
+  addCustomPlaceholder: string;
 }) {
   const [customInput, setCustomInput] = useState('');
 
@@ -343,7 +350,7 @@ function MultiSelectCheckboxes({
           );
         })}
         {suggestions.length === 0 && (
-          <span className="text-[#888] text-xs">No options available</span>
+          <span className="text-[#888] text-xs">{noOptionsText}</span>
         )}
       </div>
 
@@ -376,7 +383,7 @@ function MultiSelectCheckboxes({
           value={customInput}
           onChange={(e) => setCustomInput(e.target.value)}
           onKeyDown={handleKeyDown}
-          placeholder="Add custom value..."
+          placeholder={addCustomPlaceholder}
           className="h-6 text-xs bg-[#2d2d2d] border-[#555] text-[#d4d4d4] flex-1"
         />
         <Button
@@ -403,6 +410,8 @@ function VariableFormInner({
   dictionaryCache,
   isYamlValid = true
 }: VariableFormProps) {
+  const { t } = useTranslation();
+
   // プリセットをDBから読み込み
   const [presets, setPresets] = useState<Preset[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -563,7 +572,7 @@ function VariableFormInner({
   if (isLoading) {
     return (
       <div className="h-full bg-[#252526] flex items-center justify-center">
-        <span className="text-xs text-[#888]">Loading...</span>
+        <span className="text-xs text-[#888]">{t('common.loading')}</span>
       </div>
     );
   }
@@ -574,10 +583,10 @@ function VariableFormInner({
       <div className="h-11 px-3 flex items-center justify-between border-b border-[#333] flex-shrink-0">
         <div className="flex items-center gap-2">
           <span className="text-xs uppercase text-[#888] font-medium">
-            Variables
+            {t('variables.title')}
           </span>
           {!isYamlValid && (
-            <span title="YAML is invalid">
+            <span title={t('prompt.yamlParseError')}>
               <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" />
             </span>
           )}
@@ -590,7 +599,7 @@ function VariableFormInner({
             className="h-6 w-6 p-0 text-[#888] hover:text-[#d4d4d4] hover:bg-[#3c3c3c] disabled:opacity-30 disabled:hover:bg-transparent"
             onClick={handleSaveClick}
             disabled={variables.length === 0 || (selectedPreset ? !isModified : false)}
-            title={selectedPreset ? `Save to "${selectedPreset}"` : 'Save as new preset'}
+            title={selectedPreset ? t('common.save') : t('variables.saveAsPreset')}
           >
             <Save className="h-3.5 w-3.5" />
           </Button>
@@ -609,7 +618,7 @@ function VariableFormInner({
                     {isModified && <span className="text-yellow-500 ml-1">*</span>}
                   </span>
                 ) : (
-                  <span className="text-[#888]">No preset</span>
+                  <span className="text-[#888]">{t('variables.noPreset')}</span>
                 )}
               </SelectValue>
             </SelectTrigger>
@@ -618,7 +627,7 @@ function VariableFormInner({
                 value="__none__"
                 className="text-xs text-[#888] focus:bg-[#094771] focus:text-white"
               >
-                No preset
+                {t('variables.noPreset')}
               </SelectItem>
               {presets.map((preset) => (
                 <SelectItem
@@ -637,7 +646,7 @@ function VariableFormInner({
               size="sm"
               className="h-7 w-7 p-0 text-red-400 hover:text-red-300 hover:bg-red-900/30"
               onClick={() => handleDeletePreset(selectedPreset)}
-              title="Delete preset"
+              title={t('common.delete')}
             >
               <Trash2 className="h-3.5 w-3.5" />
             </Button>
@@ -649,7 +658,7 @@ function VariableFormInner({
       <div className="flex-1 overflow-y-auto p-3">
         {variables.length === 0 ? (
           <div className="text-xs text-[#666] text-center py-4">
-            No variables
+            {t('variables.noVariables')}
           </div>
         ) : (
         <div className="flex flex-col gap-3">
@@ -670,7 +679,7 @@ function VariableFormInner({
                   )}
                   {variable.defaultValue && (
                     <span className="text-[#666] ml-1">
-                      (default: {variable.defaultValue})
+                      {t('variables.defaultValue', { value: variable.defaultValue })}
                     </span>
                   )}
                 </Label>
@@ -687,21 +696,24 @@ function VariableFormInner({
                     value={Array.isArray(currentValue) ? currentValue : []}
                     onChange={(value) => handleChange(variable.name, value)}
                     suggestions={suggestions}
+                    noOptionsText={t('common.noOptions')}
+                    addCustomPlaceholder={t('variables.addCustomValue')}
                   />
                 ) : hasSuggestions ? (
                   <AutocompleteInput
                     id={`var-${variable.name}`}
                     value={typeof currentValue === 'string' ? currentValue : (currentValue?.[0] ?? variable.defaultValue ?? '')}
                     onChange={(value) => handleChange(variable.name, value)}
-                    placeholder={variable.defaultValue || `Enter ${variable.name}`}
+                    placeholder={variable.defaultValue || t('variables.enterValue', { name: variable.name })}
                     suggestions={suggestions}
+                    clearTitle={t('common.clear')}
                   />
                 ) : (
                   <Input
                     id={`var-${variable.name}`}
                     value={typeof currentValue === 'string' ? currentValue : (currentValue?.[0] ?? variable.defaultValue ?? '')}
                     onChange={(e) => handleChange(variable.name, e.target.value)}
-                    placeholder={variable.defaultValue || `Enter ${variable.name}`}
+                    placeholder={variable.defaultValue || t('variables.enterValue', { name: variable.name })}
                     className="h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
                   />
                 )}
@@ -716,11 +728,11 @@ function VariableFormInner({
       <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
         <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4]">
           <DialogHeader>
-            <DialogTitle className="text-white">Save as New Preset</DialogTitle>
+            <DialogTitle className="text-white">{t('variables.saveAsPreset')}</DialogTitle>
           </DialogHeader>
           <div className="py-4">
             <Input
-              placeholder="Preset name"
+              placeholder={t('variables.presetNamePlaceholder')}
               value={newPresetName}
               onChange={(e) => setNewPresetName(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleCreatePreset()}
@@ -734,14 +746,14 @@ function VariableFormInner({
               onClick={() => setIsCreateDialogOpen(false)}
               className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleCreatePreset}
               className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
               disabled={!newPresetName.trim()}
             >
-              Save
+              {t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>
