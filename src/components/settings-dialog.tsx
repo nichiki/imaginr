@@ -540,7 +540,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         <ChevronRight className="h-3 w-3" />
                       )}
                     </span>
-                    <Sparkles className="h-4 w-4 shrink-0" />
+                    <Sparkles className="h-4 w-4 shrink-0 text-yellow-500" />
                     <span className="flex-1">{t('settings.ollama.title')}</span>
                   </button>
 

@@ -2,6 +2,7 @@
 // Direct HTTP requests using Tauri plugin (no CORS issues)
 
 import { fetch as tauriFetch } from '@tauri-apps/plugin-http';
+import { YAPS_SPEC } from './yaps-spec';
 
 export interface OllamaModel {
   name: string;
@@ -194,4 +195,53 @@ export class OllamaClient {
 
     return fullContent;
   }
+
+  /**
+   * Text-to-Prompt: Generate YAPS YAML from natural language description
+   */
+  async generateYAPSFromText(
+    description: string,
+    model: string,
+    options?: { temperature?: number },
+    onProgress?: ProgressCallback
+  ): Promise<GenerateResult> {
+    const yaSpec = loadYAPSSpec();
+
+    const systemPrompt = `You are a YAPS (Yet Another Prompt Schema) expert and creative image prompt designer. Your task is to convert natural language descriptions into rich, detailed YAPS YAML format.
+
+Here is the YAPS specification:
+
+${yaSpec}
+
+Instructions:
+- Convert the user's description into valid YAPS YAML format
+- Use only keys defined in the YAPS specification
+- BE CREATIVE AND DETAILED: Fill in unspecified elements with appropriate, aesthetically pleasing choices
+  - If hair color is not specified, choose one that fits the mood/setting
+  - If pose details are missing, add natural hand positions, head tilt, etc.
+  - If outfit is vague, elaborate with specific items, colors, and materials
+  - Add appropriate lighting, composition, and effects that enhance the scene
+  - Include environment details that complement the subject
+- Always include:
+  - quality: [masterpiece, best quality, highly detailed]
+  - negative: [worst quality, low quality, bad anatomy, extra fingers, bad hands]
+  - Appropriate composition (shot type, angle)
+  - Lighting that matches the mood
+- Make the output visually rich - a minimal input should produce a comprehensive, detailed prompt
+- Output ONLY the YAML content, no explanations or markdown code fences
+- The output must be valid YAML that can be parsed directly`;
+
+    const prompt = `Convert this description to YAPS YAML format:
+
+${description}`;
+
+    return this.generate(prompt, model, systemPrompt, options, onProgress);
+  }
+}
+
+/**
+ * Get YAPS specification (embedded in code)
+ */
+function loadYAPSSpec(): string {
+  return YAPS_SPEC;
 }

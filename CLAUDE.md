@@ -195,7 +195,7 @@ interface NodeOverride {
 - [ ] お気に入り機能
 
 **LLM機能拡張**
-- [ ] t2p: テキストからYAPSプロンプト生成（自然言語 → 構造化YAML）
+- [x] t2p: テキストからYAPSプロンプト生成（自然言語 → 構造化YAML）
 - [ ] i2p: 画像からYAPSプロンプト生成（ビジョンモデル使用）
 
 ## Ollama連携（LLMエンハンサー）

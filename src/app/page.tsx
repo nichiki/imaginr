@@ -964,6 +964,28 @@ export default function Home() {
     }
   }, [openTabs, t]);
 
+  // ファイル作成ハンドラ（コンテンツ付き、AIアシスト用）
+  const handleCreateFileWithContent = useCallback(async (path: string, content: string) => {
+    try {
+      await fileAPI.createFile(path, content);
+      // ファイルツリーを再読み込み
+      const tree = await fileAPI.listFiles();
+      setFileTree(tree);
+      // 新しいファイルを選択（タブを開く）
+      setFiles((prev) => ({ ...prev, [path]: content }));
+      const newTabs = openTabs.includes(path) ? openTabs : [...openTabs, path];
+      setOpenTabs(newTabs);
+      setActiveTab(path);
+      if (initialized.current) {
+        saveState({ openTabs: newTabs, activeTab: path });
+      }
+    } catch (error) {
+      console.error('Failed to create file:', error);
+      const { showError } = await import('@/lib/dialog');
+      await showError(t('fileTree.createFileFailed'));
+    }
+  }, [openTabs, t]);
+
   // フォルダ作成ハンドラ
   const handleCreateFolder = useCallback(async (path: string) => {
     try {
@@ -1660,6 +1682,7 @@ export default function Home() {
             expandedFolders={expandedFolders}
             onToggleFolder={handleToggleFolder}
             onCreateFile={handleCreateFile}
+            onCreateFileWithContent={handleCreateFileWithContent}
             onCreateFolder={handleCreateFolder}
             onDeleteFile={handleDeleteFile}
             onDeleteFolder={handleDeleteFolder}
@@ -1667,6 +1690,7 @@ export default function Home() {
             onRenameFile={handleRenameFile}
             onFindReferences={handleFindReferences}
             onDuplicateFile={handleDuplicateFile}
+            ollamaSettings={ollamaSettings ?? undefined}
           />
         </div>
 

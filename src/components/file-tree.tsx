@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { FileTreeItem, RenameResult } from '@/lib/file-api';
 import { cn } from '@/lib/utils';
-import { ChevronRight, FileIcon, FolderIcon, FolderPlus, Plus, Trash2, Pencil, Columns2, Copy } from 'lucide-react';
+import { ChevronRight, FileIcon, FolderIcon, FolderPlus, Plus, Trash2, Pencil, Columns2, Copy, Sparkles, Loader2 } from 'lucide-react';
 import {
   DndContext,
   DragEndEvent,
@@ -31,6 +31,10 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Textarea } from '@/components/ui/textarea';
+import { OllamaClient } from '@/lib/ollama-api';
+import { OllamaSettings } from '@/lib/storage';
 
 interface FileTreeProps {
   items: FileTreeItem[];
@@ -40,6 +44,7 @@ interface FileTreeProps {
   expandedFolders: Set<string>;
   onToggleFolder: (path: string) => void;
   onCreateFile: (path: string) => void;
+  onCreateFileWithContent?: (path: string, content: string) => void;
   onCreateFolder: (path: string) => void;
   onDeleteFile: (path: string) => void;
   onDeleteFolder: (path: string) => void;
@@ -47,6 +52,7 @@ interface FileTreeProps {
   onRenameFile?: (path: string, newName: string, updateReferences: boolean) => Promise<RenameResult>;
   onFindReferences?: (path: string) => Promise<string[]>;
   onDuplicateFile?: (path: string) => void;
+  ollamaSettings?: OllamaSettings;
 }
 
 export function FileTree({
@@ -57,6 +63,7 @@ export function FileTree({
   expandedFolders,
   onToggleFolder,
   onCreateFile,
+  onCreateFileWithContent,
   onCreateFolder,
   onDeleteFile,
   onDeleteFolder,
@@ -64,6 +71,7 @@ export function FileTree({
   onRenameFile,
   onFindReferences,
   onDuplicateFile,
+  ollamaSettings,
 }: FileTreeProps) {
   const { t } = useTranslation();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
@@ -84,6 +92,12 @@ export function FileTree({
   const [fileNameError, setFileNameError] = useState('');
   const [folderNameError, setFolderNameError] = useState('');
   const [renameError, setRenameError] = useState('');
+
+  // AI Assist state
+  const [aiAssistEnabled, setAiAssistEnabled] = useState(false);
+  const [aiPrompt, setAiPrompt] = useState('');
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState('');
 
   // ファイル名/フォルダ名のバリデーション
   const validateFileName = (name: string): string | null => {
@@ -108,7 +122,7 @@ export function FileTree({
     })
   );
 
-  const handleCreateFile = () => {
+  const handleCreateFile = async () => {
     if (!newFileName.trim()) return;
     const error = validateFileName(newFileName);
     if (error) {
@@ -117,11 +131,55 @@ export function FileTree({
     }
     const fileName = `${newFileName}.yaml`;
     const path = createInFolder ? `${createInFolder}/${fileName}` : fileName;
-    onCreateFile(path);
+
+    // AI Assist mode: generate content with Ollama
+    if (aiAssistEnabled && aiPrompt.trim() && ollamaSettings?.enabled && ollamaSettings.model) {
+      setIsGenerating(true);
+      setGenerateError('');
+      try {
+        const client = new OllamaClient(ollamaSettings.baseUrl);
+        const result = await client.generateYAPSFromText(
+          aiPrompt,
+          ollamaSettings.model,
+          { temperature: ollamaSettings.temperature }
+        );
+
+        if (result.success && result.content) {
+          // Clean up the content (remove markdown code fences if present)
+          let content = result.content.trim();
+          if (content.startsWith('```yaml')) {
+            content = content.replace(/^```yaml\n?/, '').replace(/\n?```$/, '');
+          } else if (content.startsWith('```')) {
+            content = content.replace(/^```\n?/, '').replace(/\n?```$/, '');
+          }
+
+          if (onCreateFileWithContent) {
+            onCreateFileWithContent(path, content);
+          } else {
+            onCreateFile(path);
+          }
+        } else {
+          setGenerateError(result.error || t('fileTree.aiGenerateFailed'));
+          setIsGenerating(false);
+          return;
+        }
+      } catch (err) {
+        setGenerateError(err instanceof Error ? err.message : t('fileTree.aiGenerateFailed'));
+        setIsGenerating(false);
+        return;
+      }
+      setIsGenerating(false);
+    } else {
+      onCreateFile(path);
+    }
+
     setIsCreateDialogOpen(false);
     setNewFileName('');
     setCreateInFolder('');
     setFileNameError('');
+    setAiAssistEnabled(false);
+    setAiPrompt('');
+    setGenerateError('');
   };
 
   const handleCreateFolder = () => {
@@ -307,12 +365,19 @@ export function FileTree({
         </div>
 
         {/* New File Dialog */}
-        <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <Dialog open={isCreateDialogOpen} onOpenChange={(open) => {
+          setIsCreateDialogOpen(open);
+          if (!open) {
+            setAiAssistEnabled(false);
+            setAiPrompt('');
+            setGenerateError('');
+          }
+        }}>
           <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4]">
             <DialogHeader>
               <DialogTitle className="text-white">{t('fileTree.newFile')}</DialogTitle>
             </DialogHeader>
-            <div className="py-4">
+            <div className="py-4 space-y-4">
               <div className="flex items-center gap-1">
                 <Input
                   placeholder={t('fileTree.fileNamePlaceholder')}
@@ -321,19 +386,62 @@ export function FileTree({
                     setNewFileName(e.target.value);
                     setFileNameError('');
                   }}
-                  onKeyDown={(e) => e.key === 'Enter' && handleCreateFile()}
+                  onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && !aiAssistEnabled && handleCreateFile()}
                   className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] flex-1"
                   autoFocus
+                  disabled={isGenerating}
                 />
                 <span className="text-[#888] text-sm">.yaml</span>
               </div>
               {fileNameError && (
-                <p className="text-xs text-red-400 mt-2">{fileNameError}</p>
+                <p className="text-xs text-red-400">{fileNameError}</p>
               )}
               {createInFolder && (
-                <p className="text-xs text-[#888] mt-2">
+                <p className="text-xs text-[#888]">
                   {t('fileTree.inFolder', { folder: createInFolder })}
                 </p>
+              )}
+
+              {/* AI Assist Section - only show if Ollama is enabled */}
+              {ollamaSettings?.enabled && ollamaSettings.model && (
+                <>
+                  <div className="flex items-center gap-2 pt-2 border-t border-[#444]">
+                    <Switch
+                      id="ai-assist"
+                      checked={aiAssistEnabled}
+                      onCheckedChange={setAiAssistEnabled}
+                      disabled={isGenerating}
+                    />
+                    <label
+                      htmlFor="ai-assist"
+                      className="text-sm flex items-center gap-1.5 cursor-pointer"
+                    >
+                      <Sparkles className="h-4 w-4 text-yellow-500" />
+                      {t('fileTree.aiAssist')}
+                    </label>
+                  </div>
+
+                  {aiAssistEnabled && (
+                    <div className="space-y-2">
+                      <Textarea
+                        placeholder={t('fileTree.aiPromptPlaceholder')}
+                        value={aiPrompt}
+                        onChange={(e) => {
+                          setAiPrompt(e.target.value);
+                          setGenerateError('');
+                        }}
+                        className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] min-h-[80px] resize-none"
+                        disabled={isGenerating}
+                      />
+                      <p className="text-xs text-[#888]">
+                        {t('fileTree.aiAssistDescription')}
+                      </p>
+                      {generateError && (
+                        <p className="text-xs text-red-400">{generateError}</p>
+                      )}
+                    </div>
+                  )}
+                </>
               )}
             </div>
             <DialogFooter>
@@ -341,14 +449,23 @@ export function FileTree({
                 variant="outline"
                 onClick={() => setIsCreateDialogOpen(false)}
                 className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
+                disabled={isGenerating}
               >
                 {t('common.cancel')}
               </Button>
               <Button
                 onClick={handleCreateFile}
                 className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
+                disabled={isGenerating || (aiAssistEnabled && !aiPrompt.trim())}
               >
-                {t('common.create')}
+                {isGenerating ? (
+                  <>
+                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                    {t('fileTree.generating')}
+                  </>
+                ) : (
+                  t('common.create')
+                )}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -368,7 +485,7 @@ export function FileTree({
                   setNewFolderName(e.target.value);
                   setFolderNameError('');
                 }}
-                onKeyDown={(e) => e.key === 'Enter' && handleCreateFolder()}
+                onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleCreateFolder()}
                 className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
                 autoFocus
               />
@@ -423,7 +540,7 @@ export function FileTree({
                         setNewRenameName(e.target.value);
                         setRenameError('');
                       }}
-                      onKeyDown={(e) => e.key === 'Enter' && handleRenameSubmit()}
+                      onKeyDown={(e) => e.key === 'Enter' && !e.nativeEvent.isComposing && handleRenameSubmit()}
                       className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] flex-1"
                       autoFocus
                       disabled={isCheckingReferences || isRenaming}

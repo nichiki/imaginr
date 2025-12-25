@@ -321,7 +321,7 @@ export function GenerationPanel({
               </>
             ) : (
               <>
-                <Sparkles className="h-4 w-4 mr-2" />
+                <Sparkles className="h-4 w-4 mr-2 text-yellow-500" />
                 {t('generation.enhance')}{hasEnhancedPrompt ? ` ${t('generation.rerun')}` : ''}
               </>
             )}

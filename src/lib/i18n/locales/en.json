@@ -81,7 +81,12 @@
     "duplicateFailed": "Failed to duplicate file",
     "moveFailed": "Failed to move file",
     "folderNamePlaceholder": "folder name",
-    "fileNamePlaceholder": "filename (no extension)"
+    "fileNamePlaceholder": "filename (no extension)",
+    "aiAssist": "AI Assist (Experimental)",
+    "aiPromptPlaceholder": "Describe the image you want to create (e.g., \"girl with blue hair standing in forest\")",
+    "aiAssistDescription": "AI will generate YAPS-format YAML based on your description",
+    "aiGenerateFailed": "Failed to generate content",
+    "generating": "Generating..."
   },
   "tabBar": {
     "close": "Close",

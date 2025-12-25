@@ -81,7 +81,12 @@
     "duplicateFailed": "ファイルの複製に失敗しました",
     "moveFailed": "ファイルの移動に失敗しました",
     "folderNamePlaceholder": "フォルダ名",
-    "fileNamePlaceholder": "ファイル名（拡張子不要）"
+    "fileNamePlaceholder": "ファイル名（拡張子不要）",
+    "aiAssist": "AIアシスト（実験的）",
+    "aiPromptPlaceholder": "生成したい画像を説明（例: 「青い髪の女の子が森に立っている」）",
+    "aiAssistDescription": "AIが説明文からYAPS形式のYAMLを生成します",
+    "aiGenerateFailed": "コンテンツの生成に失敗しました",
+    "generating": "生成中..."
   },
   "tabBar": {
     "close": "閉じる",

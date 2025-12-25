@@ -420,7 +420,7 @@ export function PromptPanel({
                   : 'text-[#888] hover:text-[#d4d4d4]'
               }`}
             >
-              <Sparkles className="h-3 w-3" />
+              <Sparkles className="h-3 w-3 text-yellow-500" />
               {t('prompt.enhancedLabel')}
               {isEnhancing && <Loader2 className="h-3 w-3 animate-spin" />}
             </button>
