@@ -14,7 +14,11 @@ export interface AppState {
   variablePanelWidth: number;
   generationPanelWidth: number;
   expandedFolders: string[] | null; // nullは未保存を示す
-  selectedFile: string;
+  // タブ管理
+  openTabs: string[];     // 開いているタブ一覧（順序保持）
+  activeTab: string;      // アクティブタブのパス
+  // 後方互換性のため残す（マイグレーション用）
+  selectedFile?: string;
 }
 
 const defaultState: AppState = {
@@ -24,7 +28,8 @@ const defaultState: AppState = {
   variablePanelWidth: 280, // leftPanelWidthと同じ
   generationPanelWidth: 200,
   expandedFolders: null, // 初回は全て開く
-  selectedFile: '',
+  openTabs: [],
+  activeTab: '',
 };
 
 export function loadState(): AppState {
@@ -34,6 +39,13 @@ export function loadState(): AppState {
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       const parsed = JSON.parse(saved);
+
+      // 後方互換性: selectedFile から openTabs/activeTab に移行
+      if (parsed.selectedFile && (!parsed.openTabs || parsed.openTabs.length === 0)) {
+        parsed.openTabs = [parsed.selectedFile];
+        parsed.activeTab = parsed.selectedFile;
+      }
+
       return { ...defaultState, ...parsed };
     }
   } catch (error) {

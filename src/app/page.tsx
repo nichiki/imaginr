@@ -52,8 +52,9 @@ import {
   VariableValues,
 } from '@/lib/variable-utils';
 import { VariableForm } from '@/components/variable-form';
+import { TabBar } from '@/components/tab-bar';
 import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
+import { Settings, FileText } from 'lucide-react';
 import { initializeAppData } from '@/lib/init-data';
 
 // 全フォルダのパスを収集
@@ -105,14 +106,14 @@ export default function Home() {
   const [fileTree, setFileTree] = useState<FileTreeItem[]>([]);
   // ファイル内容のキャッシュ
   const [files, setFiles] = useState<FileData>({});
-  // 選択中のファイル
-  const [selectedFile, setSelectedFile] = useState<string>('');
+  // タブ管理
+  const [openTabs, setOpenTabs] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState<string>('');
+  const [dirtyFiles, setDirtyFiles] = useState<Set<string>>(new Set());
   // ローディング状態
   const [isLoading, setIsLoading] = useState(true);
   // 保存中状態
   const [isSaving, setIsSaving] = useState(false);
-  // 未保存の変更があるか
-  const [isDirty, setIsDirty] = useState(false);
   // フォルダ開閉状態
   const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
   // スニペット一覧（補完用）
@@ -124,7 +125,7 @@ export default function Home() {
 
   // 変数関連
   const [variables, setVariables] = useState<VariableDefinition[]>([]);
-  const [variableValues, setVariableValues] = useState<VariableValues>({});
+  const [variableValuesMap, setVariableValuesMap] = useState<Record<string, VariableValues>>({});
 
   // 設定ダイアログ
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -206,25 +207,43 @@ export default function Home() {
           setExpandedFolders(new Set(collectAllFolders(tree)));
         }
 
-        // 保存されたファイルがあればそれを選択、なければ最初のshotファイル
-        let fileToSelect = savedState.selectedFile;
+        // タブを復元
+        let tabs = savedState.openTabs || [];
+        let active = savedState.activeTab || '';
 
-        // 保存されたファイルがツリー内に存在するか確認
-        if (fileToSelect && !fileExistsInTree(tree, fileToSelect)) {
-          console.warn(`Saved file not found: ${fileToSelect}, falling back to first file`);
-          fileToSelect = '';
+        // 存在しないファイルを除外
+        tabs = tabs.filter((path) => fileExistsInTree(tree, path));
+        if (active && !tabs.includes(active)) {
+          active = tabs[0] || '';
         }
 
-        if (!fileToSelect) {
-          fileToSelect = findFirstFile(tree, 'shots') || '';
+        // タブが空の場合、最初のファイルを開く
+        if (tabs.length === 0) {
+          const firstFile = findFirstFile(tree, 'shots');
+          if (firstFile) {
+            tabs = [firstFile];
+            active = firstFile;
+          }
         }
 
-        if (fileToSelect) {
-          setSelectedFile(fileToSelect);
-          // 選択ファイルを読み込み（_base/_layersは非同期マージ時に動的読み込み）
-          const content = await fileAPI.readFile(fileToSelect);
-          setFiles({ [fileToSelect]: content });
+        // 開いているタブのファイルを読み込み
+        const filesData: FileData = {};
+        for (const path of tabs) {
+          try {
+            filesData[path] = await fileAPI.readFile(path);
+          } catch {
+            // 読み込み失敗したタブは除外
+            console.error(`Failed to read file: ${path}`);
+          }
         }
+
+        // 読み込みに成功したタブのみ保持
+        const validTabs = tabs.filter((path) => path in filesData);
+        const validActive = validTabs.includes(active) ? active : validTabs[0] || '';
+
+        setFiles(filesData);
+        setOpenTabs(validTabs);
+        setActiveTab(validActive);
 
         // スニペットを読み込み
         try {
@@ -279,10 +298,22 @@ export default function Home() {
     loadFiles();
   }, []);
 
-  // 現在のファイル内容
+  // アクティブタブの内容
   const currentContent = useMemo(
-    () => files[selectedFile] || '',
-    [files, selectedFile]
+    () => files[activeTab] || '',
+    [files, activeTab]
+  );
+
+  // アクティブタブが未保存かどうか
+  const isActiveTabDirty = useMemo(
+    () => dirtyFiles.has(activeTab),
+    [dirtyFiles, activeTab]
+  );
+
+  // アクティブタブの変数値
+  const currentVariableValues = useMemo(
+    () => variableValuesMap[activeTab] || {},
+    [variableValuesMap, activeTab]
   );
 
   // filesのrefを保持（useEffect内で最新値を参照するため）
@@ -293,8 +324,8 @@ export default function Home() {
 
   // 変数解決済みのマージ結果（表示用、negativeも含む）
   const mergedYaml = useMemo(
-    () => cleanYamlString(resolveVariables(mergedYamlRaw, variableValues)),
-    [mergedYamlRaw, variableValues]
+    () => cleanYamlString(resolveVariables(mergedYamlRaw, currentVariableValues)),
+    [mergedYamlRaw, currentVariableValues]
   );
 
   // エンハンス・生成用（negativeを除外）
@@ -315,8 +346,8 @@ export default function Home() {
 
   // 変数解決済みのネガティブプロンプト
   const resolvedNegativePrompt = useMemo(
-    () => resolveVariables(negativePrompt, variableValues),
-    [negativePrompt, variableValues]
+    () => resolveVariables(negativePrompt, currentVariableValues),
+    [negativePrompt, currentVariableValues]
   );
 
   // mergedYamlが変更されたらエンハンスキャッシュをクリア
@@ -564,7 +595,7 @@ export default function Home() {
   // マージ結果とプロンプトテキスト（非同期で計算）
   // マージ後のYAMLから変数を抽出
   useEffect(() => {
-    if (!selectedFile || !currentContent) {
+    if (!activeTab || !currentContent) {
       setMergedYamlRaw('');
       setIsYamlValid(true);
       setVariables([]);
@@ -578,8 +609,8 @@ export default function Home() {
       try {
         // 参照ファイル用のキャッシュ（メイン状態とは別管理）
         // 現在のファイルは生のコンテンツを使用（変数解決前）
-        const tempCache: FileData = { ...filesRef.current, [selectedFile]: currentContent };
-        const merged = await resolveAndMergeAsync(selectedFile, tempCache, readFileForMerge);
+        const tempCache: FileData = { ...filesRef.current, [activeTab]: currentContent };
+        const merged = await resolveAndMergeAsync(activeTab, tempCache, readFileForMerge);
 
         if (cancelled) return;
 
@@ -605,9 +636,10 @@ export default function Home() {
         const vars = extractVariablesWithPath(merged);
         setVariables(vars);
 
-        // 新しい変数があればデフォルト値で初期化
-        setVariableValues((prev) => {
-          const next = { ...prev };
+        // 新しい変数があればデフォルト値で初期化（タブごとに管理）
+        setVariableValuesMap((prev) => {
+          const currentValues = prev[activeTab] || {};
+          const next = { ...currentValues };
           for (const v of vars) {
             if (!(v.name in next)) {
               // 配列変数は空配列、通常変数は空文字列で初期化
@@ -621,7 +653,7 @@ export default function Home() {
               delete next[key];
             }
           }
-          return next;
+          return { ...prev, [activeTab]: next };
         });
 
         setMergedYamlRaw(yamlStr);
@@ -638,32 +670,20 @@ export default function Home() {
     return () => {
       cancelled = true;
     };
-  }, [selectedFile, currentContent, readFileForMerge]);
+  }, [activeTab, currentContent, readFileForMerge]);
 
-  // ファイル選択ハンドラ
+  // ファイル選択ハンドラ（タブを開く）
   const handleFileSelect = useCallback(async (path: string) => {
-    // 同じファイルを選択した場合は何もしない
-    if (path === selectedFile) return;
-
-    // 未保存の変更がある場合は確認
-    if (isDirty) {
-      const { showConfirm } = await import('@/lib/dialog');
-      const confirmed = await showConfirm(
-        '未保存の変更があります。保存せずに別のファイルを開きますか？',
-        { okLabel: '開く' }
-      );
-      if (!confirmed) return;
-
-      // 現在のファイルの未保存変更を破棄（ディスクから再読み込み）
-      try {
-        const originalContent = await fileAPI.readFile(selectedFile);
-        setFiles((prev) => ({ ...prev, [selectedFile]: originalContent }));
-      } catch (error) {
-        console.error('Failed to reload original file:', error);
+    // 既にタブが開いていればアクティブにする
+    if (openTabs.includes(path)) {
+      setActiveTab(path);
+      if (initialized.current) {
+        saveState({ activeTab: path });
       }
+      return;
     }
 
-    // 新しいファイルを読み込み（常にディスクから読み込む）
+    // 新しいファイルを読み込み
     try {
       const content = await fileAPI.readFile(path);
       setFiles((prev) => ({ ...prev, [path]: content }));
@@ -672,13 +692,76 @@ export default function Home() {
       return;
     }
 
-    setSelectedFile(path);
-    setIsDirty(false);
-    // 選択したファイルを保存
+    // 新しいタブを追加してアクティブにする
+    const newTabs = [...openTabs, path];
+    setOpenTabs(newTabs);
+    setActiveTab(path);
+
+    // 状態を保存
     if (initialized.current) {
-      saveState({ selectedFile: path });
+      saveState({ openTabs: newTabs, activeTab: path });
     }
-  }, [selectedFile, isDirty]);
+  }, [openTabs]);
+
+  // タブを閉じるハンドラ
+  const handleCloseTab = useCallback(async (path: string) => {
+    // 未保存なら確認
+    if (dirtyFiles.has(path)) {
+      const { showConfirm } = await import('@/lib/dialog');
+      const confirmed = await showConfirm(
+        '未保存の変更があります。保存せずに閉じますか？',
+        { okLabel: '閉じる' }
+      );
+      if (!confirmed) return;
+    }
+
+    // タブを削除
+    const closedIndex = openTabs.indexOf(path);
+    const newTabs = openTabs.filter((t) => t !== path);
+    setOpenTabs(newTabs);
+
+    // ファイルキャッシュから削除
+    setFiles((prev) => {
+      const next = { ...prev };
+      delete next[path];
+      return next;
+    });
+
+    // 未保存フラグを削除
+    setDirtyFiles((prev) => {
+      const next = new Set(prev);
+      next.delete(path);
+      return next;
+    });
+
+    // 変数値を削除
+    setVariableValuesMap((prev) => {
+      const next = { ...prev };
+      delete next[path];
+      return next;
+    });
+
+    // アクティブタブが閉じられた場合、別のタブをアクティブにする
+    let newActiveTab = activeTab;
+    if (activeTab === path) {
+      // 右隣 → 左隣 → なし の順で選択
+      newActiveTab = newTabs[closedIndex] || newTabs[closedIndex - 1] || '';
+      setActiveTab(newActiveTab);
+    }
+
+    // 状態を保存
+    if (initialized.current) {
+      saveState({ openTabs: newTabs, activeTab: newActiveTab });
+    }
+  }, [openTabs, activeTab, dirtyFiles]);
+
+  // タブ並び替えハンドラ
+  const handleReorderTabs = useCallback((newTabs: string[]) => {
+    setOpenTabs(newTabs);
+    if (initialized.current) {
+      saveState({ openTabs: newTabs });
+    }
+  }, []);
 
   // フォルダ開閉ハンドラ
   const handleToggleFolder = useCallback((path: string) => {
@@ -705,19 +788,20 @@ export default function Home() {
       // ファイルツリーを再読み込み
       const tree = await fileAPI.listFiles();
       setFileTree(tree);
-      // 新しいファイルを選択
+      // 新しいファイルを選択（タブを開く）
       setFiles((prev) => ({ ...prev, [path]: defaultContent }));
-      setSelectedFile(path);
-      setIsDirty(false);
+      const newTabs = openTabs.includes(path) ? openTabs : [...openTabs, path];
+      setOpenTabs(newTabs);
+      setActiveTab(path);
       if (initialized.current) {
-        saveState({ selectedFile: path });
+        saveState({ openTabs: newTabs, activeTab: path });
       }
     } catch (error) {
       console.error('Failed to create file:', error);
       const { showError } = await import('@/lib/dialog');
       await showError('ファイルの作成に失敗しました');
     }
-  }, []);
+  }, [openTabs]);
 
   // フォルダ作成ハンドラ
   const handleCreateFolder = useCallback(async (path: string) => {
@@ -754,40 +838,49 @@ export default function Home() {
       // ファイルツリーを再読み込み
       const tree = await fileAPI.listFiles();
       setFileTree(tree);
-      // 削除したファイルが選択中だった場合、別のファイルを選択
-      if (selectedFile === path) {
-        const firstFile = findFirstFile(tree, 'shots');
-        if (firstFile) {
-          const content = await fileAPI.readFile(firstFile);
-          setFiles((prev) => {
-            const next = { ...prev };
-            delete next[path];
-            next[firstFile] = content;
-            return next;
-          });
-          setSelectedFile(firstFile);
-        } else {
-          setSelectedFile('');
-          setFiles((prev) => {
-            const next = { ...prev };
-            delete next[path];
-            return next;
-          });
-        }
-      } else {
-        setFiles((prev) => {
-          const next = { ...prev };
-          delete next[path];
-          return next;
-        });
+
+      // タブから削除
+      const newTabs = openTabs.filter((t) => t !== path);
+      setOpenTabs(newTabs);
+
+      // ファイルキャッシュから削除
+      setFiles((prev) => {
+        const next = { ...prev };
+        delete next[path];
+        return next;
+      });
+
+      // 未保存フラグを削除
+      setDirtyFiles((prev) => {
+        const next = new Set(prev);
+        next.delete(path);
+        return next;
+      });
+
+      // 変数値を削除
+      setVariableValuesMap((prev) => {
+        const next = { ...prev };
+        delete next[path];
+        return next;
+      });
+
+      // 削除したファイルがアクティブタブだった場合、別のタブをアクティブにする
+      let newActiveTab = activeTab;
+      if (activeTab === path) {
+        const closedIndex = openTabs.indexOf(path);
+        newActiveTab = newTabs[closedIndex] || newTabs[closedIndex - 1] || '';
+        setActiveTab(newActiveTab);
       }
-      setIsDirty(false);
+
+      if (initialized.current) {
+        saveState({ openTabs: newTabs, activeTab: newActiveTab });
+      }
     } catch (error) {
       console.error('Failed to delete file:', error);
       const { showError } = await import('@/lib/dialog');
       await showError('ファイルの削除に失敗しました');
     }
-  }, [selectedFile]);
+  }, [openTabs, activeTab]);
 
   // ファイル/フォルダ移動ハンドラ
   const handleMoveFile = useCallback(async (from: string, to: string) => {
@@ -808,10 +901,8 @@ export default function Home() {
         const next: Record<string, string> = {};
         for (const [key, value] of Object.entries(prev)) {
           if (key === from) {
-            // 移動したファイルは新しいパスで追加
             next[newPath] = value;
           } else if (key.startsWith(from + '/')) {
-            // 移動したフォルダ内のファイルも更新
             const relativePath = key.substring(from.length);
             next[newPath + relativePath] = value;
           } else {
@@ -821,20 +912,58 @@ export default function Home() {
         return next;
       });
 
-      // 選択中のファイルが移動対象だった場合、新しいパスを選択
-      if (selectedFile === from) {
-        setSelectedFile(newPath);
-        if (initialized.current) {
-          saveState({ selectedFile: newPath });
+      // タブのパスを更新
+      const newTabs = openTabs.map((t) => {
+        if (t === from) return newPath;
+        if (t.startsWith(from + '/')) {
+          const relativePath = t.substring(from.length);
+          return newPath + relativePath;
         }
-      } else if (selectedFile.startsWith(from + '/')) {
-        // 移動したフォルダ内のファイルを選択中だった場合
-        const relativePath = selectedFile.substring(from.length);
-        const newSelectedPath = newPath + relativePath;
-        setSelectedFile(newSelectedPath);
-        if (initialized.current) {
-          saveState({ selectedFile: newSelectedPath });
+        return t;
+      });
+      setOpenTabs(newTabs);
+
+      // 変数値のパスを更新
+      setVariableValuesMap((prev) => {
+        const next: Record<string, VariableValues> = {};
+        for (const [key, value] of Object.entries(prev)) {
+          if (key === from) {
+            next[newPath] = value;
+          } else if (key.startsWith(from + '/')) {
+            const relativePath = key.substring(from.length);
+            next[newPath + relativePath] = value;
+          } else {
+            next[key] = value;
+          }
         }
+        return next;
+      });
+
+      // 未保存フラグのパスを更新
+      setDirtyFiles((prev) => {
+        const next = new Set<string>();
+        for (const p of prev) {
+          if (p === from) {
+            next.add(newPath);
+          } else if (p.startsWith(from + '/')) {
+            const relativePath = p.substring(from.length);
+            next.add(newPath + relativePath);
+          } else {
+            next.add(p);
+          }
+        }
+        return next;
+      });
+
+      // アクティブタブのパスを更新
+      let newActiveTab = activeTab;
+      if (activeTab === from) {
+        newActiveTab = newPath;
+        setActiveTab(newPath);
+      } else if (activeTab.startsWith(from + '/')) {
+        const relativePath = activeTab.substring(from.length);
+        newActiveTab = newPath + relativePath;
+        setActiveTab(newActiveTab);
       }
 
       // 展開状態を更新（フォルダの場合）
@@ -851,7 +980,7 @@ export default function Home() {
           }
         }
         if (initialized.current) {
-          saveState({ expandedFolders: Array.from(next) });
+          saveState({ expandedFolders: Array.from(next), openTabs: newTabs, activeTab: newActiveTab });
         }
         return next;
       });
@@ -860,7 +989,7 @@ export default function Home() {
       const { showError } = await import('@/lib/dialog');
       await showError(error instanceof Error ? error.message : 'ファイルの移動に失敗しました');
     }
-  }, [selectedFile]);
+  }, [openTabs, activeTab]);
 
   // フォルダ削除ハンドラ
   const handleDeleteFolder = useCallback(async (path: string) => {
@@ -874,69 +1003,71 @@ export default function Home() {
       // ファイルツリーを再読み込み
       const tree = await fileAPI.listFiles();
       setFileTree(tree);
-      // 削除したフォルダ内のファイルが選択中だった場合、別のファイルを選択
-      if (selectedFile.startsWith(path + '/')) {
-        const firstFile = findFirstFile(tree, 'shots');
-        if (firstFile) {
-          const content = await fileAPI.readFile(firstFile);
-          setFiles((prev) => {
-            // 削除したフォルダ内のファイルをキャッシュから削除
-            const next: Record<string, string> = {};
-            for (const [key, value] of Object.entries(prev)) {
-              if (!key.startsWith(path + '/')) {
-                next[key] = value;
-              }
-            }
-            next[firstFile] = content;
-            return next;
-          });
-          setSelectedFile(firstFile);
-        } else {
-          setSelectedFile('');
-          setFiles((prev) => {
-            const next: Record<string, string> = {};
-            for (const [key, value] of Object.entries(prev)) {
-              if (!key.startsWith(path + '/')) {
-                next[key] = value;
-              }
-            }
-            return next;
-          });
-        }
-      } else {
-        // 削除したフォルダ内のファイルをキャッシュから削除
-        setFiles((prev) => {
-          const next: Record<string, string> = {};
-          for (const [key, value] of Object.entries(prev)) {
-            if (!key.startsWith(path + '/')) {
-              next[key] = value;
-            }
+
+      // 削除したフォルダ内のタブを閉じる
+      const newTabs = openTabs.filter((t) => !t.startsWith(path + '/'));
+      setOpenTabs(newTabs);
+
+      // 削除したフォルダ内のファイルをキャッシュから削除
+      setFiles((prev) => {
+        const next: Record<string, string> = {};
+        for (const [key, value] of Object.entries(prev)) {
+          if (!key.startsWith(path + '/')) {
+            next[key] = value;
           }
-          return next;
-        });
+        }
+        return next;
+      });
+
+      // 未保存フラグから削除
+      setDirtyFiles((prev) => {
+        const next = new Set<string>();
+        for (const p of prev) {
+          if (!p.startsWith(path + '/')) {
+            next.add(p);
+          }
+        }
+        return next;
+      });
+
+      // 変数値から削除
+      setVariableValuesMap((prev) => {
+        const next: Record<string, VariableValues> = {};
+        for (const [key, value] of Object.entries(prev)) {
+          if (!key.startsWith(path + '/')) {
+            next[key] = value;
+          }
+        }
+        return next;
+      });
+
+      // アクティブタブが削除された場合、別のタブをアクティブにする
+      let newActiveTab = activeTab;
+      if (activeTab.startsWith(path + '/')) {
+        newActiveTab = newTabs[0] || '';
+        setActiveTab(newActiveTab);
       }
+
       // 展開状態から削除
       setExpandedFolders((prev) => {
         const next = new Set(prev);
         next.delete(path);
-        // サブフォルダも削除
         for (const p of prev) {
           if (p.startsWith(path + '/')) {
             next.delete(p);
           }
         }
         if (initialized.current) {
-          saveState({ expandedFolders: Array.from(next) });
+          saveState({ expandedFolders: Array.from(next), openTabs: newTabs, activeTab: newActiveTab });
         }
         return next;
       });
-      setIsDirty(false);
     } catch (error) {
       console.error('Failed to delete folder:', error);
       const { showError } = await import('@/lib/dialog');
       await showError('フォルダの削除に失敗しました');
     }
-  }, [selectedFile]);
+  }, [openTabs, activeTab]);
 
   // 参照検索ハンドラ
   const handleFindReferences = useCallback(async (path: string): Promise<string[]> => {
@@ -966,15 +1097,12 @@ export default function Home() {
       const next: Record<string, string> = {};
       for (const [key, value] of Object.entries(prev)) {
         if (key === path) {
-          // リネームしたファイルは新しいパスで追加
           next[result.newPath] = value;
         } else if (key.startsWith(path + '/')) {
-          // リネームしたフォルダ内のファイルも更新
           const relativePath = key.substring(path.length);
           next[result.newPath + relativePath] = value;
         } else if (result.updatedFiles.includes(key)) {
           // 参照が更新されたファイルはキャッシュから削除（次回選択時に再読み込み）
-          // next に追加しないことで削除
         } else {
           next[key] = value;
         }
@@ -982,25 +1110,63 @@ export default function Home() {
       return next;
     });
 
-    // 選択中のファイルがリネーム対象だった場合、新しいパスを選択
-    if (selectedFile === path) {
-      setSelectedFile(result.newPath);
-      if (initialized.current) {
-        saveState({ selectedFile: result.newPath });
+    // タブのパスを更新
+    const newTabs = openTabs.map((t) => {
+      if (t === path) return result.newPath;
+      if (t.startsWith(path + '/')) {
+        const relativePath = t.substring(path.length);
+        return result.newPath + relativePath;
       }
-    } else if (selectedFile.startsWith(path + '/')) {
-      // リネームしたフォルダ内のファイルを選択中だった場合
-      const relativePath = selectedFile.substring(path.length);
-      const newSelectedPath = result.newPath + relativePath;
-      setSelectedFile(newSelectedPath);
-      if (initialized.current) {
-        saveState({ selectedFile: newSelectedPath });
+      return t;
+    });
+    setOpenTabs(newTabs);
+
+    // 変数値のパスを更新
+    setVariableValuesMap((prev) => {
+      const next: Record<string, VariableValues> = {};
+      for (const [key, value] of Object.entries(prev)) {
+        if (key === path) {
+          next[result.newPath] = value;
+        } else if (key.startsWith(path + '/')) {
+          const relativePath = key.substring(path.length);
+          next[result.newPath + relativePath] = value;
+        } else {
+          next[key] = value;
+        }
       }
-    } else if (result.updatedFiles.includes(selectedFile)) {
-      // 選択中のファイルの参照が更新された場合、再読み込み
+      return next;
+    });
+
+    // 未保存フラグのパスを更新
+    setDirtyFiles((prev) => {
+      const next = new Set<string>();
+      for (const p of prev) {
+        if (p === path) {
+          next.add(result.newPath);
+        } else if (p.startsWith(path + '/')) {
+          const relativePath = p.substring(path.length);
+          next.add(result.newPath + relativePath);
+        } else {
+          next.add(p);
+        }
+      }
+      return next;
+    });
+
+    // アクティブタブのパスを更新
+    let newActiveTab = activeTab;
+    if (activeTab === path) {
+      newActiveTab = result.newPath;
+      setActiveTab(result.newPath);
+    } else if (activeTab.startsWith(path + '/')) {
+      const relativePath = activeTab.substring(path.length);
+      newActiveTab = result.newPath + relativePath;
+      setActiveTab(newActiveTab);
+    } else if (result.updatedFiles.includes(activeTab)) {
+      // アクティブタブの参照が更新された場合、再読み込み
       try {
-        const updatedContent = await fileAPI.readFile(selectedFile);
-        setFiles((prev) => ({ ...prev, [selectedFile]: updatedContent }));
+        const updatedContent = await fileAPI.readFile(activeTab);
+        setFiles((prev) => ({ ...prev, [activeTab]: updatedContent }));
       } catch (e) {
         console.error('Failed to reload updated file:', e);
       }
@@ -1020,40 +1186,57 @@ export default function Home() {
         }
       }
       if (initialized.current) {
-        saveState({ expandedFolders: Array.from(next) });
+        saveState({ expandedFolders: Array.from(next), openTabs: newTabs, activeTab: newActiveTab });
       }
       return next;
     });
 
     return result;
-  }, [selectedFile]);
+  }, [openTabs, activeTab]);
 
   // エディタ変更ハンドラ
   const handleEditorChange = useCallback(
     (value: string) => {
       setFiles((prev) => ({
         ...prev,
-        [selectedFile]: value,
+        [activeTab]: value,
       }));
-      setIsDirty(true);
+      // アクティブタブを未保存に設定
+      setDirtyFiles((prev) => new Set(prev).add(activeTab));
     },
-    [selectedFile]
+    [activeTab]
+  );
+
+  // 変数値変更ハンドラ
+  const handleVariableValuesChange = useCallback(
+    (values: VariableValues) => {
+      setVariableValuesMap((prev) => ({
+        ...prev,
+        [activeTab]: values,
+      }));
+    },
+    [activeTab]
   );
 
   // ファイル保存ハンドラ
   const handleSave = useCallback(async () => {
-    if (!selectedFile || !isDirty) return;
+    if (!activeTab || !dirtyFiles.has(activeTab)) return;
 
     setIsSaving(true);
     try {
-      await fileAPI.writeFile(selectedFile, files[selectedFile]);
-      setIsDirty(false);
+      await fileAPI.writeFile(activeTab, files[activeTab]);
+      // 未保存フラグを削除
+      setDirtyFiles((prev) => {
+        const next = new Set(prev);
+        next.delete(activeTab);
+        return next;
+      });
     } catch (error) {
       console.error('Failed to save file:', error);
     } finally {
       setIsSaving(false);
     }
-  }, [selectedFile, files, isDirty]);
+  }, [activeTab, files, dirtyFiles]);
 
   // Ctrl+S で保存
   useEffect(() => {
@@ -1194,7 +1377,7 @@ export default function Home() {
           <span className="text-xs text-[#888]">
             Ctrl+S: 保存
           </span>
-          {isDirty && (
+          {isActiveTabDirty && (
             <span className="text-xs text-amber-400">● 未保存</span>
           )}
           {isSaving && (
@@ -1221,7 +1404,7 @@ export default function Home() {
         >
           <FileTree
             items={fileTree}
-            selectedFile={selectedFile}
+            selectedFile={activeTab}
             onSelectFile={handleFileSelect}
             expandedFolders={expandedFolders}
             onToggleFolder={handleToggleFolder}
@@ -1241,27 +1424,52 @@ export default function Home() {
           onMouseDown={handleLeftResizeStart}
         />
 
-        {/* Editor */}
-        <div className="flex-1 min-w-0 bg-[#1e1e1e]">
-          <YamlEditor
-            key={selectedFile}
-            ref={yamlEditorRef}
-            value={currentContent}
-            onChange={handleEditorChange}
-            fileList={allFilePaths}
-            snippets={snippets}
-            dictionaryCache={dictionaryCache}
-            keyDictionaryCache={keyDictionaryCache}
-            onDictionaryChange={async () => {
-              try {
-                const dictData = await dictionaryAPI.list();
-                const cache = buildDictionaryCache(dictData);
-                setDictionaryCache(cache);
-              } catch (e) {
-                console.error('Failed to reload dictionary:', e);
-              }
-            }}
+        {/* Editor with Tab Bar */}
+        <div className="flex-1 min-w-0 bg-[#1e1e1e] flex flex-col">
+          {/* Tab Bar */}
+          <TabBar
+            tabs={openTabs}
+            activeTab={activeTab}
+            dirtyTabs={dirtyFiles}
+            onSelectTab={setActiveTab}
+            onCloseTab={handleCloseTab}
+            onReorderTabs={handleReorderTabs}
           />
+
+          {/* Editor or Empty Placeholder */}
+          <div className="flex-1 min-h-0">
+            {activeTab ? (
+              <YamlEditor
+                key={activeTab}
+                ref={yamlEditorRef}
+                value={currentContent}
+                onChange={handleEditorChange}
+                fileList={allFilePaths}
+                snippets={snippets}
+                dictionaryCache={dictionaryCache}
+                keyDictionaryCache={keyDictionaryCache}
+                onDictionaryChange={async () => {
+                  try {
+                    const dictData = await dictionaryAPI.list();
+                    const cache = buildDictionaryCache(dictData);
+                    setDictionaryCache(cache);
+                  } catch (e) {
+                    console.error('Failed to reload dictionary:', e);
+                  }
+                }}
+              />
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                <div className="text-center">
+                  <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
+                  <p>ファイルを開いてください</p>
+                  <p className="text-sm mt-2 opacity-75">
+                    左のファイルツリーからファイルを選択
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Right Resize Handle */}
@@ -1299,10 +1507,10 @@ export default function Home() {
           style={{ width: variablePanelWidth }}
         >
           <VariableForm
-            templatePath={selectedFile}
+            templatePath={activeTab}
             variables={variables}
-            values={variableValues}
-            onChange={setVariableValues}
+            values={currentVariableValues}
+            onChange={handleVariableValuesChange}
             dictionaryCache={dictionaryCache}
             isYamlValid={isYamlValid}
           />
