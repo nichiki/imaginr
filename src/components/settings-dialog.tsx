@@ -310,12 +310,12 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
       setSelection({ type: 'comfyui-workflow', id: newWorkflow.id });
     } catch {
       const { showError } = await import('@/lib/dialog');
-      await showError('無効なJSONファイルです');
+      await showError(t('settings.invalidJson'));
     } finally {
       setIsUploading(false);
       e.target.value = '';
     }
-  }, []);
+  }, [t]);
 
   const handleAddWorkflow = useCallback((file: string) => {
     const wf = availableWorkflows.find(w => w.name === file);
@@ -457,7 +457,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4] max-w-4xl sm:max-w-4xl h-[80vh] max-h-[700px] overflow-hidden flex flex-col p-0">
         <DialogHeader className="px-4 py-3 border-b border-[#333] shrink-0">
-          <DialogTitle className="text-[#d4d4d4]">設定</DialogTitle>
+          <DialogTitle className="text-[#d4d4d4]">{t('settings.title')}</DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 flex overflow-hidden">
@@ -466,7 +466,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
             <ScrollArea className="flex-1">
               <div className="p-2 space-y-0.5">
                 {/* データ */}
-                {renderTreeItem('データ', 'data', undefined, <FolderOpen className="h-4 w-4 shrink-0" />)}
+                {renderTreeItem(t('settings.data'), 'data', undefined, <FolderOpen className="h-4 w-4 shrink-0" />)}
 
                 {/* ComfyUI */}
                 <div>
@@ -504,7 +504,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         renderTreeItem(wf.name, 'comfyui-workflow', wf.id, undefined, 1)
                       ))}
                       {renderTreeItem(
-                        '追加...',
+                        t('settings.addWorkflow'),
                         'comfyui-add',
                         undefined,
                         <Plus className="h-3 w-3 shrink-0" />,
@@ -554,12 +554,12 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                           preset.builtIn ? undefined : undefined,
                           1,
                           preset.builtIn ? (
-                            <span className="text-[10px] text-[#888] px-1 bg-[#333] rounded">Built-in</span>
+                            <span className="text-[10px] text-[#888] px-1 bg-[#333] rounded">{t('settings.ollama.builtIn')}</span>
                           ) : undefined
                         )
                       ))}
                       {renderTreeItem(
-                        '追加...',
+                        t('settings.addPreset'),
                         'ollama-add',
                         undefined,
                         <Plus className="h-3 w-3 shrink-0" />,
@@ -612,7 +612,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
 
                     {/* データフォルダ */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Data Folder</Label>
+                      <Label className="text-sm font-medium">{t('settings.dataFolder')}</Label>
                       <div className="flex gap-2">
                         <Input
                           value={dataFolderPath}
@@ -630,23 +630,23 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         </Button>
                       </div>
                       <p className="text-xs text-[#888]">
-                        Templates, dictionary, snippets, and generated images
+                        {t('settings.dataFolderDescription')}
                       </p>
                     </div>
 
                     {/* 辞書管理 */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">Dictionary</Label>
+                      <Label className="text-sm font-medium">{t('dictionary.title')}</Label>
                       <Button
                         variant="outline"
                         onClick={() => setDictionaryManagerOpen(true)}
                         className="w-full h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white justify-start"
                       >
                         <BookOpen className="h-4 w-4 mr-2" />
-                        Manage Dictionary
+                        {t('dictionary.manage')}
                       </Button>
                       <p className="text-xs text-[#888]">
-                        Manage autocomplete dictionary
+                        {t('dictionary.manageDescription')}
                       </p>
                     </div>
                   </div>
@@ -655,11 +655,11 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                 {/* ComfyUI基本設定 */}
                 {selection.type === 'comfyui' && (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-[#d4d4d4]">ComfyUI設定</h3>
+                    <h3 className="text-sm font-medium text-[#d4d4d4]">{t('settings.comfyui.title')}</h3>
 
                     <div className="flex items-center justify-between">
                       <Label htmlFor="comfyui-enabled" className="text-sm font-medium">
-                        ComfyUI連携を有効化
+                        {t('settings.comfyui.enable')}
                       </Label>
                       <Switch
                         id="comfyui-enabled"
@@ -673,7 +673,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         {/* URL設定 */}
                         <div className="space-y-2">
                           <Label htmlFor="comfyui-url" className="text-xs text-[#b0b0b0]">
-                            ComfyUI URL
+                            {t('settings.comfyui.apiUrl')}
                           </Label>
                           <div className="flex gap-2">
                             <Input
@@ -697,7 +697,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                               ) : connectionStatus === 'error' ? (
                                 <XCircle className="h-4 w-4 text-red-500" />
                               ) : (
-                                'テスト'
+                                t('common.test')
                               )}
                             </Button>
                           </div>
@@ -716,7 +716,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-medium text-[#d4d4d4]">
-                        ワークフロー: {selectedWorkflow.name}
+                        {t('settings.comfyui.workflow')}: {selectedWorkflow.name}
                       </h3>
                       <Button
                         variant="ghost"
@@ -725,7 +725,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         onClick={() => handleRemoveWorkflow(selectedWorkflow.id)}
                       >
                         <Trash2 className="h-4 w-4 mr-1" />
-                        削除
+                        {t('common.delete')}
                       </Button>
                     </div>
                     <WorkflowEditor
@@ -740,23 +740,23 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                 {/* ワークフロー追加 */}
                 {selection.type === 'comfyui-add' && (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-[#d4d4d4]">ワークフローを追加</h3>
+                    <h3 className="text-sm font-medium text-[#d4d4d4]">{t('settings.comfyui.addWorkflow')}</h3>
 
                     <div className="space-y-2">
                       <Label className="text-xs text-[#b0b0b0]">
-                        既存ファイルから追加
+                        {t('settings.comfyui.addFromFile')}
                       </Label>
                       <Select
                         value=""
                         onValueChange={(value) => handleAddWorkflow(value)}
                       >
                         <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9">
-                          <SelectValue placeholder="ファイルを選択..." />
+                          <SelectValue placeholder={t('common.selectFile')} />
                         </SelectTrigger>
                         <SelectContent className="bg-[#252526] border-[#333]">
                           {unusedWorkflowFiles.length === 0 ? (
                             <SelectItem value="_none" disabled className="text-[#888]">
-                              利用可能なファイルがありません
+                              {t('settings.comfyui.noFilesAvailable')}
                             </SelectItem>
                           ) : (
                             unusedWorkflowFiles.map((wf) => (
@@ -775,7 +775,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
 
                     <div className="space-y-2">
                       <Label className="text-xs text-[#b0b0b0]">
-                        ファイルをアップロード
+                        {t('settings.comfyui.uploadFile')}
                       </Label>
                       <Button
                         variant="outline"
@@ -788,7 +788,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         ) : (
                           <Upload className="h-4 w-4 mr-2" />
                         )}
-                        JSONファイルをアップロード
+                        {t('settings.comfyui.uploadJson')}
                       </Button>
                       <input
                         id="workflow-upload"
@@ -798,7 +798,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         onChange={handleFileUpload}
                       />
                       <p className="text-xs text-[#888]">
-                        ComfyUIからAPI形式でエクスポートしたJSONをアップロード
+                        {t('settings.comfyui.uploadDescription')}
                       </p>
                     </div>
                   </div>
@@ -807,11 +807,11 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                 {/* Ollama基本設定 */}
                 {selection.type === 'ollama' && (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-[#d4d4d4]">Ollama設定</h3>
+                    <h3 className="text-sm font-medium text-[#d4d4d4]">{t('settings.ollama.title')}</h3>
 
                     <div className="flex items-center justify-between">
                       <Label htmlFor="ollama-enabled" className="text-sm font-medium">
-                        Ollamaエンハンサーを有効化
+                        {t('settings.ollama.enable')}
                       </Label>
                       <Switch
                         id="ollama-enabled"
@@ -825,7 +825,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         {/* URL設定 */}
                         <div className="space-y-2">
                           <Label htmlFor="ollama-url" className="text-xs text-[#b0b0b0]">
-                            Ollama URL
+                            {t('settings.ollama.apiUrl')}
                           </Label>
                           <div className="flex gap-2">
                             <Input
@@ -849,7 +849,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                               ) : ollamaConnectionStatus === 'error' ? (
                                 <XCircle className="h-4 w-4 text-red-500" />
                               ) : (
-                                'テスト'
+                                t('common.test')
                               )}
                             </Button>
                           </div>
@@ -861,19 +861,19 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         {/* モデル選択 */}
                         <div className="space-y-2">
                           <Label className="text-xs text-[#b0b0b0]">
-                            モデル
+                            {t('settings.ollama.model')}
                           </Label>
                           <Select
                             value={ollamaSettings.model}
                             onValueChange={(value) => updateOllamaSettings({ model: value })}
                           >
                             <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9">
-                              <SelectValue placeholder={isLoadingModels ? "読み込み中..." : "モデルを選択"} />
+                              <SelectValue placeholder={isLoadingModels ? t('settings.loadingModels') : t('settings.selectModel')} />
                             </SelectTrigger>
                             <SelectContent className="bg-[#252526] border-[#333]">
                               {ollamaModels.length === 0 ? (
                                 <SelectItem value="_none" disabled className="text-[#888]">
-                                  接続テストでモデル一覧を取得してください
+                                  {t('settings.comfyui.getModelsViaTest')}
                                 </SelectItem>
                               ) : (
                                 ollamaModels.map((model) => (
@@ -894,7 +894,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                         <div className="space-y-2">
                           <div className="flex items-center justify-between">
                             <Label className="text-xs text-[#b0b0b0]">
-                              Temperature
+                              {t('settings.ollama.temperature')}
                             </Label>
                             <span className="text-xs text-[#888]">{ollamaSettings.temperature.toFixed(1)}</span>
                           </div>
@@ -907,7 +907,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                             className="w-full"
                           />
                           <p className="text-xs text-[#888]">
-                            低い値: 一貫性重視 / 高い値: 創造性重視
+                            {t('settings.ollama.temperatureDescription')}
                           </p>
                         </div>
                       </>
@@ -920,9 +920,9 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="text-sm font-medium text-[#d4d4d4]">
-                        プリセット: {selectedPreset.name}
+                        {t('settings.ollama.preset')}: {selectedPreset.name}
                         {selectedPreset.builtIn && (
-                          <span className="ml-2 text-[10px] text-[#888] px-1.5 py-0.5 bg-[#333] rounded">Built-in</span>
+                          <span className="ml-2 text-[10px] text-[#888] px-1.5 py-0.5 bg-[#333] rounded">{t('settings.ollama.builtIn')}</span>
                         )}
                       </h3>
                       <div className="flex gap-1">
@@ -931,7 +931,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                           size="sm"
                           className="h-8 px-2 text-[#d4d4d4] hover:text-white hover:bg-[#3c3c3c]"
                           onClick={() => handleDuplicatePreset(selectedPreset)}
-                          title="複製"
+                          title={t('common.duplicate')}
                         >
                           <Copy className="h-4 w-4" />
                         </Button>
@@ -950,7 +950,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
 
                     {/* 名前 */}
                     <div className="space-y-2">
-                      <Label className="text-xs text-[#b0b0b0]">名前</Label>
+                      <Label className="text-xs text-[#b0b0b0]">{t('settings.ollama.presetName')}</Label>
                       <Input
                         value={selectedPreset.name}
                         onChange={(e) => handleUpdatePreset(selectedPreset.id, { name: e.target.value })}
@@ -961,12 +961,12 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
 
                     {/* 説明 */}
                     <div className="space-y-2">
-                      <Label className="text-xs text-[#b0b0b0]">説明</Label>
+                      <Label className="text-xs text-[#b0b0b0]">{t('settings.ollama.presetDescription')}</Label>
                       <Input
                         value={selectedPreset.description || ''}
                         onChange={(e) => handleUpdatePreset(selectedPreset.id, { description: e.target.value })}
                         disabled={selectedPreset.builtIn}
-                        placeholder="プリセットの説明"
+                        placeholder={t('settings.presetDescription')}
                         className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9 disabled:opacity-50"
                       />
                     </div>
@@ -974,15 +974,15 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                     {/* システムプロンプト */}
                     <div className="space-y-2">
                       <Label className="text-xs text-[#b0b0b0]">
-                        システムプロンプト
-                        {selectedPreset.builtIn && ' (読み取り専用)'}
+                        {t('settings.systemPrompt')}
+                        {selectedPreset.builtIn && ` ${t('common.readOnly')}`}
                       </Label>
                       <Textarea
                         value={selectedPreset.systemPrompt}
                         onChange={(e) => handleUpdatePreset(selectedPreset.id, { systemPrompt: e.target.value })}
                         disabled={selectedPreset.builtIn}
                         className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-xs h-64 resize-none font-mono disabled:opacity-50"
-                        placeholder="システムプロンプトを入力..."
+                        placeholder={t('settings.systemPromptPlaceholder')}
                       />
                     </div>
                   </div>
@@ -991,7 +991,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                 {/* プリセット追加 */}
                 {selection.type === 'ollama-add' && (
                   <div className="space-y-4">
-                    <h3 className="text-sm font-medium text-[#d4d4d4]">プリセットを追加</h3>
+                    <h3 className="text-sm font-medium text-[#d4d4d4]">{t('settings.ollama.addPreset')}</h3>
 
                     <Button
                       variant="outline"
@@ -999,11 +999,11 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                       onClick={handleAddPreset}
                     >
                       <Plus className="h-4 w-4 mr-2" />
-                      新規プリセットを作成
+                      {t('settings.ollama.createNewPreset')}
                     </Button>
 
                     <p className="text-xs text-[#888]">
-                      既存のプリセットを複製する場合は、プリセットを選択して複製ボタンを使用してください。
+                      {t('settings.ollama.duplicatePresetHint')}
                     </p>
                   </div>
                 )}
@@ -1018,14 +1018,14 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
             onClick={() => onOpenChange(false)}
             className="text-[#d4d4d4] hover:bg-[#3c3c3c]"
           >
-            キャンセル
+            {t('common.cancel')}
           </Button>
           <Button
             onClick={handleSave}
             disabled={isSaving}
             className="bg-[#094771] text-white hover:bg-[#0e639c]"
           >
-            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : '保存'}
+            {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : t('common.save')}
           </Button>
         </DialogFooter>
       </DialogContent>

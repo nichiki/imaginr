@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,6 +39,7 @@ interface SnippetPanelProps {
 }
 
 export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanelProps) {
+  const { t } = useTranslation();
   const [snippets, setSnippets] = useState<Snippet[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [expandedCategories, setExpandedCategories] = useState<Set<string>>(() => {
@@ -192,14 +194,14 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
     } catch (error) {
       console.error('Failed to save snippet:', error);
       const { showError } = await import('@/lib/dialog');
-      await showError('スニペットの保存に失敗しました');
+      await showError(t('snippets.saveFailed'));
     }
   };
 
   // 削除
   const handleDelete = async (snippet: Snippet) => {
     const { showConfirm } = await import('@/lib/dialog');
-    if (!await showConfirm(`"${snippet.label}" を削除しますか？`)) return;
+    if (!await showConfirm(t('snippets.deleteConfirm', { name: snippet.label }))) return;
 
     try {
       await snippetAPI.delete(snippet.id);
@@ -207,14 +209,14 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
     } catch (error) {
       console.error('Failed to delete snippet:', error);
       const { showError } = await import('@/lib/dialog');
-      await showError('スニペットの削除に失敗しました');
+      await showError(t('snippets.deleteFailed'));
     }
   };
 
   if (isLoading) {
     return (
       <div className="h-full bg-[#252526] flex items-center justify-center text-[#888] text-sm">
-        Loading...
+        {t('common.loading')}
       </div>
     );
   }
@@ -222,11 +224,11 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
   return (
     <div className="h-full bg-[#252526] flex flex-col">
       <div className="px-4 py-2 text-xs uppercase text-[#888] font-medium flex items-center justify-between">
-        <span>Snippets</span>
+        <span>{t('snippets.title')}</span>
         <button
           onClick={() => handleCreate()}
           className="p-0.5 hover:bg-[#3c3c3c] rounded"
-          title="New Snippet"
+          title={t('snippets.newSnippet')}
         >
           <Plus className="h-4 w-4" />
         </button>
@@ -235,7 +237,7 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
         <div className="relative">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-[#888]" />
           <Input
-            placeholder="Search snippets..."
+            placeholder={t('snippets.searchPlaceholder')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="h-7 pl-7 text-xs bg-[#3c3c3c] border-[#555] focus:border-[#007acc]"
@@ -246,9 +248,9 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
         <div className="px-2 pb-4">
           {snippets.length === 0 ? (
             <div className="text-center text-[#888] text-xs py-4">
-              No snippets yet.
+              {t('snippets.noSnippets')}
               <br />
-              Click + to create one.
+              {t('snippets.createFirst')}
             </div>
           ) : (
             sortedCategories.map((category) => {
@@ -294,7 +296,7 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
                         className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
                       >
                         <Plus className="h-4 w-4 mr-2" />
-                        New Snippet
+                        {t('snippets.newSnippet')}
                       </ContextMenuItem>
                     </ContextMenuContent>
                   </ContextMenu>
@@ -322,21 +324,21 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
                               className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
                             >
                               <FileInput className="h-4 w-4 mr-2" />
-                              Insert
+                              {t('common.add')}
                             </ContextMenuItem>
                             <ContextMenuItem
                               onClick={() => handleClick(snippet)}
                               className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
                             >
                               <Pencil className="h-4 w-4 mr-2" />
-                              Edit
+                              {t('common.edit')}
                             </ContextMenuItem>
                             <ContextMenuItem
                               onClick={() => handleDelete(snippet)}
                               className="text-red-400 focus:bg-red-900 focus:text-red-200"
                             >
                               <Trash2 className="h-4 w-4 mr-2" />
-                              Delete
+                              {t('common.delete')}
                             </ContextMenuItem>
                           </ContextMenuContent>
                         </ContextMenu>
@@ -355,32 +357,32 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
         <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4] max-w-lg">
           <DialogHeader>
             <DialogTitle className="text-white">
-              {isCreating ? 'New Snippet' : 'Edit Snippet'}
+              {isCreating ? t('snippets.newSnippet') : t('snippets.editSnippet')}
             </DialogTitle>
           </DialogHeader>
           {editingSnippet && (
             <div className="space-y-4 py-2">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label className="text-[#888]">Label</Label>
+                  <Label className="text-[#888]">{t('common.label')}</Label>
                   <Input
                     value={editingSnippet.label}
                     onChange={(e) =>
                       setEditingSnippet({ ...editingSnippet, label: e.target.value })
                     }
                     className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
-                    placeholder="e.g. standing pose"
+                    placeholder={t('snippets.labelPlaceholder')}
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label className="text-[#888]">Category</Label>
+                  <Label className="text-[#888]">{t('common.category')}</Label>
                   {isNewCategory ? (
                     <div className="flex gap-2">
                       <Input
                         value={newCategoryName}
                         onChange={(e) => setNewCategoryName(e.target.value)}
                         className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] flex-1"
-                        placeholder="New category name"
+                        placeholder={t('snippets.newCategoryPlaceholder')}
                         autoFocus
                       />
                       {existingCategories.length > 0 && (
@@ -397,7 +399,7 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
                           }}
                           className="bg-transparent border-[#555] text-[#888] hover:bg-[#3c3c3c] px-2"
                         >
-                          Cancel
+                          {t('common.cancel')}
                         </Button>
                       )}
                     </div>
@@ -407,7 +409,7 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
                       onValueChange={handleCategoryChange}
                     >
                       <SelectTrigger className="w-full bg-[#3c3c3c] border-[#555] text-[#d4d4d4]">
-                        <SelectValue placeholder="Select category" />
+                        <SelectValue placeholder={t('snippets.selectCategory')} />
                       </SelectTrigger>
                       <SelectContent className="bg-[#3c3c3c] border-[#555]">
                         {existingCategories.map((cat) => (
@@ -423,7 +425,7 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
                           value={NEW_CATEGORY_VALUE}
                           className="text-[#9cdcfe] focus:bg-[#094771] focus:text-white"
                         >
-                          + New Category...
+                          {t('snippets.newCategory')}
                         </SelectItem>
                       </SelectContent>
                     </Select>
@@ -431,18 +433,18 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
                 </div>
               </div>
               <div className="space-y-2">
-                <Label className="text-[#888]">Description (optional)</Label>
+                <Label className="text-[#888]">{t('common.description')} {t('common.optional')}</Label>
                 <Input
                   value={editingSnippet.description || ''}
                   onChange={(e) =>
                     setEditingSnippet({ ...editingSnippet, description: e.target.value })
                   }
                   className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
-                  placeholder="e.g. Basic standing pose"
+                  placeholder={t('snippets.descriptionPlaceholder')}
                 />
               </div>
               <div className="space-y-2">
-                <Label className="text-[#888]">Content</Label>
+                <Label className="text-[#888]">{t('common.content')}</Label>
                 <Textarea
                   value={editingSnippet.content}
                   onChange={(e) =>
@@ -460,14 +462,14 @@ export function SnippetPanel({ onInsertSnippet, onSnippetsChange }: SnippetPanel
               onClick={() => setEditDialogOpen(false)}
               className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button
               onClick={handleSave}
               disabled={!editingSnippet?.label || !editingSnippet?.content}
               className="bg-[#0e639c] hover:bg-[#1177bb] text-white disabled:opacity-50"
             >
-              {isCreating ? 'Create' : 'Save'}
+              {isCreating ? t('common.create') : t('common.save')}
             </Button>
           </DialogFooter>
         </DialogContent>

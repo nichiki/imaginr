@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Copy, Check, AlertCircle, Loader2, X, Sparkles, Search, Settings, ArrowDown, ArrowUp, CheckSquare, Trash2 } from 'lucide-react';
 import { Input } from '@/components/ui/input';
@@ -16,9 +17,9 @@ export type PromptTab = 'prompt' | 'gallery';
 export type PromptSubTab = 'yaml' | 'enhanced';
 
 // YAMLのnegativeセクションを赤くハイライトするコンポーネント
-function YamlHighlight({ yaml }: { yaml: string }) {
+function YamlHighlight({ yaml, emptyText }: { yaml: string; emptyText: string }) {
   if (!yaml) {
-    return <span className="text-[#888]">(YAMLを入力してください)</span>;
+    return <span className="text-[#888]">{emptyText}</span>;
   }
 
   // negativeセクションを検出して分割
@@ -103,6 +104,7 @@ export function PromptPanel({
   comfyEnabled,
   isGenerating,
 }: PromptPanelProps) {
+  const { t } = useTranslation();
   const [copied, setCopied] = useState(false);
 
   // 画像ギャラリー
@@ -212,7 +214,7 @@ export function PromptPanel({
   // 画像削除
   const handleDeleteImage = useCallback(async (image: ImageInfo) => {
     const { showConfirm } = await import('@/lib/dialog');
-    if (!await showConfirm('この画像を削除しますか？')) return;
+    if (!await showConfirm(t('dialog.confirmDeleteImage'))) return;
 
     try {
       await imageAPI.delete(image.filename);
@@ -224,7 +226,7 @@ export function PromptPanel({
     } catch (error) {
       console.error('Failed to delete image:', error);
     }
-  }, [selectedImage]);
+  }, [selectedImage, t]);
 
   // 選択トグル（Shift+クリック対応）
   const handleToggleSelect = useCallback((id: string, shiftKey: boolean) => {
@@ -272,7 +274,7 @@ export function PromptPanel({
     if (selectedIds.size === 0) return;
 
     const { showConfirm } = await import('@/lib/dialog');
-    if (!await showConfirm(`${selectedIds.size}件の画像を削除しますか？`)) return;
+    if (!await showConfirm(t('dialog.confirmDelete'))) return;
 
     try {
       const idsToDelete = Array.from(selectedIds);
@@ -287,7 +289,7 @@ export function PromptPanel({
     } catch (error) {
       console.error('Failed to bulk delete images:', error);
     }
-  }, [selectedIds, selectedImage]);
+  }, [selectedIds, selectedImage, t]);
 
   // 選択モード終了時にリセット
   const handleExitSelectMode = useCallback(() => {
@@ -306,7 +308,7 @@ export function PromptPanel({
         <div className="h-11 px-3 flex items-center justify-between border-b border-[#333] flex-shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-xs uppercase text-[#888] font-medium">
-              {activeTab === 'prompt' ? 'Prompt' : 'Gallery'}
+              {activeTab === 'prompt' ? t('prompt.tab') : t('prompt.galleryTab')}
             </span>
             {activeTab === 'prompt' && currentFileName && (
               <span className="text-xs text-[#569cd6] truncate max-w-[200px]" title={currentFileName}>
@@ -324,12 +326,12 @@ export function PromptPanel({
                 {copied ? (
                   <>
                     <Check className="h-3.5 w-3.5 mr-1.5 text-green-500" />
-                    <span className="text-xs">Copied</span>
+                    <span className="text-xs">{t('common.copied')}</span>
                   </>
                 ) : (
                   <>
                     <Copy className="h-3.5 w-3.5 mr-1.5" />
-                    <span className="text-xs">Copy</span>
+                    <span className="text-xs">{t('common.copy')}</span>
                   </>
                 )}
               </Button>
@@ -342,7 +344,7 @@ export function PromptPanel({
                   <Input
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search"
+                    placeholder={t('common.search')}
                     className="w-40 pl-7 pr-6 h-7 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4] placeholder:text-[#888]"
                   />
                   {searchQuery && (
@@ -362,7 +364,7 @@ export function PromptPanel({
                   size="sm"
                   className="h-7 px-2 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
                   onClick={() => setSortOrder((prev) => prev === 'desc' ? 'asc' : 'desc')}
-                  title={sortOrder === 'desc' ? '新しい順' : '古い順'}
+                  title={sortOrder === 'desc' ? t('gallery.sortNewest') : t('gallery.sortOldest')}
                 >
                   {sortOrder === 'desc' ? (
                     <ArrowDown className="h-3.5 w-3.5" />
@@ -376,7 +378,7 @@ export function PromptPanel({
                   size="sm"
                   className={`h-7 px-2 ${isSelectMode ? 'text-[#0e639c] bg-[#0e639c]/20' : 'text-[#888]'} hover:text-white hover:bg-[#3c3c3c]`}
                   onClick={() => isSelectMode ? handleExitSelectMode() : setIsSelectMode(true)}
-                  title="選択モード"
+                  title={t('gallery.selectionMode')}
                 >
                   <CheckSquare className="h-3.5 w-3.5" />
                 </Button>
@@ -385,10 +387,10 @@ export function PromptPanel({
           </div>
           <TabsList className="h-7 bg-[#3c3c3c]">
             <TabsTrigger value="prompt" className="text-xs h-5 px-2 text-[#d4d4d4] data-[state=active]:text-white data-[state=active]:bg-[#094771]">
-              Prompt
+              {t('prompt.tab')}
             </TabsTrigger>
             <TabsTrigger value="gallery" className="text-xs h-5 px-2 text-[#d4d4d4] data-[state=active]:text-white data-[state=active]:bg-[#094771]">
-              Gallery
+              {t('prompt.galleryTab')}
               {totalImages > 0 && (
                 <span className="ml-1 text-[10px] text-[#888]">({totalImages})</span>
               )}
@@ -419,7 +421,7 @@ export function PromptPanel({
               }`}
             >
               <Sparkles className="h-3 w-3" />
-              Enhanced
+              {t('prompt.enhancedLabel')}
               {isEnhancing && <Loader2 className="h-3 w-3 animate-spin" />}
             </button>
           </div>
@@ -430,11 +432,11 @@ export function PromptPanel({
               !isYamlValid ? (
                 <div className="p-4 flex items-center gap-2 text-yellow-500 text-sm">
                   <AlertCircle className="h-4 w-4" />
-                  <span>YAML parse error - 構文を確認してください</span>
+                  <span>{t('prompt.yamlParseError')}</span>
                 </div>
               ) : (
                 <pre className="p-3 text-xs font-mono whitespace-pre-wrap">
-                  <YamlHighlight yaml={mergedYaml} />
+                  <YamlHighlight yaml={mergedYaml} emptyText={t('prompt.enterYaml')} />
                 </pre>
               )
             ) : (
@@ -457,7 +459,7 @@ export function PromptPanel({
                   <Textarea
                     value={enhancedPrompt}
                     onChange={(e) => onEnhancedPromptChange(e.target.value)}
-                    placeholder={isEnhancing ? 'Enhancing...' : 'Use "Enhance" button in Generate panel'}
+                    placeholder={isEnhancing ? t('generation.enhancing') : t('prompt.useEnhanceButton')}
                     className="h-full w-full bg-[#1e1e1e] border-[#333] text-[#d4d4d4] text-xs font-mono resize-none"
                   />
                 </div>
@@ -471,8 +473,7 @@ export function PromptPanel({
           {!comfyEnabled ? (
             <div className="p-4 flex flex-col items-center justify-center h-full gap-3 text-[#888]">
               <Settings className="h-8 w-8" />
-              <span className="text-sm">ComfyUIが設定されていません</span>
-              <span className="text-xs">設定から有効にしてください</span>
+              <span className="text-sm">{t('prompt.comfyuiNotConfigured')}</span>
             </div>
           ) : (
             <>
@@ -481,7 +482,7 @@ export function PromptPanel({
                 <div className="flex-shrink-0 px-3 py-2 bg-[#0e639c]/20 border-b border-[#0e639c]/40 flex items-center gap-2">
                   <CheckSquare className="h-4 w-4 text-[#0e639c]" />
                   <span className="text-xs text-[#d4d4d4]">
-                    選択: {selectedIds.size}件
+                    {t('common.selected', { count: selectedIds.size })}
                   </span>
                   <div className="flex-1" />
                   <Button
@@ -490,7 +491,7 @@ export function PromptPanel({
                     className="h-6 px-2 text-xs text-[#d4d4d4] hover:text-white hover:bg-[#3c3c3c]"
                     onClick={handleSelectAll}
                   >
-                    全選択
+                    {t('common.selectAll')}
                   </Button>
                   <Button
                     variant="ghost"
@@ -499,7 +500,7 @@ export function PromptPanel({
                     onClick={handleDeselectAll}
                     disabled={selectedIds.size === 0}
                   >
-                    選択解除
+                    {t('common.deselectAll')}
                   </Button>
                   <Button
                     variant="ghost"
@@ -509,7 +510,7 @@ export function PromptPanel({
                     disabled={selectedIds.size === 0}
                   >
                     <Trash2 className="h-3 w-3 mr-1" />
-                    削除
+                    {t('common.delete')}
                   </Button>
                   <Button
                     variant="ghost"
@@ -542,7 +543,7 @@ export function PromptPanel({
               {isGenerating && (
                 <div className="absolute inset-0 bg-[#252526]/90 flex flex-col items-center justify-center gap-3 z-10">
                   <Loader2 className="h-8 w-8 animate-spin text-[#888]" />
-                  <span className="text-sm text-[#888]">Generating...</span>
+                  <span className="text-sm text-[#888]">{t('generation.generating')}</span>
                 </div>
               )}
             </>
