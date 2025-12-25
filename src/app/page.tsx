@@ -559,12 +559,12 @@ export default function Home() {
   // 生成可能かどうか
   const canGenerate = useMemo(() => {
     const activeWorkflow = comfySettings ? getActiveWorkflow(comfySettings) : null;
-    return comfySettings?.enabled && !!activeWorkflow && !!mergedYamlForPrompt && !isGenerating && !isEnhancing;
+    return !!(comfySettings?.enabled && activeWorkflow && mergedYamlForPrompt && !isGenerating && !isEnhancing);
   }, [comfySettings, mergedYamlForPrompt, isGenerating, isEnhancing]);
 
   // エンハンス可能かどうか
   const canEnhance = useMemo(() => {
-    return ollamaSettings?.enabled && !!ollamaSettings?.model && !!mergedYamlForPrompt;
+    return !!(ollamaSettings?.enabled && ollamaSettings?.model && mergedYamlForPrompt);
   }, [ollamaSettings, mergedYamlForPrompt]);
 
   // ファイルパス一覧（補完用）
@@ -1574,7 +1574,12 @@ export default function Home() {
       <SettingsDialog
         open={settingsOpen}
         onOpenChange={setSettingsOpen}
-        onSettingsChange={() => setSettingsKey((k) => k + 1)}
+        onSettingsChange={() => {
+          setSettingsKey((k) => k + 1);
+          // Also update the settings state to reflect changes in canGenerate/canEnhance
+          fetchComfyUISettings().then(setComfySettings);
+          fetchOllamaSettings().then(setOllamaSettings);
+        }}
         onDictionaryChange={async () => {
           // Reload dictionary cache
           try {

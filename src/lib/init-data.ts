@@ -38,10 +38,13 @@ export async function initializeAppData(): Promise<void> {
   const { exists, mkdir, readDir, readTextFile, writeTextFile } = await import('@tauri-apps/plugin-fs');
 
   const appDataPath = await getAppDataPath();
+  const { join } = await import('@tauri-apps/api/path');
 
-  // Check if app data directory exists
-  if (await exists(appDataPath)) {
-    console.log('App data directory already exists, skipping initialization');
+  // Check if templates folder exists (not just root AppData)
+  // This handles the case where AppData exists but contents were cleared
+  const templatesPath = await join(appDataPath, 'templates');
+  if (await exists(templatesPath)) {
+    console.log('Templates folder already exists, skipping initialization');
     return;
   }
 
