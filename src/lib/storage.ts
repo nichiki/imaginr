@@ -7,6 +7,8 @@ const STORAGE_KEY = 'image-prompt-builder-state';
 const COMFYUI_SETTINGS_KEY = 'image-prompt-builder-comfyui';
 const OLLAMA_SETTINGS_KEY = 'image-prompt-builder-ollama';
 
+export type LayoutMode = 'full' | 'upper' | 'lower';
+
 export interface AppState {
   leftPanelWidth: number;
   rightPanelWidth: number;
@@ -22,6 +24,8 @@ export interface AppState {
   rightTabs: string[];        // 右ペインのタブ
   activeRightTab: string;     // 右ペインのアクティブタブ
   splitRatio: number;         // 分割比率（左ペインの割合、0-1）
+  // レイアウトモード
+  layoutMode: LayoutMode;     // 'full': 全表示, 'upper': 上段のみ, 'lower': 下段のみ
   // 後方互換性のため残す（マイグレーション用）
   selectedFile?: string;
 }
@@ -39,6 +43,7 @@ const defaultState: AppState = {
   rightTabs: [],
   activeRightTab: '',
   splitRatio: 0.5,
+  layoutMode: 'full',
 };
 
 export function loadState(): AppState {

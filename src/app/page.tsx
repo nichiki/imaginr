@@ -38,6 +38,7 @@ import {
   getEnhancerSystemPrompt,
   type ComfyUISettings,
   type OllamaSettings,
+  type LayoutMode,
 } from '@/lib/storage';
 import { ComfyUIClient } from '@/lib/comfyui-api';
 import { OllamaClient } from '@/lib/ollama-api';
@@ -54,7 +55,7 @@ import {
 import { VariableForm } from '@/components/variable-form';
 import { TabBar } from '@/components/tab-bar';
 import { Button } from '@/components/ui/button';
-import { Settings, FileText } from 'lucide-react';
+import { Settings, FileText, PanelTop, PanelBottom, Rows2 } from 'lucide-react';
 import { initializeAppData } from '@/lib/init-data';
 
 // 全フォルダのパスを収集
@@ -153,6 +154,8 @@ export default function Home() {
   const [variablePanelWidth, setVariablePanelWidth] = useState(280);
   // 生成パネルの幅
   const [generationPanelWidth, setGenerationPanelWidth] = useState(200);
+  // レイアウトモード
+  const [layoutMode, setLayoutMode] = useState<LayoutMode>('full');
 
   // ComfyUI/Ollama設定
   const [comfySettings, setComfySettings] = useState<ComfyUISettings | null>(null);
@@ -201,6 +204,9 @@ export default function Home() {
         setRightPanelWidth(savedState.rightPanelWidth);
         setVariablePanelWidth(savedState.variablePanelWidth);
         setGenerationPanelWidth(savedState.generationPanelWidth);
+        if (savedState.layoutMode) {
+          setLayoutMode(savedState.layoutMode);
+        }
 
         const tree = await fileAPI.listFiles();
         setFileTree(tree);
@@ -1515,6 +1521,12 @@ export default function Home() {
     return () => clearTimeout(timer);
   }, [previewHeight, leftPanelWidth, rightPanelWidth, variablePanelWidth, generationPanelWidth, splitRatio]);
 
+  // レイアウトモード変更を保存（即時）
+  useEffect(() => {
+    if (!initialized.current) return;
+    saveState({ layoutMode });
+  }, [layoutMode]);
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-[#1e1e1e] text-[#d4d4d4]">
@@ -1539,18 +1551,50 @@ export default function Home() {
             <span className="text-xs text-blue-400">保存中...</span>
           )}
         </div>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-7 w-7 p-0 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
-          onClick={() => setSettingsOpen(true)}
-          title="設定"
-        >
-          <Settings className="h-4 w-4" />
-        </Button>
+        <div className="flex items-center gap-1">
+          {/* レイアウト切り替えボタン */}
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-7 w-7 p-0 hover:bg-[#3c3c3c] ${layoutMode === 'upper' ? 'text-white bg-[#3c3c3c]' : 'text-[#888] hover:text-white'}`}
+            onClick={() => setLayoutMode(layoutMode === 'upper' ? 'full' : 'upper')}
+            title="上段のみ"
+          >
+            <PanelBottom className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-7 w-7 p-0 hover:bg-[#3c3c3c] ${layoutMode === 'lower' ? 'text-white bg-[#3c3c3c]' : 'text-[#888] hover:text-white'}`}
+            onClick={() => setLayoutMode(layoutMode === 'lower' ? 'full' : 'lower')}
+            title="下段のみ"
+          >
+            <PanelTop className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className={`h-7 w-7 p-0 hover:bg-[#3c3c3c] ${layoutMode === 'full' ? 'text-white bg-[#3c3c3c]' : 'text-[#888] hover:text-white'}`}
+            onClick={() => setLayoutMode('full')}
+            title="全表示"
+          >
+            <Rows2 className="h-4 w-4" />
+          </Button>
+          <div className="w-px h-4 bg-[#444] mx-1" />
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
+            onClick={() => setSettingsOpen(true)}
+            title="設定"
+          >
+            <Settings className="h-4 w-4" />
+          </Button>
+        </div>
       </header>
 
-      {/* Main Area */}
+      {/* Main Area (Upper Row) */}
+      {layoutMode !== 'lower' && (
       <div className="flex-1 flex min-h-0">
         {/* File Tree */}
         <div
@@ -1723,17 +1767,21 @@ export default function Home() {
           />
         </div>
       </div>
+      )}
 
-      {/* Preview Resize Handle */}
+      {/* Preview Resize Handle (only in full mode) */}
+      {layoutMode === 'full' && (
       <div
         className="h-1 flex-shrink-0 bg-[#333] cursor-ns-resize hover:bg-[#007acc]"
         onMouseDown={handlePreviewResizeStart}
       />
+      )}
 
-      {/* Preview Panel with Variables */}
+      {/* Preview Panel with Variables (Lower Row) */}
+      {layoutMode !== 'upper' && (
       <div
-        className="flex-shrink-0 relative flex"
-        style={{ height: previewHeight }}
+        className={`relative flex ${layoutMode === 'lower' ? 'flex-1' : 'flex-shrink-0'}`}
+        style={layoutMode === 'lower' ? undefined : { height: previewHeight }}
       >
         {/* Variable Form - always show */}
         <div
@@ -1805,6 +1853,7 @@ export default function Home() {
           />
         </div>
       </div>
+      )}
 
       {/* Settings Dialog */}
       <SettingsDialog
