@@ -7,6 +7,7 @@
     "add": "追加",
     "edit": "編集",
     "copy": "コピー",
+    "copied": "コピーしました",
     "rename": "名前変更",
     "create": "作成",
     "test": "テスト",
@@ -27,7 +28,20 @@
     "download": "ダウンロード",
     "openFolder": "フォルダを開く",
     "selectFile": "ファイルを選択...",
-    "readOnly": "(読み取り専用)"
+    "readOnly": "(読み取り専用)",
+    "name": "名前",
+    "description": "説明",
+    "content": "内容",
+    "label": "ラベル",
+    "category": "カテゴリ",
+    "optional": "（任意）",
+    "required": "（必須）",
+    "noOptions": "選択肢がありません",
+    "clear": "クリア",
+    "selectAll": "全選択",
+    "deselectAll": "選択解除",
+    "selected": "選択: {{count}}件",
+    "allShown": "— すべて表示しました —"
   },
   "header": {
     "save": "Ctrl+S: 保存",
@@ -76,12 +90,32 @@
     "confirmDelete": "削除しますか？",
     "confirmDeleteImage": "この画像を削除しますか？"
   },
+  "prompt": {
+    "tab": "プロンプト",
+    "galleryTab": "ギャラリー",
+    "enterYaml": "(YAMLを入力してください)",
+    "yamlParseError": "YAML解析エラー - 構文を確認してください",
+    "enhancedLabel": "エンハンス済み",
+    "useEnhanceButton": "生成パネルの「エンハンス」ボタンを使用してください",
+    "comfyuiNotConfigured": "ComfyUIが設定されていません。設定から有効にしてください。",
+    "noSearchResults": "検索結果がありません",
+    "generateImages": "「生成」ボタンで画像を生成"
+  },
   "generation": {
+    "title": "生成",
     "noWorkflow": "ワークフローが選択されていません",
     "generate": "生成",
     "generating": "生成中...",
     "enhance": "エンハンス",
-    "enhancing": "エンハンス中..."
+    "enhancing": "エンハンス中...",
+    "rerun": "(再実行)",
+    "preset": "プリセット",
+    "selectPreset": "プリセットを選択",
+    "workflow": "ワークフロー",
+    "selectWorkflow": "ワークフローを選択",
+    "enhanceBeforeGenerate": "生成前にエンハンス",
+    "properties": "プロパティ",
+    "comfyuiNotConfigured": "ComfyUIが設定されていません。設定から有効にしてください。"
   },
   "gallery": {
     "noPrompt": "(プロンプトなし)",
@@ -90,10 +124,40 @@
     "selectionMode": "選択モード"
   },
   "snippets": {
+    "title": "スニペット",
+    "newSnippet": "新規スニペット",
+    "editSnippet": "スニペットを編集",
+    "searchPlaceholder": "スニペットを検索...",
+    "noSnippets": "スニペットがありません",
+    "createFirst": "最初のスニペットを作成しましょう",
+    "labelPlaceholder": "例: 立ちポーズ",
+    "newCategoryPlaceholder": "新しいカテゴリ名",
+    "selectCategory": "カテゴリを選択",
+    "newCategory": "+ 新規カテゴリ...",
+    "descriptionPlaceholder": "例: 基本的な立ちポーズ",
     "saveFailed": "スニペットの保存に失敗しました",
-    "deleteFailed": "スニペットの削除に失敗しました"
+    "deleteFailed": "スニペットの削除に失敗しました",
+    "deleteConfirm": "「{{name}}」を削除しますか？"
+  },
+  "variables": {
+    "title": "変数",
+    "noVariables": "変数がありません",
+    "noPreset": "プリセットなし",
+    "saveAsPreset": "新規プリセットとして保存",
+    "presetNamePlaceholder": "プリセット名",
+    "defaultValue": "(デフォルト: {{value}})",
+    "enterValue": "{{name}}を入力",
+    "addCustomValue": "カスタム値を追加..."
+  },
+  "imageViewer": {
+    "title": "画像プレビュー",
+    "seed": "シード",
+    "parameters": "パラメータ",
+    "negative": "ネガティブ",
+    "prompt": "プロンプト"
   },
   "dictionary": {
+    "title": "辞書管理",
     "value": "値",
     "description": "説明（任意）",
     "addToDictionary": "辞書に追加",
@@ -108,22 +172,63 @@
     "exportFailed": "エクスポートに失敗しました",
     "importFailed": "インポートに失敗しました",
     "importMethod": "インポート方法を選択してください:\n\n「OK」= 既存データを全て置き換え\n「キャンセル」= 既存データにマージ",
+    "importResult": "追加: {{added}}件\n更新: {{updated}}件\nスキップ: {{skipped}}件",
     "keyName": "キー名",
     "contextPlaceholder": "* または hair など",
-    "keyPlaceholder": "color, style など"
+    "keyPlaceholder": "color, style など",
+    "createNewKey": "新規キーを作成",
+    "contextLabel": "コンテキスト（例: hair, outfit, *）",
+    "keyLabel": "キー名（例: style, color）",
+    "selectKeyFromTree": "左のツリーからキーを選択してください",
+    "valuePlaceholder": "追加する値",
+    "descriptionExample": "日本語の説明など",
+    "detectedContext": "カーソル位置から検出: {{context}}.{{key}}",
+    "manage": "辞書管理",
+    "manageDescription": "オートコンプリート辞書を管理"
   },
   "settings": {
     "title": "設定",
     "data": "データ",
+    "dataFolder": "データフォルダ",
+    "dataFolderDescription": "テンプレート、辞書、スニペット、生成画像",
     "addWorkflow": "追加...",
     "addPreset": "追加...",
     "selectModel": "モデルを選択",
     "loadingModels": "読み込み中...",
     "presetDescription": "プリセットの説明",
+    "systemPrompt": "システムプロンプト",
     "systemPromptPlaceholder": "システムプロンプトを入力...",
     "saveFailed": "設定の保存に失敗しました",
     "invalidJson": "無効なJSONファイルです",
-    "language": "言語"
+    "language": "言語",
+    "comfyui": {
+      "title": "ComfyUI設定",
+      "enable": "ComfyUI連携を有効化",
+      "apiUrl": "API URL",
+      "workflow": "ワークフロー",
+      "addWorkflow": "ワークフローを追加",
+      "addFromFile": "既存ファイルから追加",
+      "uploadFile": "ファイルをアップロード",
+      "uploadJson": "JSONファイルをアップロード",
+      "uploadDescription": "ComfyUIからAPI形式でエクスポートしたJSONをアップロード",
+      "noFilesAvailable": "利用可能なファイルがありません",
+      "getModelsViaTest": "接続テストでモデル一覧を取得してください"
+    },
+    "ollama": {
+      "title": "Ollama設定",
+      "enable": "Ollamaエンハンサーを有効化",
+      "apiUrl": "API URL",
+      "model": "モデル",
+      "temperature": "Temperature",
+      "temperatureDescription": "低い値: 一貫性重視 / 高い値: 創造性重視",
+      "preset": "プリセット",
+      "builtIn": "（ビルトイン）",
+      "presetName": "名前",
+      "presetDescription": "説明",
+      "addPreset": "プリセットを追加",
+      "createNewPreset": "新規プリセットを作成",
+      "duplicatePresetHint": "既存のプリセットを複製する場合は、プリセットを選択して複製ボタンを使用してください。"
+    }
   },
   "workflow": {
     "nodeId": "ノードID (例: 6)",

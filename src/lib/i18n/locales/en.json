@@ -7,6 +7,7 @@
     "add": "Add",
     "edit": "Edit",
     "copy": "Copy",
+    "copied": "Copied",
     "rename": "Rename",
     "create": "Create",
     "test": "Test",
@@ -27,7 +28,20 @@
     "download": "Download",
     "openFolder": "Open Folder",
     "selectFile": "Select file...",
-    "readOnly": "(Read-only)"
+    "readOnly": "(Read-only)",
+    "name": "Name",
+    "description": "Description",
+    "content": "Content",
+    "label": "Label",
+    "category": "Category",
+    "optional": "(optional)",
+    "required": "(required)",
+    "noOptions": "No options available",
+    "clear": "Clear",
+    "selectAll": "Select All",
+    "deselectAll": "Deselect All",
+    "selected": "Selected: {{count}}",
+    "allShown": "— All shown —"
   },
   "header": {
     "save": "Ctrl+S: Save",
@@ -76,12 +90,32 @@
     "confirmDelete": "Are you sure you want to delete this?",
     "confirmDeleteImage": "Delete this image?"
   },
+  "prompt": {
+    "tab": "Prompt",
+    "galleryTab": "Gallery",
+    "enterYaml": "(Enter YAML)",
+    "yamlParseError": "YAML parse error - check syntax",
+    "enhancedLabel": "Enhanced",
+    "useEnhanceButton": "Use \"Enhance\" button in Generate panel",
+    "comfyuiNotConfigured": "ComfyUI is not configured. Please enable it in Settings.",
+    "noSearchResults": "No search results",
+    "generateImages": "Generate images with the Generate button"
+  },
   "generation": {
+    "title": "Generate",
     "noWorkflow": "No workflow selected",
     "generate": "Generate",
     "generating": "Generating...",
     "enhance": "Enhance",
-    "enhancing": "Enhancing..."
+    "enhancing": "Enhancing...",
+    "rerun": "(Re-run)",
+    "preset": "Preset",
+    "selectPreset": "Select preset",
+    "workflow": "Workflow",
+    "selectWorkflow": "Select workflow",
+    "enhanceBeforeGenerate": "Enhance before generate",
+    "properties": "Properties",
+    "comfyuiNotConfigured": "ComfyUI is not configured. Please enable it in Settings."
   },
   "gallery": {
     "noPrompt": "(No prompt)",
@@ -90,10 +124,40 @@
     "selectionMode": "Selection mode"
   },
   "snippets": {
+    "title": "Snippets",
+    "newSnippet": "New Snippet",
+    "editSnippet": "Edit Snippet",
+    "searchPlaceholder": "Search snippets...",
+    "noSnippets": "No snippets yet",
+    "createFirst": "Create your first snippet",
+    "labelPlaceholder": "e.g. standing pose",
+    "newCategoryPlaceholder": "New category name",
+    "selectCategory": "Select category",
+    "newCategory": "+ New Category...",
+    "descriptionPlaceholder": "e.g. Basic standing pose",
     "saveFailed": "Failed to save snippet",
-    "deleteFailed": "Failed to delete snippet"
+    "deleteFailed": "Failed to delete snippet",
+    "deleteConfirm": "Delete \"{{name}}\"?"
+  },
+  "variables": {
+    "title": "Variables",
+    "noVariables": "No variables",
+    "noPreset": "No preset",
+    "saveAsPreset": "Save as New Preset",
+    "presetNamePlaceholder": "Preset name",
+    "defaultValue": "(default: {{value}})",
+    "enterValue": "Enter {{name}}",
+    "addCustomValue": "Add custom value..."
+  },
+  "imageViewer": {
+    "title": "Image Preview",
+    "seed": "Seed",
+    "parameters": "Parameters",
+    "negative": "Negative",
+    "prompt": "Prompt"
   },
   "dictionary": {
+    "title": "Dictionary Manager",
     "value": "Value",
     "description": "Description (optional)",
     "addToDictionary": "Add to Dictionary",
@@ -108,22 +172,63 @@
     "exportFailed": "Export failed",
     "importFailed": "Import failed",
     "importMethod": "Choose import method:\n\n\"OK\" = Replace all existing data\n\"Cancel\" = Merge with existing data",
+    "importResult": "Added: {{added}}\nUpdated: {{updated}}\nSkipped: {{skipped}}",
     "keyName": "Key name",
     "contextPlaceholder": "* or hair, etc.",
-    "keyPlaceholder": "color, style, etc."
+    "keyPlaceholder": "color, style, etc.",
+    "createNewKey": "Create new key",
+    "contextLabel": "Context (e.g., hair, outfit, *)",
+    "keyLabel": "Key name (e.g., style, color)",
+    "selectKeyFromTree": "Select a key from the left tree",
+    "valuePlaceholder": "Value to add",
+    "descriptionExample": "e.g. Japanese description",
+    "detectedContext": "Detected from cursor: {{context}}.{{key}}",
+    "manage": "Manage Dictionary",
+    "manageDescription": "Manage autocomplete dictionary"
   },
   "settings": {
     "title": "Settings",
     "data": "Data",
+    "dataFolder": "Data Folder",
+    "dataFolderDescription": "Templates, dictionary, snippets, and generated images",
     "addWorkflow": "Add...",
     "addPreset": "Add...",
     "selectModel": "Select model",
     "loadingModels": "Loading...",
     "presetDescription": "Preset description",
+    "systemPrompt": "System Prompt",
     "systemPromptPlaceholder": "Enter system prompt...",
     "saveFailed": "Failed to save settings",
     "invalidJson": "Invalid JSON file",
-    "language": "Language"
+    "language": "Language",
+    "comfyui": {
+      "title": "ComfyUI Settings",
+      "enable": "Enable ComfyUI integration",
+      "apiUrl": "API URL",
+      "workflow": "Workflow",
+      "addWorkflow": "Add Workflow",
+      "addFromFile": "Add from existing file",
+      "uploadFile": "Upload file",
+      "uploadJson": "Upload JSON file",
+      "uploadDescription": "Upload JSON exported from ComfyUI in API format",
+      "noFilesAvailable": "No available files",
+      "getModelsViaTest": "Get model list via connection test"
+    },
+    "ollama": {
+      "title": "Ollama Settings",
+      "enable": "Enable Ollama Enhancer",
+      "apiUrl": "API URL",
+      "model": "Model",
+      "temperature": "Temperature",
+      "temperatureDescription": "Low: consistency / High: creativity",
+      "preset": "Preset",
+      "builtIn": "(Built-in)",
+      "presetName": "Name",
+      "presetDescription": "Description",
+      "addPreset": "Add Preset",
+      "createNewPreset": "Create new preset",
+      "duplicatePresetHint": "To duplicate an existing preset, select it and use the duplicate button."
+    }
   },
   "workflow": {
     "nodeId": "Node ID (e.g., 6)",
