@@ -50,6 +50,7 @@
     "layoutUpper": "Upper only",
     "layoutLower": "Lower only",
     "layoutFull": "Full view",
+    "resetLayout": "Reset panel sizes",
     "settings": "Settings"
   },
   "fileTree": {

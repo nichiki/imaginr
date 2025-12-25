@@ -37,6 +37,7 @@ import {
   loadOllamaSettings,
   getActiveWorkflow,
   getEnhancerSystemPrompt,
+  DEFAULT_PANEL_SIZES,
   type ComfyUISettings,
   type OllamaSettings,
   type LayoutMode,
@@ -56,7 +57,7 @@ import {
 import { VariableForm } from '@/components/variable-form';
 import { TabBar } from '@/components/tab-bar';
 import { Button } from '@/components/ui/button';
-import { Settings, FileText, PanelTop, PanelBottom, Rows2, Save } from 'lucide-react';
+import { Settings, FileText, PanelTop, PanelBottom, Rows2, Save, RotateCcw } from 'lucide-react';
 import { initializeAppData } from '@/lib/init-data';
 import { migrateToUnifiedSettings } from '@/lib/storage';
 
@@ -1398,6 +1399,17 @@ export default function Home() {
     }
   }, [currentFilePath, files, dirtyFiles]);
 
+  // パネルサイズをリセット
+  const handleResetLayout = useCallback(() => {
+    setLeftPanelWidth(DEFAULT_PANEL_SIZES.leftPanelWidth);
+    setRightPanelWidth(DEFAULT_PANEL_SIZES.rightPanelWidth);
+    setPreviewHeight(DEFAULT_PANEL_SIZES.previewHeight);
+    setVariablePanelWidth(DEFAULT_PANEL_SIZES.variablePanelWidth);
+    setGenerationPanelWidth(DEFAULT_PANEL_SIZES.generationPanelWidth);
+    setSplitRatio(DEFAULT_PANEL_SIZES.splitRatio);
+    saveState(DEFAULT_PANEL_SIZES);
+  }, []);
+
   // Ctrl+S で保存
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -1593,6 +1605,15 @@ export default function Home() {
             title={t('header.layoutFull')}
           >
             <Rows2 className="h-4 w-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 w-7 p-0 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
+            onClick={handleResetLayout}
+            title={t('header.resetLayout')}
+          >
+            <RotateCcw className="h-4 w-4" />
           </Button>
           <div className="w-px h-4 bg-[#444] mx-1" />
           <Button

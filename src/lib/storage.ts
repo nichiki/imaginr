@@ -30,19 +30,24 @@ export interface AppState {
   selectedFile?: string;
 }
 
-const defaultState: AppState = {
+// パネルサイズのデフォルト値
+export const DEFAULT_PANEL_SIZES = {
   leftPanelWidth: 280,
   rightPanelWidth: 280,
-  previewHeight: 280,
-  variablePanelWidth: 280, // leftPanelWidthと同じ
-  generationPanelWidth: 280, // rightPanelWidthと同じ
+  previewHeight: 420,
+  variablePanelWidth: 280,
+  generationPanelWidth: 280,
+  splitRatio: 0.5,
+} as const;
+
+const defaultState: AppState = {
+  ...DEFAULT_PANEL_SIZES,
   expandedFolders: [], // 初回は全て閉じる
   openTabs: [],
   activeTab: '',
   splitView: false,
   rightTabs: [],
   activeRightTab: '',
-  splitRatio: 0.5,
   layoutMode: 'full',
 };
 

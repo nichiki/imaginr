@@ -50,6 +50,7 @@
     "layoutUpper": "上段のみ",
     "layoutLower": "下段のみ",
     "layoutFull": "全表示",
+    "resetLayout": "パネルサイズをリセット",
     "settings": "設定"
   },
   "fileTree": {
