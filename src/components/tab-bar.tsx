@@ -17,7 +17,6 @@ import {
   horizontalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
 import { X } from 'lucide-react';
 
 interface TabBarProps {

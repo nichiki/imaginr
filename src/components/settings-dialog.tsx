@@ -652,37 +652,6 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                           )}
                         </div>
 
-                        {/* アクティブワークフロー */}
-                        <div className="space-y-2">
-                          <Label className="text-xs text-[#b0b0b0]">
-                            アクティブなワークフロー
-                          </Label>
-                          <Select
-                            value={settings.activeWorkflowId}
-                            onValueChange={(value) => updateSettings({ activeWorkflowId: value })}
-                          >
-                            <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9">
-                              <SelectValue placeholder="ワークフローを選択" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#252526] border-[#333]">
-                              {settings.workflows.length === 0 ? (
-                                <SelectItem value="_none" disabled className="text-[#888]">
-                                  ワークフローを追加してください
-                                </SelectItem>
-                              ) : (
-                                settings.workflows.map((wf) => (
-                                  <SelectItem
-                                    key={wf.id}
-                                    value={wf.id}
-                                    className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
-                                  >
-                                    {wf.name}
-                                  </SelectItem>
-                                ))
-                              )}
-                            </SelectContent>
-                          </Select>
-                        </div>
                       </>
                     )}
                   </div>
@@ -863,32 +832,6 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                                   </SelectItem>
                                 ))
                               )}
-                            </SelectContent>
-                          </Select>
-                        </div>
-
-                        {/* アクティブプリセット */}
-                        <div className="space-y-2">
-                          <Label className="text-xs text-[#b0b0b0]">
-                            アクティブなプリセット
-                          </Label>
-                          <Select
-                            value={ollamaSettings.activePresetId || ''}
-                            onValueChange={(value) => updateOllamaSettings({ activePresetId: value })}
-                          >
-                            <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9">
-                              <SelectValue placeholder="プリセットを選択" />
-                            </SelectTrigger>
-                            <SelectContent className="bg-[#252526] border-[#333]">
-                              {ollamaSettings.enhancerPresets.map((preset) => (
-                                <SelectItem
-                                  key={preset.id}
-                                  value={preset.id}
-                                  className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
-                                >
-                                  {preset.name}
-                                </SelectItem>
-                              ))}
                             </SelectContent>
                           </Select>
                         </div>

@@ -102,10 +102,11 @@ export function GenerationPanel({
   }, []);
 
   // ワークフロー変更
-  const handleWorkflowChange = useCallback((id: string) => {
+  const handleWorkflowChange = useCallback(async (id: string) => {
     setSelectedWorkflowId(id);
-    saveActiveWorkflowId(id);
-    fetchComfyUISettings().then(setComfySettings);
+    await saveActiveWorkflowId(id);
+    const settings = await fetchComfyUISettings();
+    setComfySettings(settings);
     onWorkflowChange?.();
   }, [onWorkflowChange]);
 
@@ -182,7 +183,7 @@ export function GenerationPanel({
               <div className="flex flex-col gap-1">
                 <label className="text-xs text-[#d4d4d4]">Preset</label>
                 <Select value={selectedPresetId} onValueChange={handlePresetChange}>
-                  <SelectTrigger className="h-8 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4]">
+                  <SelectTrigger className="w-full h-8 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4]">
                     <SelectValue placeholder="Select preset" />
                   </SelectTrigger>
                   <SelectContent className="bg-[#252526] border-[#333]">
@@ -211,7 +212,7 @@ export function GenerationPanel({
           <div className="flex flex-col gap-1">
             <label className="text-xs text-[#d4d4d4]">Workflow</label>
             <Select value={selectedWorkflowId} onValueChange={handleWorkflowChange}>
-              <SelectTrigger className="h-8 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4]">
+              <SelectTrigger className="w-full h-8 text-xs bg-[#3c3c3c] border-[#555] text-[#d4d4d4]">
                 <SelectValue placeholder="Select workflow" />
               </SelectTrigger>
               <SelectContent className="bg-[#252526] border-[#333]">
