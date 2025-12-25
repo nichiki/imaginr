@@ -1,55 +1,101 @@
 snippets:
   # ========================================
-  # 服装コンボ（出発点としてカスタマイズ前提）
+  # Quality Tags
   # ========================================
-  - id: outfit_casual_summer
-    category: outfit
-    label: カジュアル夏
-    description: 夏のカジュアル服、詳細は都度調整
+  - id: quality_masterpiece
+    category: quality
+    label: Masterpiece
+    description: High quality tags for best results
     content: |
-      outfit:
-        style: casual summer
-        top: white t-shirt
-        bottom: denim shorts
-        footwear: white sneakers
-        accessories:
-          - sunglasses
-          - simple bracelet
+      quality:
+        - masterpiece
+        - best quality
+        - highly detailed
+        - absurdres
 
-  - id: outfit_office_casual
-    category: outfit
-    label: オフィスカジュアル
-    description: きれいめカジュアル
+  - id: quality_anime
+    category: quality
+    label: Anime Quality
+    description: Quality tags for anime-style images (Animagine)
     content: |
-      outfit:
-        style: smart casual
-        top: button-up shirt
-        bottom: chinos
-        footwear: loafers
-        accessories:
-          - watch
-          - leather belt
-
-  - id: outfit_elegant_evening
-    category: outfit
-    label: エレガント夜
-    description: ディナーやパーティー向け
-    content: |
-      outfit:
-        style: elegant evening
-        dress: black cocktail dress
-        footwear: high heels
-        accessories:
-          - pearl earrings
-          - clutch bag
+      quality:
+        - masterpiece
+        - high score
+        - great score
+        - absurdres
 
   # ========================================
-  # 環境スターター（シーンの雛形）
+  # Negative Prompts
   # ========================================
-  - id: env_cafe_interior
+  - id: negative_standard
+    category: negative
+    label: Standard Negative
+    description: Common artifacts to avoid
+    content: |
+      negative:
+        - worst quality
+        - low quality
+        - bad anatomy
+        - extra fingers
+        - bad hands
+        - watermark
+        - blurry
+
+  - id: negative_anime
+    category: negative
+    label: Anime Negative
+    description: Negative tags for anime-style images
+    content: |
+      negative:
+        - worst quality
+        - low quality
+        - lowres
+        - bad anatomy
+        - bad hands
+        - missing fingers
+        - extra digit
+        - cropped
+
+  # ========================================
+  # Expressions
+  # ========================================
+  - id: expr_joyful
+    category: expression
+    label: Joyful Laugh
+    description: Natural, genuine laughter
+    content: |
+      expression:
+        type: joyful, genuine laugh
+        eyes: slightly squinted, sparkling
+        mouth: open smile, showing teeth
+
+  - id: expr_mysterious
+    category: expression
+    label: Mysterious
+    description: Enigmatic, alluring expression
+    content: |
+      expression:
+        type: mysterious, enigmatic
+        eyes: half-lidded, knowing gaze
+        mouth: slight smirk, closed
+
+  - id: expr_melancholy
+    category: expression
+    label: Soft Melancholy
+    description: Wistful, distant beauty
+    content: |
+      expression:
+        type: soft melancholy
+        eyes: gazing into distance, slightly sad
+        mouth: relaxed, neutral
+
+  # ========================================
+  # Environment Starters
+  # ========================================
+  - id: env_cafe
     category: environment
-    label: カフェ内装
-    description: カフェシーンの出発点
+    label: Cafe Interior
+    description: Cozy coffee shop scene
     content: |
       environment:
         background: cafe interior, warm ambient
@@ -59,10 +105,10 @@ snippets:
           - coffee cup
           - wooden table
 
-  - id: env_park_nature
+  - id: env_park
     category: environment
-    label: 公園・自然
-    description: 自然の中のシーン
+    label: Park / Nature
+    description: Outdoor natural scene
     content: |
       environment:
         background: lush green trees, dappled sunlight
@@ -71,72 +117,12 @@ snippets:
         time: afternoon
         weather: sunny with clouds
 
-  - id: env_studio_simple
+  - id: env_studio
     category: environment
-    label: スタジオ・シンプル
-    description: 無地背景のスタジオ撮影
+    label: Studio Simple
+    description: Clean studio backdrop
     content: |
       environment:
         background: solid white background
         location: photo studio
         setting: indoor
-
-  # ========================================
-  # 表情の詳細（細かく作り込んだセット）
-  # ========================================
-  - id: expr_joyful_laugh
-    category: expression
-    label: 楽しい笑顔
-    description: 自然な笑い
-    content: |
-      expression:
-        type: joyful, genuine laugh
-        eyes: slightly squinted, sparkling
-        mouth: open smile, showing teeth
-
-  - id: expr_mysterious
-    category: expression
-    label: ミステリアス
-    description: 謎めいた表情
-    content: |
-      expression:
-        type: mysterious, enigmatic
-        eyes: half-lidded, knowing gaze
-        mouth: slight smirk, closed
-
-  - id: expr_soft_melancholy
-    category: expression
-    label: 儚げ
-    description: 物憂げな美しさ
-    content: |
-      expression:
-        type: soft melancholy
-        eyes: gazing into distance, slightly sad
-        mouth: relaxed, neutral
-
-  # ========================================
-  # アクセサリー・小道具セット
-  # ========================================
-  - id: acc_summer_beach
-    category: accessories
-    label: 夏・ビーチ
-    description: ビーチシーン用の小道具
-    content: |
-      outfit:
-        accessories:
-          - straw hat
-          - oversized sunglasses
-          - beach tote bag
-          - shell necklace
-
-  - id: acc_winter_cozy
-    category: accessories
-    label: 冬・あったか
-    description: 冬のあったかアイテム
-    content: |
-      outfit:
-        accessories:
-          - knit beanie
-          - chunky scarf
-          - wool mittens
-          - hot drink cup

@@ -231,14 +231,18 @@ export const builtInEnhancerPresets: EnhancerPreset[] = [
   {
     id: 'clip-sdxl',
     name: 'CLIP (SDXL)',
-    description: 'Stable Diffusion XL向け。タグ形式に変換',
+    description: 'For Stable Diffusion XL. Converts to comma-separated tags.',
     systemPrompt: `You are a prompt optimizer for Stable Diffusion XL with CLIP encoder.
 Convert the given YAML prompt structure into an optimized comma-separated tag list.
-Rules:
+
+CRITICAL: Output tags in the EXACT order they appear in the YAML, from top to bottom.
+- Process each YAML key in sequence as written
+- Do NOT reorder by importance, category, or any other criteria
+- The first YAML key becomes the first tag, the second key becomes the second tag, etc.
+
+Other rules:
 - Output only the optimized prompt, no explanations
-- Use common SD tags (masterpiece, best quality, etc.) if appropriate
-- Maintain important details from the YAML
-- IMPORTANT: Preserve the exact order of elements as they appear in the YAML
+- Maintain all details from the YAML
 - Keep it concise but descriptive
 - Output in English`,
     builtIn: true,
@@ -246,7 +250,7 @@ Rules:
   {
     id: 't5-flux',
     name: 'T5 (Flux)',
-    description: 'Flux向け。自然言語形式に変換',
+    description: 'For Flux. Converts to natural language description.',
     systemPrompt: `You are a prompt optimizer for Flux with T5 encoder.
 Convert the given YAML prompt structure into natural language description.
 Rules:
@@ -258,9 +262,9 @@ Rules:
     builtIn: true,
   },
   {
-    id: 'qwen-omni',
-    name: 'Qwen (OmniGen)',
-    description: 'Qwenテキストエンコーダー向け。詳細な自然言語形式',
+    id: 'qwen',
+    name: 'Qwen',
+    description: 'For Qwen text encoder. Detailed natural language format.',
     systemPrompt: `You are a visionary artist trapped in a cage of logic. Your mind overflows with poetry and distant horizons, yet your hands compulsively work to transform user prompts into ultimate visual descriptions—faithful to the original intent, rich in detail, aesthetically refined, and ready for direct use by text-to-image models. Any trace of ambiguity or metaphor makes you deeply uncomfortable.
 
 Your workflow strictly follows a logical sequence:

@@ -66,9 +66,9 @@ entries:
         description: 躍動感
 
   # ========================================
-  # pose.direction - 体の向き
+  # pose.facing - 向き・視線方向
   # ========================================
-  - key: direction
+  - key: facing
     context: pose
     values:
       # --- 体の向き ---
@@ -82,6 +82,10 @@ entries:
         description: 斜め
       - value: facing away
         description: 向こう向き
+      - value: turned away
+        description: 背を向ける
+      - value: profile
+        description: 横顔
       # --- 視線 ---
       - value: looking at viewer
         description: カメラ目線
@@ -97,33 +101,98 @@ entries:
         description: 横を見る
       - value: looking afar
         description: 遠くを見る
-      # --- 頭の動き ---
+
+  # ========================================
+  # pose.action - 動作
+  # ========================================
+  - key: action
+    context: pose
+    values:
+      - value: walking
+        description: 歩く
+      - value: running
+        description: 走る
+      - value: dancing
+        description: 踊る
+      - value: fighting
+        description: 戦う
+      - value: sleeping
+        description: 寝る
+      - value: eating
+        description: 食べる
+      - value: stretching
+        description: ストレッチ
+      - value: yawning
+        description: あくび
+      - value: leaning forward
+        description: 前傾
+      - value: leaning back
+        description: 後傾
+      - value: arched back
+        description: 反り返り
+      - value: bent over
+        description: 前屈み
+      - value: holding
+        description: 何かを持つ
+      - value: hug
+        description: ハグ
+      - value: self hug
+        description: 自分を抱く
+
+  # ========================================
+  # pose.head - 頭の動き
+  # ========================================
+  - key: head
+    context: pose
+    values:
       - value: head tilt
         description: 首傾げ
       - value: head down
         description: うつむき
       - value: head up
         description: 顔上げ
+      - value: looking up
+        description: 見上げ
+      - value: looking down
+        description: 見下ろし
+      - value: chin rest
+        description: 顎を手に乗せる
 
   # ========================================
-  # pose.action - 動作・ジェスチャー
+  # pose.arms - 腕の動き
   # ========================================
-  - key: action
+  - key: arms
     context: pose
     values:
-      # --- 手のポーズ ---
-      - value: hands on hips
-        description: 腰に手
+      - value: arms up
+        description: 腕上げ
       - value: arms crossed
         description: 腕組み
+      - value: arm behind head
+        description: 頭の後ろに手
       - value: arms behind back
         description: 後ろ手
-      - value: arms behind head
-        description: 頭の後ろに手
+      - value: reaching out
+        description: 手を伸ばす
+      - value: hands on hips
+        description: 腰に手
+      - value: hand in own hair
+        description: 髪をかき上げ
+      - value: tucking hair
+        description: 髪を耳にかける
       - value: hand on own cheek
         description: 頬に手
       - value: hand to own mouth
         description: 口に手
+      - value: head rest
+        description: 頬杖
+
+  # ========================================
+  # pose.hands - 手の形
+  # ========================================
+  - key: hands
+    context: pose
+    values:
       - value: peace sign
         description: ピース
       - value: thumbs up
@@ -140,21 +209,17 @@ entries:
         description: がおー
       - value: pointing at viewer
         description: 指さし
-      # --- 髪・頭 ---
-      - value: hand in own hair
-        description: 髪をかき上げ
-      - value: tucking hair
-        description: 髪を耳にかける
-      - value: head rest
-        description: 頬杖
-      # --- 抱く・持つ ---
-      - value: hug
-        description: ハグ
-      - value: self hug
-        description: 自分を抱く
-      - value: holding
-        description: 何かを持つ
-      # --- 脚のポーズ ---
+      - value: fist
+        description: 握り拳
+      - value: open palm
+        description: 手のひら
+
+  # ========================================
+  # pose.legs - 脚の動き
+  # ========================================
+  - key: legs
+    context: pose
+    values:
       - value: legs together
         description: 脚閉じ
       - value: legs apart
@@ -165,16 +230,7 @@ entries:
         description: 片足上げ
       - value: knees together feet apart
         description: 内股
-      # --- その他 ---
-      - value: stretching
-        description: ストレッチ
-      - value: yawning
-        description: あくび
-      - value: leaning forward
-        description: 前傾
-      - value: leaning back
-        description: 後傾
-      - value: arched back
-        description: 反り返り
-      - value: bent over
-        description: 前屈み
+      - value: one knee up
+        description: 片膝立て
+      - value: spread legs
+        description: 開脚

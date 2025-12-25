@@ -2,6 +2,42 @@
 
 entries:
   # ========================================
+  # world - 世界観
+  # ========================================
+  - key: world
+    context: environment
+    values:
+      # --- 基本 ---
+      - value: modern
+        description: 現代
+      - value: fantasy
+        description: ファンタジー
+      - value: sci-fi
+        description: SF
+      - value: historical
+        description: 歴史
+      # --- SF・ファンタジー ---
+      - value: cyberpunk
+        description: サイバーパンク
+      - value: steampunk
+        description: スチームパンク
+      - value: dystopian
+        description: ディストピア
+      - value: post-apocalyptic
+        description: ポストアポカリプス
+      # --- 時代 ---
+      - value: medieval
+        description: 中世
+      - value: victorian
+        description: ヴィクトリアン
+      - value: 1920s
+        description: 1920年代
+      - value: 1950s
+        description: 1950年代
+      - value: 1980s
+        description: 1980年代
+
+  # ========================================
   # background - 背景
   # ========================================
   - key: background
@@ -478,88 +514,6 @@ entries:
         description: 空中
       - value: fantasy world
         description: ファンタジー世界
-
-  # ========================================
-  # setting - シーン設定・雰囲気
-  # ========================================
-  - key: setting
-    context: environment
-    values:
-      # --- 建築スタイル ---
-      - value: modern
-        description: モダン
-      - value: contemporary
-        description: コンテンポラリー
-      - value: minimalist
-        description: ミニマリスト
-      - value: industrial
-        description: インダストリアル
-      - value: rustic
-        description: ラスティック
-      - value: vintage
-        description: ヴィンテージ
-      - value: retro
-        description: レトロ
-      - value: classic
-        description: クラシック
-      - value: elegant
-        description: エレガント
-      - value: luxurious
-        description: 豪華
-      - value: cozy
-        description: 居心地の良い
-      - value: urban
-        description: アーバン
-      - value: suburban
-        description: 郊外
-      # --- 文化・地域 ---
-      - value: east asian architecture
-        description: 東アジア風建築
-      - value: gothic architecture
-        description: ゴシック建築
-      - value: greco-roman architecture
-        description: 古代ローマ風建築
-      # --- 雰囲気 ---
-      - value: romantic
-        description: ロマンチック
-      - value: mysterious
-        description: ミステリアス
-      - value: dramatic
-        description: ドラマチック
-      - value: serene
-        description: 静謐
-      - value: vibrant
-        description: 活気ある
-      - value: peaceful
-        description: 平和
-      - value: chaotic
-        description: 混沌
-      - value: ethereal
-        description: 幻想的
-      # --- SF・ファンタジー ---
-      - value: futuristic
-        description: 未来的
-      - value: dystopian
-        description: ディストピア
-      - value: cyberpunk
-        description: サイバーパンク
-      - value: steampunk
-        description: スチームパンク
-      - value: wasteland
-        description: 荒廃地
-      # --- 時代 ---
-      - value: historical
-        description: 歴史的
-      - value: medieval
-        description: 中世
-      - value: victorian
-        description: ヴィクトリアン
-      - value: 1920s art deco
-        description: 1920年代アールデコ
-      - value: 1950s
-        description: 1950年代
-      - value: 1980s
-        description: 1980年代
 
   # ========================================
   # time - 時間帯

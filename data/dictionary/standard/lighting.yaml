@@ -1,45 +1,38 @@
 # lighting関連の辞書
 
 entries:
-  # lighting.style - ライティングスタイル
-  - key: style
+  # ========================================
+  # lighting.base - 雰囲気
+  # ========================================
+  - key: base
     context: lighting
     values:
-      - value: low-key
-        description: 暗め、コントラスト強
-      - value: high-key
-        description: 明るめ、影少なめ
       - value: natural
         description: 自然光風
+      - value: professional
+        description: プロフェッショナル
       - value: dramatic
         description: ドラマチック
       - value: soft
         description: ソフト
-      - value: harsh
-        description: ハード
+      - value: studio
+        description: スタジオ照明
       - value: moody
         description: ムーディー
       - value: cinematic
         description: 映画的
 
-  # lighting.type - ライトタイプ
-  - key: type
+  # ========================================
+  # lighting.source - 光源
+  # ========================================
+  - key: source
     context: lighting
     values:
-      - value: soft diffused light
-        description: ソフト拡散光
-      - value: directional light
-        description: 指向性光
-      - value: hard directional light
-        description: ハード指向性光
-      - value: rim light
-        description: リムライト（輪郭光）
-      - value: backlight
-        description: バックライト（逆光）
-      - value: ambient light
-        description: 環境光
-      - value: spotlight
-        description: スポットライト
+      # --- 自然光 ---
+      - value: sunlight
+        description: 太陽光
+      - value: moonlight
+        description: 月光
       - value: natural daylight
         description: 自然光（昼）
       - value: golden hour
@@ -48,47 +41,85 @@ entries:
         description: ブルーアワー
       - value: overcast
         description: 曇り空の光
+      # --- 人工光 ---
       - value: window light
         description: 窓からの光
       - value: neon light
         description: ネオン光
       - value: candlelight
         description: キャンドルライト
+      - value: spotlight
+        description: スポットライト
+      - value: fluorescent
+        description: 蛍光灯
+      - value: street light
+        description: 街灯
+      - value: fire light
+        description: 焚き火の光
 
-  # lighting.color - ライト色
+  # ========================================
+  # lighting.technique - 技法
+  # ========================================
+  - key: technique
+    context: lighting
+    values:
+      - value: high-key
+        description: 明るめ、影少なめ
+      - value: low-key
+        description: 暗め、コントラスト強
+      - value: Rembrandt
+        description: レンブラント照明
+      - value: split lighting
+        description: スプリットライティング
+      - value: butterfly lighting
+        description: バタフライライティング
+      - value: rim light
+        description: リムライト（輪郭光）
+      - value: backlight
+        description: バックライト（逆光）
+      - value: three-point lighting
+        description: 三点照明
+      - value: silhouette
+        description: シルエット
+
+  # ========================================
+  # lighting.color - 色温度
+  # ========================================
   - key: color
     context: lighting
     values:
-      - value: warm white
-        description: 暖白色
-      - value: cool white
-        description: 冷白色
-      - value: neutral
-        description: ニュートラル
+      - value: warm
+        description: 暖色
+      - value: cool
+        description: 寒色
       - value: golden
         description: ゴールデン
+      - value: blue hour
+        description: ブルーアワー
+      - value: neutral
+        description: ニュートラル
       - value: amber
         description: アンバー
       - value: cyan
         description: シアン
       - value: magenta
         description: マゼンタ
-      - value: orange
-        description: オレンジ
-      - value: blue
-        description: ブルー
 
-  # lighting.shadow - 影の表現
+  # ========================================
+  # lighting.shadow - 影
+  # ========================================
   - key: shadow
     context: lighting
     values:
-      - value: soft shadows
+      - value: soft shadow
         description: ソフトな影
-      - value: hard shadows
+      - value: hard shadow
         description: ハードな影
-      - value: minimal shadows
-        description: 影最小限
+      - value: no shadow
+        description: 影なし
+      - value: rim light
+        description: 輪郭光
       - value: deep shadows
         description: 深い影
-      - value: no shadows
-        description: 影なし
+      - value: minimal shadows
+        description: 影最小限

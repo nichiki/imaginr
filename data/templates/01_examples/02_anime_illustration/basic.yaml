@@ -1,0 +1,39 @@
+# animagine-xl-4.0
+
+subject: 1girl, solo
+
+rating: safe
+
+temporal: year 2020
+
+pose:
+  base: looking up
+
+expression:
+  type: light smile
+
+appearance:
+  hair:
+    color: silver hair
+    length: long hair
+    style: low ponytail
+  eyes:
+    color: blue eyes
+
+outfit:
+  dress: orange camisole dress
+
+composition:
+  - from side
+  - three quarter
+
+aesthetic: anime coloring
+
+effects:
+  - depth of field
+
+quality:
+  - masterpiece
+  - high score
+  - great score
+  - absurdres

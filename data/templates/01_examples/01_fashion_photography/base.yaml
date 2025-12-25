@@ -9,9 +9,9 @@ demographics:
 
 appearance:
   hair:
-    length: long hair
-    style: straight hair
-    color: chestnut hair
+    length: ${hair_length|long hair}
+    style: ${hair_style|straight hair}
+    color: ${hair_color|chestnut hair}
     extras:
       - silky
       - natural flow

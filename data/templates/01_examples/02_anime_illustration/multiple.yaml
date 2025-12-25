@@ -1,0 +1,37 @@
+# animagine-xl-4.0
+
+subject: 2girls
+
+rating: safe
+
+temporal: year 2020
+
+character_1:
+  demographics:
+    age: young
+  appearance:
+    hair:
+      color: blonde
+  pose:
+    base: standing
+  outfit:
+    costume: schoolgirl
+
+character_2:
+  demographics:
+    age: young
+  appearance:
+    hair:
+      color: teal
+  pose:
+    base: sitting
+  outfit:
+    costume: idol
+
+interaction: holding hands, looking at each other
+
+quality:
+  - masterpiece
+  - high score
+  - great score
+  - absurdres

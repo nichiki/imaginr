@@ -1,17 +1,22 @@
-# 構図・フレーミング
+# composition関連の辞書
+
 entries:
-  - key: composition
-    context: "*"
+  # ========================================
+  # composition.shot - 切り取り範囲
+  # ========================================
+  - key: shot
+    context: composition
     values:
-      # 人物向け構図
       - value: headshot
         description: 顔のみ
-      - value: close up
+      - value: close-up
         description: 顔〜首
       - value: bust shot
         description: 胸上
       - value: portrait
         description: 頭〜上半身
+      - value: upper body
+        description: 上半身
       - value: medium shot
         description: 腰上
       - value: cowboy shot
@@ -20,30 +25,53 @@ entries:
         description: 膝上
       - value: full body
         description: 全身
-      # 一般構図
       - value: wide shot
         description: 被写体＋周囲環境
       - value: extreme wide shot
         description: 風景主体
+
+  # ========================================
+  # composition.angle - カメラアングル
+  # ========================================
+  - key: angle
+    context: composition
+    values:
+      - value: eye level
+        description: 目線の高さ
+      - value: from above
+        description: 上から
+      - value: from below
+        description: 下から
+      - value: high angle
+        description: フカン（見下ろし）
+      - value: low angle
+        description: アオリ（見上げ）
+      - value: dutch angle
+        description: 傾き構図
       - value: overhead
         description: 真上から
       - value: birds eye view
         description: 高所から斜め下
       - value: worms eye view
         description: 低所から見上げ
-      - value: dutch angle
-        description: 傾き構図
-      - value: low angle
-        description: アオリ（見上げ）
-      - value: high angle
-        description: フカン（見下ろし）
-      - value: eye level
-        description: 目線の高さ
-      - value: symmetrical
-        description: 左右対称
+
+  # ========================================
+  # composition.method - 構図技法
+  # ========================================
+  - key: method
+    context: composition
+    values:
       - value: rule of thirds
         description: 三分割法
       - value: centered
         description: 中央配置
+      - value: symmetrical
+        description: 左右対称
+      - value: golden ratio
+        description: 黄金比
       - value: diagonal
         description: 対角線配置
+      - value: leading lines
+        description: 導線
+      - value: framing
+        description: フレーミング
