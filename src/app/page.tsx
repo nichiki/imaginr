@@ -56,7 +56,7 @@ import {
 import { VariableForm } from '@/components/variable-form';
 import { TabBar } from '@/components/tab-bar';
 import { Button } from '@/components/ui/button';
-import { Settings, FileText, PanelTop, PanelBottom, Rows2 } from 'lucide-react';
+import { Settings, FileText, PanelTop, PanelBottom, Rows2, Save } from 'lucide-react';
 import { initializeAppData } from '@/lib/init-data';
 
 // 全フォルダのパスを収集
@@ -1544,9 +1544,16 @@ export default function Home() {
       <header className="h-10 flex-shrink-0 bg-[#2d2d2d] flex items-center justify-between px-4 border-b border-[#333]">
         <div className="flex items-center gap-4">
           <h1 className="text-sm font-medium text-white">Imaginr</h1>
-          <span className="text-xs text-[#888]">
-            {t('header.save')}
-          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-7 px-2 text-[#888] hover:text-white hover:bg-[#3c3c3c] disabled:opacity-50"
+            onClick={handleSave}
+            disabled={!isCurrentFileDirty || isSaving}
+            title={t('common.save')}
+          >
+            <Save className="h-4 w-4" />
+          </Button>
           {isCurrentFileDirty && (
             <span className="text-xs text-amber-400">● {t('header.unsaved')}</span>
           )}
