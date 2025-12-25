@@ -240,10 +240,13 @@ YAML → (Ollama LLM) → 自然言語プロンプト → ComfyUI → 画像生�
    - 調査結果を報告し、対応方針を相談する
    - 行き当たりばったりの対応は禁止
 
-4. **許容している警告**
-   - `@next/next/no-img-element`: ComfyUI画像表示で`<img>`を使用（外部URLのためnext/imageは使用不可）
-
 ## ESLint注意事項
+
+### 無効化しているルール
+
+`eslint.config.mjs`で以下のルールを無効化している：
+
+- **`@next/next/no-img-element`**: Tauri環境ではNext.jsのサーバーサイド画像最適化が機能しないため、`<img>`要素の使用を許可。ComfyUIからの画像URLは動的で、`next/image`の`unoptimized`プロップを使っても対応が煩雑になるため、シンプルに`<img>`を使用する方針とした。
 
 ### カスタムフック抽出時のルール厳格化
 

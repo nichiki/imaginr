@@ -15,6 +15,14 @@ const eslintConfig = defineConfig([
     // Tauri build artifacts:
     "src-tauri/target/**",
   ]),
+  // Tauri + Next.js specific rule overrides
+  {
+    rules: {
+      // Tauri環境ではNext.jsのサーバーサイド画像最適化が使えないため、
+      // <img>要素の使用を許可する
+      "@next/next/no-img-element": "off",
+    },
+  },
 ]);
 
 export default eslintConfig;
