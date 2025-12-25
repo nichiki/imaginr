@@ -88,7 +88,14 @@
   "dialog": {
     "unsavedChanges": "未保存の変更があります。保存せずに閉じますか？",
     "confirmDelete": "削除しますか？",
-    "confirmDeleteImage": "この画像を削除しますか？"
+    "confirmDeleteImage": "この画像を削除しますか？",
+    "confirmDeleteFile": "\"{{path}}\" を削除しますか？",
+    "confirmDeleteFolder": "フォルダ \"{{path}}\" とその中身をすべて削除しますか？"
+  },
+  "main": {
+    "noWorkflowSelected": "ワークフローが選択されていません",
+    "openFile": "ファイルを開いてください",
+    "selectFromTree": "左のファイルツリーからファイルを選択"
   },
   "prompt": {
     "tab": "プロンプト",
@@ -186,7 +193,8 @@
     "manage": "辞書管理",
     "manageDescription": "オートコンプリート辞書を管理",
     "noValues": "値がありません",
-    "addValue": "値を追加"
+    "addValue": "値を追加",
+    "empty": "辞書が空です"
   },
   "settings": {
     "title": "設定",
@@ -233,12 +241,22 @@
     }
   },
   "workflow": {
+    "title": "ワークフロー設定",
+    "displayName": "表示名",
+    "file": "ファイル",
+    "promptNode": "プロンプトノード",
+    "samplerNode": "サンプラーノード",
+    "negativeNode": "ネガティブプロンプトノード (任意)",
     "nodeId": "ノードID (例: 6)",
     "promptProperty": "プロパティ (default: text)",
     "samplerNodeId": "ノードID (例: 3)",
     "seedProperty": "プロパティ (default: seed)",
     "negativeNodeId": "ノードID (未設定時は無視)",
-    "negativeProperty": "プロパティ (default: text)"
+    "negativeProperty": "プロパティ (default: text)",
+    "negativeHint": "YAMLの「negative」キーの内容がこのノードに送られます",
+    "overrides": "プロパティ上書き",
+    "overridesHint": "ノードのプロパティを上書きする設定を追加できます",
+    "overridesExample": "例: NodeID=5, property=width, value=1024"
   },
   "enhancer": {
     "presets": {

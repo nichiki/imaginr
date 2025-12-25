@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronRight, ChevronDown, Folder, Key } from 'lucide-react';
 import type { DictionaryTreeNode } from '@/lib/dictionary-db-api';
 
@@ -17,6 +18,7 @@ export function DictionaryContextTree({
   selectedKey,
   onSelectKey,
 }: DictionaryContextTreeProps) {
+  const { t } = useTranslation();
   const [expandedContexts, setExpandedContexts] = useState<Set<string>>(
     () => new Set(nodes.map((n) => n.context))
   );
@@ -36,7 +38,7 @@ export function DictionaryContextTree({
   if (nodes.length === 0) {
     return (
       <div className="p-4 text-center text-[#888] text-sm">
-        辞書が空です
+        {t('dictionary.empty')}
       </div>
     );
   }

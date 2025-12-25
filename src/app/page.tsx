@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileTree } from '@/components/file-tree';
 import { SnippetPanel } from '@/components/snippet-panel';
 import { PromptPanel, type PromptTab, type PromptSubTab } from '@/components/prompt-panel';
@@ -103,6 +104,8 @@ function findFirstFile(items: FileTreeItem[], preferFolder?: string): string | n
 }
 
 export default function Home() {
+  const { t } = useTranslation();
+
   // ファイルツリー
   const [fileTree, setFileTree] = useState<FileTreeItem[]>([]);
   // ファイル内容のキャッシュ
@@ -480,7 +483,7 @@ export default function Home() {
 
     const activeWorkflow = getActiveWorkflow(comfySettings);
     if (!activeWorkflow) {
-      setGenerationError('ワークフローが選択されていません');
+      setGenerationError(t('main.noWorkflowSelected'));
       return;
     }
 
@@ -613,7 +616,7 @@ export default function Home() {
     } finally {
       setIsGenerating(false);
     }
-  }, [comfySettings, ollamaSettings, mergedYamlForPrompt, enhanceEnabled, enhancedPrompt, resolvedNegativePrompt, overrideValues]);
+  }, [comfySettings, ollamaSettings, mergedYamlForPrompt, enhanceEnabled, enhancedPrompt, resolvedNegativePrompt, overrideValues, t]);
 
   // 生成可能かどうか
   const canGenerate = useMemo(() => {
@@ -768,8 +771,8 @@ export default function Home() {
     if (dirtyFiles.has(path)) {
       const { showConfirm } = await import('@/lib/dialog');
       const confirmed = await showConfirm(
-        '未保存の変更があります。保存せずに閉じますか？',
-        { okLabel: '閉じる' }
+        t('dialog.unsavedChanges'),
+        { okLabel: t('common.close') }
       );
       if (!confirmed) return;
     }
@@ -812,7 +815,7 @@ export default function Home() {
     if (initialized.current) {
       saveState({ openTabs: newTabs, activeTab: newActiveTab });
     }
-  }, [openTabs, activeTab, dirtyFiles]);
+  }, [openTabs, activeTab, dirtyFiles, t]);
 
   // タブ並び替えハンドラ
   const handleReorderTabs = useCallback((newTabs: string[]) => {
@@ -895,7 +898,7 @@ export default function Home() {
     // 未保存の確認
     if (dirtyFiles.has(path)) {
       const { showConfirm } = await import('@/lib/dialog');
-      const result = await showConfirm('未保存の変更があります。保存せずに閉じますか？');
+      const result = await showConfirm(t('dialog.unsavedChanges'));
       if (!result) return;
     }
     const newTabs = rightTabs.filter((t) => t !== path);
@@ -914,7 +917,7 @@ export default function Home() {
         saveState({ rightTabs: newTabs, activeRightTab: newActive });
       }
     }
-  }, [rightTabs, activeRightTab, dirtyFiles]);
+  }, [rightTabs, activeRightTab, dirtyFiles, t]);
 
   // フォルダ開閉ハンドラ
   const handleToggleFolder = useCallback((path: string) => {
@@ -952,9 +955,9 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to create file:', error);
       const { showError } = await import('@/lib/dialog');
-      await showError('ファイルの作成に失敗しました');
+      await showError(t('fileTree.createFileFailed'));
     }
-  }, [openTabs]);
+  }, [openTabs, t]);
 
   // フォルダ作成ハンドラ
   const handleCreateFolder = useCallback(async (path: string) => {
@@ -975,14 +978,14 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to create folder:', error);
       const { showError } = await import('@/lib/dialog');
-      await showError('フォルダの作成に失敗しました');
+      await showError(t('fileTree.createFolderFailed'));
     }
-  }, []);
+  }, [t]);
 
   // ファイル削除ハンドラ
   const handleDeleteFile = useCallback(async (path: string) => {
     const { showConfirm } = await import('@/lib/dialog');
-    if (!await showConfirm(`"${path}" を削除しますか？`)) return;
+    if (!await showConfirm(t('dialog.confirmDeleteFile', { path }))) return;
 
     try {
       await fileAPI.deleteFile(path);
@@ -1031,9 +1034,9 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to delete file:', error);
       const { showError } = await import('@/lib/dialog');
-      await showError('ファイルの削除に失敗しました');
+      await showError(t('fileTree.deleteFileFailed'));
     }
-  }, [openTabs, activeTab]);
+  }, [openTabs, activeTab, t]);
 
   // ファイル/フォルダ移動ハンドラ
   const handleMoveFile = useCallback(async (from: string, to: string) => {
@@ -1140,14 +1143,14 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to move file:', error);
       const { showError } = await import('@/lib/dialog');
-      await showError(error instanceof Error ? error.message : 'ファイルの移動に失敗しました');
+      await showError(error instanceof Error ? error.message : t('fileTree.moveFailed'));
     }
-  }, [openTabs, activeTab]);
+  }, [openTabs, activeTab, t]);
 
   // フォルダ削除ハンドラ
   const handleDeleteFolder = useCallback(async (path: string) => {
     const { showConfirm } = await import('@/lib/dialog');
-    if (!await showConfirm(`フォルダ "${path}" とその中身をすべて削除しますか？`)) return;
+    if (!await showConfirm(t('dialog.confirmDeleteFolder', { path }))) return;
 
     try {
       await fileAPI.deleteFolder(path);
@@ -1218,9 +1221,9 @@ export default function Home() {
     } catch (error) {
       console.error('Failed to delete folder:', error);
       const { showError } = await import('@/lib/dialog');
-      await showError('フォルダの削除に失敗しました');
+      await showError(t('fileTree.deleteFolderFailed'));
     }
-  }, [openTabs, activeTab]);
+  }, [openTabs, activeTab, t]);
 
   // 参照検索ハンドラ
   const handleFindReferences = useCallback(async (path: string): Promise<string[]> => {
@@ -1542,13 +1545,13 @@ export default function Home() {
         <div className="flex items-center gap-4">
           <h1 className="text-sm font-medium text-white">Imaginr</h1>
           <span className="text-xs text-[#888]">
-            Ctrl+S: 保存
+            {t('header.save')}
           </span>
           {isCurrentFileDirty && (
-            <span className="text-xs text-amber-400">● 未保存</span>
+            <span className="text-xs text-amber-400">● {t('header.unsaved')}</span>
           )}
           {isSaving && (
-            <span className="text-xs text-blue-400">保存中...</span>
+            <span className="text-xs text-blue-400">{t('header.saving')}</span>
           )}
         </div>
         <div className="flex items-center gap-1">
@@ -1558,7 +1561,7 @@ export default function Home() {
             size="sm"
             className={`h-7 w-7 p-0 hover:bg-[#3c3c3c] ${layoutMode === 'upper' ? 'text-white bg-[#3c3c3c]' : 'text-[#888] hover:text-white'}`}
             onClick={() => setLayoutMode(layoutMode === 'upper' ? 'full' : 'upper')}
-            title="上段のみ"
+            title={t('header.layoutUpper')}
           >
             <PanelBottom className="h-4 w-4" />
           </Button>
@@ -1567,7 +1570,7 @@ export default function Home() {
             size="sm"
             className={`h-7 w-7 p-0 hover:bg-[#3c3c3c] ${layoutMode === 'lower' ? 'text-white bg-[#3c3c3c]' : 'text-[#888] hover:text-white'}`}
             onClick={() => setLayoutMode(layoutMode === 'lower' ? 'full' : 'lower')}
-            title="下段のみ"
+            title={t('header.layoutLower')}
           >
             <PanelTop className="h-4 w-4" />
           </Button>
@@ -1576,7 +1579,7 @@ export default function Home() {
             size="sm"
             className={`h-7 w-7 p-0 hover:bg-[#3c3c3c] ${layoutMode === 'full' ? 'text-white bg-[#3c3c3c]' : 'text-[#888] hover:text-white'}`}
             onClick={() => setLayoutMode('full')}
-            title="全表示"
+            title={t('header.layoutFull')}
           >
             <Rows2 className="h-4 w-4" />
           </Button>
@@ -1586,7 +1589,7 @@ export default function Home() {
             size="sm"
             className="h-7 w-7 p-0 text-[#888] hover:text-white hover:bg-[#3c3c3c]"
             onClick={() => setSettingsOpen(true)}
-            title="設定"
+            title={t('header.settings')}
           >
             <Settings className="h-4 w-4" />
           </Button>
@@ -1673,9 +1676,9 @@ export default function Home() {
                 <div className="flex items-center justify-center h-full text-gray-500">
                   <div className="text-center">
                     <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                    <p>ファイルを開いてください</p>
+                    <p>{t('main.openFile')}</p>
                     <p className="text-sm mt-2 opacity-75">
-                      左のファイルツリーからファイルを選択
+                      {t('main.selectFromTree')}
                     </p>
                   </div>
                 </div>
@@ -1741,7 +1744,7 @@ export default function Home() {
                   <div className="flex items-center justify-center h-full text-gray-500">
                     <div className="text-center">
                       <FileText className="h-12 w-12 mx-auto mb-4 opacity-50" />
-                      <p>ファイルを開いてください</p>
+                      <p>{t('main.openFile')}</p>
                     </div>
                   </div>
                 )}

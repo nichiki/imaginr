@@ -88,7 +88,14 @@
   "dialog": {
     "unsavedChanges": "You have unsaved changes. Close without saving?",
     "confirmDelete": "Are you sure you want to delete this?",
-    "confirmDeleteImage": "Delete this image?"
+    "confirmDeleteImage": "Delete this image?",
+    "confirmDeleteFile": "Delete \"{{path}}\"?",
+    "confirmDeleteFolder": "Delete folder \"{{path}}\" and all its contents?"
+  },
+  "main": {
+    "noWorkflowSelected": "No workflow selected",
+    "openFile": "Please open a file",
+    "selectFromTree": "Select a file from the file tree on the left"
   },
   "prompt": {
     "tab": "Prompt",
@@ -186,7 +193,8 @@
     "manage": "Manage Dictionary",
     "manageDescription": "Manage autocomplete dictionary",
     "noValues": "No values",
-    "addValue": "Add Value"
+    "addValue": "Add Value",
+    "empty": "Dictionary is empty"
   },
   "settings": {
     "title": "Settings",
@@ -233,12 +241,22 @@
     }
   },
   "workflow": {
+    "title": "Workflow Settings",
+    "displayName": "Display Name",
+    "file": "File",
+    "promptNode": "Prompt Node",
+    "samplerNode": "Sampler Node",
+    "negativeNode": "Negative Prompt Node (optional)",
     "nodeId": "Node ID (e.g., 6)",
     "promptProperty": "Property (default: text)",
     "samplerNodeId": "Node ID (e.g., 3)",
     "seedProperty": "Property (default: seed)",
     "negativeNodeId": "Node ID (optional)",
-    "negativeProperty": "Property (default: text)"
+    "negativeProperty": "Property (default: text)",
+    "negativeHint": "Content from YAML \"negative\" key will be sent to this node",
+    "overrides": "Property Overrides",
+    "overridesHint": "Add settings to override node properties",
+    "overridesExample": "Example: NodeID=5, property=width, value=1024"
   },
   "enhancer": {
     "presets": {
