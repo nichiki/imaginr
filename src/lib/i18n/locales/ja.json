@@ -1,0 +1,149 @@
+{
+  "common": {
+    "save": "保存",
+    "cancel": "キャンセル",
+    "close": "閉じる",
+    "delete": "削除",
+    "add": "追加",
+    "edit": "編集",
+    "copy": "コピー",
+    "rename": "名前変更",
+    "create": "作成",
+    "test": "テスト",
+    "search": "検索...",
+    "loading": "読み込み中...",
+    "saving": "保存中...",
+    "unsaved": "未保存",
+    "confirm": "確認",
+    "ok": "OK",
+    "error": "エラー",
+    "info": "情報",
+    "warning": "警告",
+    "duplicate": "複製",
+    "export": "エクスポート",
+    "import": "インポート",
+    "replace": "置き換え",
+    "merge": "マージ",
+    "download": "ダウンロード",
+    "openFolder": "フォルダを開く",
+    "selectFile": "ファイルを選択...",
+    "readOnly": "(読み取り専用)"
+  },
+  "header": {
+    "save": "Ctrl+S: 保存",
+    "unsaved": "未保存",
+    "saving": "保存中...",
+    "layoutUpper": "上段のみ",
+    "layoutLower": "下段のみ",
+    "layoutFull": "全表示",
+    "settings": "設定"
+  },
+  "fileTree": {
+    "files": "ファイル",
+    "newFile": "新規ファイル",
+    "newFolder": "新規フォルダ",
+    "splitRight": "右に分割して開く",
+    "deleteFolder": "フォルダを削除",
+    "inFolder": "フォルダ: {{folder}}",
+    "renameFile": "ファイル名を変更",
+    "renameFolder": "フォルダ名を変更",
+    "referencesFound": "参照が見つかりました",
+    "referencedBy": "このファイルは{{count}}個のファイルから参照されています:",
+    "updateReferencesQuestion": "参照を自動的に更新しますか？",
+    "checking": "確認中...",
+    "renaming": "名前変更中...",
+    "renameOnly": "名前のみ変更",
+    "updateReferences": "参照を更新",
+    "updating": "更新中...",
+    "invalidChars": "使用できない文字が含まれています: / \\ : * ? \" < > |",
+    "dotPrefix": "ファイル名は . で始められません",
+    "renameFailed": "リネームに失敗しました",
+    "createFileFailed": "ファイルの作成に失敗しました",
+    "createFolderFailed": "フォルダの作成に失敗しました",
+    "deleteFileFailed": "ファイルの削除に失敗しました",
+    "deleteFolderFailed": "フォルダの削除に失敗しました",
+    "moveFailed": "ファイルの移動に失敗しました"
+  },
+  "tabBar": {
+    "close": "閉じる",
+    "splitRight": "右に分割して開く"
+  },
+  "editor": {
+    "addToDictionary": "辞書に追加"
+  },
+  "dialog": {
+    "unsavedChanges": "未保存の変更があります。保存せずに閉じますか？",
+    "confirmDelete": "削除しますか？",
+    "confirmDeleteImage": "この画像を削除しますか？"
+  },
+  "generation": {
+    "noWorkflow": "ワークフローが選択されていません",
+    "generate": "生成",
+    "generating": "生成中...",
+    "enhance": "エンハンス",
+    "enhancing": "エンハンス中..."
+  },
+  "gallery": {
+    "noPrompt": "(プロンプトなし)",
+    "sortNewest": "新しい順",
+    "sortOldest": "古い順",
+    "selectionMode": "選択モード"
+  },
+  "snippets": {
+    "saveFailed": "スニペットの保存に失敗しました",
+    "deleteFailed": "スニペットの削除に失敗しました"
+  },
+  "dictionary": {
+    "value": "値",
+    "description": "説明（任意）",
+    "addToDictionary": "辞書に追加",
+    "allFieldsRequired": "すべての必須項目を入力してください",
+    "alreadyExists": "この値は既に登録されています",
+    "addFailed": "辞書への追加に失敗しました",
+    "updateFailed": "値の更新に失敗しました",
+    "deleteFailed": "値の削除に失敗しました",
+    "confirmDelete": "この値を削除しますか？",
+    "createKeyFailed": "キーの作成に失敗しました",
+    "exportSuccess": "辞書をエクスポートしました",
+    "exportFailed": "エクスポートに失敗しました",
+    "importFailed": "インポートに失敗しました",
+    "importMethod": "インポート方法を選択してください:\n\n「OK」= 既存データを全て置き換え\n「キャンセル」= 既存データにマージ",
+    "keyName": "キー名",
+    "contextPlaceholder": "* または hair など",
+    "keyPlaceholder": "color, style など"
+  },
+  "settings": {
+    "title": "設定",
+    "data": "データ",
+    "addWorkflow": "追加...",
+    "addPreset": "追加...",
+    "selectModel": "モデルを選択",
+    "loadingModels": "読み込み中...",
+    "presetDescription": "プリセットの説明",
+    "systemPromptPlaceholder": "システムプロンプトを入力...",
+    "saveFailed": "設定の保存に失敗しました",
+    "invalidJson": "無効なJSONファイルです",
+    "language": "言語"
+  },
+  "workflow": {
+    "nodeId": "ノードID (例: 6)",
+    "promptProperty": "プロパティ (default: text)",
+    "samplerNodeId": "ノードID (例: 3)",
+    "seedProperty": "プロパティ (default: seed)",
+    "negativeNodeId": "ノードID (未設定時は無視)",
+    "negativeProperty": "プロパティ (default: text)"
+  },
+  "enhancer": {
+    "presets": {
+      "sdxl": {
+        "description": "Stable Diffusion XL向け。タグ形式に変換"
+      },
+      "flux": {
+        "description": "Flux向け。自然言語形式に変換"
+      },
+      "qwen": {
+        "description": "Qwenテキストエンコーダー向け。詳細な自然言語形式"
+      }
+    }
+  }
+}

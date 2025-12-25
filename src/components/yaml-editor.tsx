@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useRef, useCallback, useImperativeHandle, forwardRef, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import Editor, { OnMount, OnChange } from '@monaco-editor/react';
 import type { editor, languages, Position, IDisposable } from 'monaco-editor';
 import type { Snippet } from '@/lib/snippet-api';
@@ -27,9 +28,11 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
   { value, onChange, fileList = [], snippets = [], dictionaryCache, keyDictionaryCache, onDictionaryChange },
   ref
 ) {
+  const { t, i18n } = useTranslation();
   const editorRef = useRef<editor.IStandaloneCodeEditor | null>(null);
   const monacoRef = useRef<typeof import('monaco-editor') | null>(null);
   const disposablesRef = useRef<IDisposable[]>([]);
+  const addToDictActionRef = useRef<IDisposable | null>(null);
   const fileListRef = useRef<string[]>(fileList);
   const snippetsRef = useRef<Snippet[]>(snippets);
   const dictionaryCacheRef = useRef<Map<string, DictionaryEntry[]> | undefined>(dictionaryCache);
@@ -72,6 +75,10 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         disposable.dispose();
       }
       disposablesRef.current = [];
+      if (addToDictActionRef.current) {
+        addToDictActionRef.current.dispose();
+        addToDictActionRef.current = null;
+      }
     };
   }, []);
 
@@ -185,6 +192,32 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
     setQuickAddKey(currentKey || '');
     setQuickAddOpen(true);
   }, [getContextPath, getCurrentKey]);
+
+  // 言語変更時に辞書アクションを再登録
+  useEffect(() => {
+    const editor = editorRef.current;
+    const monaco = monacoRef.current;
+    if (!editor || !monaco) return;
+
+    // 既存のアクションを削除
+    if (addToDictActionRef.current) {
+      addToDictActionRef.current.dispose();
+    }
+
+    // 新しいアクションを登録
+    addToDictActionRef.current = editor.addAction({
+      id: 'add-to-dictionary',
+      label: t('editor.addToDictionary'),
+      keybindings: [
+        monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyD,
+      ],
+      contextMenuGroupId: 'navigation',
+      contextMenuOrder: 1.5,
+      run: () => {
+        openQuickAddDialog();
+      },
+    });
+  }, [i18n.language, t, openQuickAddDialog]);
 
   const handleEditorDidMount: OnMount = useCallback((editor, monaco) => {
     editorRef.current = editor;
@@ -474,9 +507,9 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
     });
 
     // 辞書に追加アクションを登録
-    const addToDictAction = editor.addAction({
+    addToDictActionRef.current = editor.addAction({
       id: 'add-to-dictionary',
-      label: '辞書に追加',
+      label: t('editor.addToDictionary'),
       keybindings: [
         monaco.KeyMod.CtrlCmd | monaco.KeyMod.Shift | monaco.KeyCode.KeyD,
       ],
@@ -486,7 +519,6 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         openQuickAddDialog();
       },
     });
-    disposablesRef.current.push(addToDictAction);
 
     // エディタのフォーカス
     editor.focus();
@@ -517,7 +549,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         },
       });
     }
-  }, [getContextPath, lookupDictionary, onChange, openQuickAddDialog]);
+  }, [getContextPath, lookupDictionary, onChange, openQuickAddDialog, t]);
 
   const handleChange: OnChange = useCallback(
     (newValue) => {

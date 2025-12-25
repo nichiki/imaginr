@@ -1,6 +1,7 @@
 'use client';
 
 import { useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   DndContext,
   closestCenter,
@@ -52,6 +53,7 @@ function getFileName(path: string): string {
 }
 
 function SortableTab({ path, isActive, isDirty, onSelect, onClose, onSplitRight, showSplitOption }: SortableTabProps) {
+  const { t } = useTranslation();
   const {
     attributes,
     listeners,
@@ -98,7 +100,7 @@ function SortableTab({ path, isActive, isDirty, onSelect, onClose, onSplitRight,
               ${isActive ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}
             `}
             onClick={onClose}
-            title="閉じる"
+            title={t('tabBar.close')}
           >
             <X size={14} />
           </button>
@@ -111,7 +113,7 @@ function SortableTab({ path, isActive, isDirty, onSelect, onClose, onSplitRight,
             className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
           >
             <Columns2 className="h-4 w-4 mr-2" />
-            右に分割して開く
+            {t('tabBar.splitRight')}
           </ContextMenuItem>
         )}
         <ContextMenuItem
@@ -119,7 +121,7 @@ function SortableTab({ path, isActive, isDirty, onSelect, onClose, onSplitRight,
           className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
         >
           <X className="h-4 w-4 mr-2" />
-          閉じる
+          {t('tabBar.close')}
         </ContextMenuItem>
       </ContextMenuContent>
     </ContextMenu>

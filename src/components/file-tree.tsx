@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { FileTreeItem, RenameResult } from '@/lib/file-api';
 import { cn } from '@/lib/utils';
 import { ChevronRight, FileIcon, FolderIcon, FolderPlus, Plus, Trash2, Pencil, Columns2 } from 'lucide-react';
@@ -62,6 +63,7 @@ export function FileTree({
   onRenameFile,
   onFindReferences,
 }: FileTreeProps) {
+  const { t } = useTranslation();
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isFolderDialogOpen, setIsFolderDialogOpen] = useState(false);
   const [newFileName, setNewFileName] = useState('');
@@ -87,10 +89,10 @@ export function FileTree({
     // 禁止文字: / \ : * ? " < > |
     const invalidChars = /[/\\:*?"<>|]/;
     if (invalidChars.test(name)) {
-      return '使用できない文字が含まれています: / \\ : * ? " < > |';
+      return t('fileTree.invalidChars');
     }
     if (name.startsWith('.')) {
-      return 'ファイル名は . で始められません';
+      return t('fileTree.dotPrefix');
     }
     return null;
   };
@@ -202,7 +204,7 @@ export function FileTree({
       setShowReferenceWarning(false);
     } catch (error) {
       const { showError } = await import('@/lib/dialog');
-      await showError(error instanceof Error ? error.message : 'リネームに失敗しました');
+      await showError(error instanceof Error ? error.message : t('fileTree.renameFailed'));
     } finally {
       setIsRenaming(false);
     }
@@ -252,19 +254,19 @@ export function FileTree({
     >
       <div className="h-full bg-[#252526] flex flex-col overflow-hidden">
         <div className="px-4 py-2 text-xs uppercase text-[#888] font-medium flex-shrink-0 flex items-center justify-between">
-          <span>Files</span>
+          <span>{t('fileTree.files')}</span>
           <div className="flex items-center gap-1">
             <button
               onClick={() => openFolderDialog('')}
               className="p-0.5 hover:bg-[#3c3c3c] rounded"
-              title="New Folder"
+              title={t('fileTree.newFolder')}
             >
               <FolderPlus className="h-4 w-4" />
             </button>
             <button
               onClick={() => openCreateDialog('')}
               className="p-0.5 hover:bg-[#3c3c3c] rounded"
-              title="New File"
+              title={t('fileTree.newFile')}
             >
               <Plus className="h-4 w-4" />
             </button>
@@ -298,7 +300,7 @@ export function FileTree({
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4]">
             <DialogHeader>
-              <DialogTitle className="text-white">New File</DialogTitle>
+              <DialogTitle className="text-white">{t('fileTree.newFile')}</DialogTitle>
             </DialogHeader>
             <div className="py-4">
               <Input
@@ -317,7 +319,7 @@ export function FileTree({
               )}
               {createInFolder && (
                 <p className="text-xs text-[#888] mt-2">
-                  In folder: {createInFolder}
+                  {t('fileTree.inFolder', { folder: createInFolder })}
                 </p>
               )}
             </div>
@@ -327,13 +329,13 @@ export function FileTree({
                 onClick={() => setIsCreateDialogOpen(false)}
                 className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={handleCreateFile}
                 className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
               >
-                Create
+                {t('common.create')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -343,7 +345,7 @@ export function FileTree({
         <Dialog open={isFolderDialogOpen} onOpenChange={setIsFolderDialogOpen}>
           <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4]">
             <DialogHeader>
-              <DialogTitle className="text-white">New Folder</DialogTitle>
+              <DialogTitle className="text-white">{t('fileTree.newFolder')}</DialogTitle>
             </DialogHeader>
             <div className="py-4">
               <Input
@@ -362,7 +364,7 @@ export function FileTree({
               )}
               {createInFolder && (
                 <p className="text-xs text-[#888] mt-2">
-                  In folder: {createInFolder}
+                  {t('fileTree.inFolder', { folder: createInFolder })}
                 </p>
               )}
             </div>
@@ -372,13 +374,13 @@ export function FileTree({
                 onClick={() => setIsFolderDialogOpen(false)}
                 className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
               >
-                Cancel
+                {t('common.cancel')}
               </Button>
               <Button
                 onClick={handleCreateFolder}
                 className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
               >
-                Create
+                {t('common.create')}
               </Button>
             </DialogFooter>
           </DialogContent>
@@ -394,7 +396,7 @@ export function FileTree({
           <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4]">
             <DialogHeader>
               <DialogTitle className="text-white">
-                {showReferenceWarning ? 'References Found' : `Rename ${renameTarget?.type === 'folder' ? 'Folder' : 'File'}`}
+                {showReferenceWarning ? t('fileTree.referencesFound') : (renameTarget?.type === 'folder' ? t('fileTree.renameFolder') : t('fileTree.renameFile'))}
               </DialogTitle>
             </DialogHeader>
             <div className="py-4">
@@ -419,7 +421,7 @@ export function FileTree({
               ) : (
                 <div className="space-y-3">
                   <p className="text-sm text-yellow-400">
-                    This file is referenced by {references.length} file(s):
+                    {t('fileTree.referencedBy', { count: references.length })}
                   </p>
                   <ul className="text-xs text-[#888] max-h-32 overflow-y-auto space-y-1 bg-[#1e1e1e] p-2 rounded">
                     {references.map((ref) => (
@@ -427,7 +429,7 @@ export function FileTree({
                     ))}
                   </ul>
                   <p className="text-sm text-[#d4d4d4]">
-                    Do you want to update these references automatically?
+                    {t('fileTree.updateReferencesQuestion')}
                   </p>
                 </div>
               )}
@@ -446,14 +448,14 @@ export function FileTree({
                     className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
                     disabled={isCheckingReferences || isRenaming}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     onClick={handleRenameSubmit}
                     className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
                     disabled={isCheckingReferences || isRenaming || !newRenameName.trim()}
                   >
-                    {isCheckingReferences ? 'Checking...' : isRenaming ? 'Renaming...' : 'Rename'}
+                    {isCheckingReferences ? t('fileTree.checking') : isRenaming ? t('fileTree.renaming') : t('common.rename')}
                   </Button>
                 </>
               ) : (
@@ -464,7 +466,7 @@ export function FileTree({
                     className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
                     disabled={isRenaming}
                   >
-                    Cancel
+                    {t('common.cancel')}
                   </Button>
                   <Button
                     variant="outline"
@@ -472,14 +474,14 @@ export function FileTree({
                     className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
                     disabled={isRenaming}
                   >
-                    {isRenaming ? 'Renaming...' : 'Rename Only'}
+                    {isRenaming ? t('fileTree.renaming') : t('fileTree.renameOnly')}
                   </Button>
                   <Button
                     onClick={() => executeRename(true)}
                     className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
                     disabled={isRenaming}
                   >
-                    {isRenaming ? 'Updating...' : 'Update References'}
+                    {isRenaming ? t('fileTree.updating') : t('fileTree.updateReferences')}
                   </Button>
                 </>
               )}
@@ -618,6 +620,7 @@ function FolderNode({
   depth,
   paddingLeft,
 }: FolderNodeProps) {
+  const { t } = useTranslation();
   const isExpanded = expandedFolders.has(item.path);
   const expandTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -682,28 +685,28 @@ function FolderNode({
             className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
           >
             <Plus className="h-4 w-4 mr-2" />
-            New File
+            {t('fileTree.newFile')}
           </ContextMenuItem>
           <ContextMenuItem
             onClick={() => onCreateFolder(item.path)}
             className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
           >
             <FolderPlus className="h-4 w-4 mr-2" />
-            New Folder
+            {t('fileTree.newFolder')}
           </ContextMenuItem>
           <ContextMenuItem
             onClick={() => onRename(item.path, item.name, 'folder')}
             className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
           >
             <Pencil className="h-4 w-4 mr-2" />
-            Rename
+            {t('common.rename')}
           </ContextMenuItem>
           <ContextMenuItem
             onClick={() => onDeleteFolder(item.path)}
             className="text-red-400 focus:bg-red-900 focus:text-red-200"
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete Folder
+            {t('fileTree.deleteFolder')}
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>
@@ -747,6 +750,7 @@ function FileNode({
   onRename,
   paddingLeft,
 }: FileNodeProps) {
+  const { t } = useTranslation();
   const { attributes, listeners, setNodeRef, isDragging } = useDraggable({
     id: `drag-${item.path}`,
     data: { item },
@@ -788,7 +792,7 @@ function FileNode({
               className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
             >
               <Columns2 className="h-4 w-4 mr-2" />
-              右に分割して開く
+              {t('fileTree.splitRight')}
             </ContextMenuItem>
           )}
           <ContextMenuItem
@@ -796,14 +800,14 @@ function FileNode({
             className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
           >
             <Pencil className="h-4 w-4 mr-2" />
-            Rename
+            {t('common.rename')}
           </ContextMenuItem>
           <ContextMenuItem
             onClick={() => onDeleteFile(item.path)}
             className="text-red-400 focus:bg-red-900 focus:text-red-200"
           >
             <Trash2 className="h-4 w-4 mr-2" />
-            Delete
+            {t('common.delete')}
           </ContextMenuItem>
         </ContextMenuContent>
       </ContextMenu>

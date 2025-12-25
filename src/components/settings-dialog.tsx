@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dialog,
   DialogContent,
@@ -36,6 +37,7 @@ import {
   Plus,
   Trash2,
   Copy,
+  Globe,
 } from 'lucide-react';
 import { DictionaryManagerDialog } from './dictionary-manager-dialog';
 import { WorkflowEditor } from './workflow-editor';
@@ -46,11 +48,14 @@ import {
   migrateLocalStorageToFile,
   fetchOllamaSettings,
   saveOllamaSettingsAsync,
+  saveLanguage,
   type ComfyUISettings,
   type WorkflowConfig,
   type OllamaSettings,
   type EnhancerPreset,
+  type SupportedLanguage,
 } from '@/lib/storage';
+import { changeLanguage, languages, type Language } from '@/lib/i18n';
 import { ComfyUIClient } from '@/lib/comfyui-api';
 import { OllamaClient } from '@/lib/ollama-api';
 import { getComfyUIPath, joinPath, getAppDataPath } from '@/lib/tauri-utils';
@@ -85,6 +90,8 @@ interface TreeSelection {
 }
 
 export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDictionaryChange, onOllamaChange }: SettingsDialogProps) {
+  const { t, i18n } = useTranslation();
+
   // ツリー選択状態
   const [selection, setSelection] = useState<TreeSelection>({ type: 'data' });
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({
@@ -122,6 +129,9 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
   const [ollamaConnectionError, setOllamaConnectionError] = useState<string | null>(null);
   const [isLoadingModels, setIsLoadingModels] = useState(false);
 
+  // 言語設定（保存時まで適用しない）
+  const [pendingLanguage, setPendingLanguage] = useState<Language>(i18n.language as Language);
+
   // 設定とワークフロー一覧を読み込む
   useEffect(() => {
     if (open) {
@@ -140,8 +150,10 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
           setOllamaModels([settings.model]);
         }
       });
+      // 言語設定を現在の値で初期化
+      setPendingLanguage(i18n.language as Language);
     }
-  }, [open]);
+  }, [open, i18n.language]);
 
   const fetchAvailableWorkflows = async () => {
     try {
@@ -188,13 +200,26 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
     try {
       await saveComfyUISettingsAsync(settings);
       await saveOllamaSettingsAsync(ollamaSettings);
+
+      // 言語が変更された場合
+      const languageChanged = pendingLanguage !== i18n.language;
+      if (languageChanged) {
+        await saveLanguage(pendingLanguage as SupportedLanguage);
+        changeLanguage(pendingLanguage);
+      }
+
       onSettingsChange?.();
       onOllamaChange?.();
       onOpenChange(false);
+
+      // Monaco Editorのローケール変更のためにリロードが必要
+      if (languageChanged) {
+        window.location.reload();
+      }
     } catch (error) {
       console.error('Failed to save settings:', error);
       const { showError } = await import('@/lib/dialog');
-      await showError('設定の保存に失敗しました');
+      await showError(t('settings.saveFailed'));
     } finally {
       setIsSaving(false);
     }
@@ -554,11 +579,40 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                 {/* データ設定 */}
                 {selection.type === 'data' && (
                   <div className="space-y-6">
-                    <h3 className="text-sm font-medium text-[#d4d4d4]">データ設定</h3>
+                    <h3 className="text-sm font-medium text-[#d4d4d4]">{t('settings.title')}</h3>
+
+                    {/* 言語設定 */}
+                    <div className="space-y-2">
+                      <Label className="text-sm font-medium flex items-center gap-2">
+                        <Globe className="h-4 w-4" />
+                        {t('settings.language')}
+                      </Label>
+                      <Select
+                        value={pendingLanguage}
+                        onValueChange={(value: Language) => {
+                          setPendingLanguage(value);
+                        }}
+                      >
+                        <SelectTrigger className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] text-sm h-9 w-48">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent className="bg-[#252526] border-[#333]">
+                          {languages.map((lang) => (
+                            <SelectItem
+                              key={lang.code}
+                              value={lang.code}
+                              className="text-[#d4d4d4] focus:bg-[#094771] focus:text-white"
+                            >
+                              {lang.nativeName} ({lang.name})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
                     {/* データフォルダ */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">データフォルダ</Label>
+                      <Label className="text-sm font-medium">Data Folder</Label>
                       <div className="flex gap-2">
                         <Input
                           value={dataFolderPath}
@@ -570,29 +624,29 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
                           size="default"
                           onClick={handleOpenDataFolder}
                           className="shrink-0 h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white"
-                          title="フォルダを開く"
+                          title={t('common.openFolder')}
                         >
                           <FolderOpen className="h-4 w-4" />
                         </Button>
                       </div>
                       <p className="text-xs text-[#888]">
-                        テンプレート、辞書、スニペット、生成画像の保存先
+                        Templates, dictionary, snippets, and generated images
                       </p>
                     </div>
 
                     {/* 辞書管理 */}
                     <div className="space-y-2">
-                      <Label className="text-sm font-medium">辞書管理</Label>
+                      <Label className="text-sm font-medium">Dictionary</Label>
                       <Button
                         variant="outline"
                         onClick={() => setDictionaryManagerOpen(true)}
                         className="w-full h-9 bg-[#3c3c3c] border-[#555] text-[#d4d4d4] hover:bg-[#4a4a4a] hover:text-white justify-start"
                       >
                         <BookOpen className="h-4 w-4 mr-2" />
-                        辞書管理を開く
+                        Manage Dictionary
                       </Button>
                       <p className="text-xs text-[#888]">
-                        オートコンプリート用の辞書を管理
+                        Manage autocomplete dictionary
                       </p>
                     </div>
                   </div>

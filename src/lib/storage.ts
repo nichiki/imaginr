@@ -491,3 +491,40 @@ export function getEnhancerSystemPrompt(settings: OllamaSettings): string {
 export async function saveActiveEnhancerPresetId(presetId: string): Promise<void> {
   await saveOllamaSettingsAsync({ activePresetId: presetId });
 }
+
+// ============================================
+// Language settings
+// ============================================
+
+const LANGUAGE_KEY = 'image-prompt-builder-language';
+
+export type SupportedLanguage = 'en' | 'ja';
+
+export function loadLanguage(): SupportedLanguage {
+  if (typeof window === 'undefined') return 'en';
+
+  try {
+    const saved = localStorage.getItem(LANGUAGE_KEY);
+    if (saved === 'en' || saved === 'ja') {
+      return saved;
+    }
+    // Default to browser language if available
+    const browserLang = navigator.language.toLowerCase();
+    if (browserLang.startsWith('ja')) {
+      return 'ja';
+    }
+  } catch (error) {
+    console.error('Failed to load language:', error);
+  }
+  return 'en';
+}
+
+export function saveLanguage(lang: SupportedLanguage): void {
+  if (typeof window === 'undefined') return;
+
+  try {
+    localStorage.setItem(LANGUAGE_KEY, lang);
+  } catch (error) {
+    console.error('Failed to save language:', error);
+  }
+}
