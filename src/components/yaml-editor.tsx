@@ -253,8 +253,10 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
             );
 
             for (const entry of matchingKeys) {
+              // 日本語UIの場合のみ説明を表示
+              const showDesc = i18n.language === 'ja' && entry.description;
               suggestions.push({
-                label: entry.description
+                label: showDesc
                   ? `${entry.childKey}（${entry.description}）`
                   : entry.childKey,
                 kind: monaco.languages.CompletionItemKind.Property,
@@ -383,8 +385,10 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
                   if (needsSpaceAfterColon || needsSpaceAfterComma) {
                     insertText = ` ${entry.value}`;
                   }
+                  // 日本語UIの場合のみ説明を表示
+                  const showDesc = i18n.language === 'ja' && entry.description;
                   return {
-                    label: entry.description ? `${entry.value}（${entry.description}）` : entry.value,
+                    label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
                     kind: monaco.languages.CompletionItemKind.Value,
                     insertText,
                     detail: `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`,
@@ -473,8 +477,11 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
 
               if (filteredEntries.length > 0) {
                 return {
-                  suggestions: filteredEntries.map((entry) => ({
-                    label: entry.description ? `${entry.value}（${entry.description}）` : entry.value,
+                  suggestions: filteredEntries.map((entry) => {
+                    // 日本語UIの場合のみ説明を表示
+                    const showDesc = i18n.language === 'ja' && entry.description;
+                    return {
+                    label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
                     kind: monaco.languages.CompletionItemKind.Value,
                     insertText: entry.value,
                     detail: `${lookupContext.length > 0 ? lookupContext.join('.') + '.' : ''}${parentKey}`,
@@ -484,7 +491,8 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
                       endLineNumber: position.lineNumber,
                       endColumn: position.column,
                     },
-                  })),
+                  };
+                  }),
                 };
               }
             }
@@ -549,7 +557,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         },
       });
     }
-  }, [getContextPath, lookupDictionary, onChange, openQuickAddDialog, t]);
+  }, [getContextPath, lookupDictionary, onChange, openQuickAddDialog, t, i18n.language]);
 
   const handleChange: OnChange = useCallback(
     (newValue) => {

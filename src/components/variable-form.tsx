@@ -86,6 +86,7 @@ function AutocompleteInput({
   placeholder,
   suggestions,
   clearTitle,
+  showDescription = true,
 }: {
   id: string;
   value: string;
@@ -93,6 +94,7 @@ function AutocompleteInput({
   placeholder: string;
   suggestions: DictionaryEntry[];
   clearTitle: string;
+  showDescription?: boolean;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -248,7 +250,7 @@ function AutocompleteInput({
               onMouseEnter={() => setSelectedIndex(index)}
             >
               <span>{entry.value}</span>
-              {entry.description && (
+              {showDescription && entry.description && (
                 <span className="text-[#888] ml-2">{entry.description}</span>
               )}
             </div>
@@ -267,6 +269,7 @@ function MultiSelectCheckboxes({
   suggestions,
   noOptionsText,
   addCustomPlaceholder,
+  showDescription = true,
 }: {
   id: string;
   value: string[];
@@ -274,6 +277,7 @@ function MultiSelectCheckboxes({
   suggestions: DictionaryEntry[];
   noOptionsText: string;
   addCustomPlaceholder: string;
+  showDescription?: boolean;
 }) {
   const [customInput, setCustomInput] = useState('');
 
@@ -330,7 +334,7 @@ function MultiSelectCheckboxes({
       {/* チェックボックス（辞書の値） */}
       <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
         {suggestions.map((entry) => {
-          const label = entry.description
+          const label = showDescription && entry.description
             ? `${entry.value}（${entry.description}）`
             : entry.value;
           return (
@@ -410,7 +414,7 @@ function VariableFormInner({
   dictionaryCache,
   isYamlValid = true
 }: VariableFormProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
 
   // プリセットをDBから読み込み
   const [presets, setPresets] = useState<Preset[]>([]);
@@ -698,6 +702,7 @@ function VariableFormInner({
                     suggestions={suggestions}
                     noOptionsText={t('common.noOptions')}
                     addCustomPlaceholder={t('variables.addCustomValue')}
+                    showDescription={i18n.language === 'ja'}
                   />
                 ) : hasSuggestions ? (
                   <AutocompleteInput
@@ -707,6 +712,7 @@ function VariableFormInner({
                     placeholder={variable.defaultValue || t('variables.enterValue', { name: variable.name })}
                     suggestions={suggestions}
                     clearTitle={t('common.clear')}
+                    showDescription={i18n.language === 'ja'}
                   />
                 ) : (
                   <Input
