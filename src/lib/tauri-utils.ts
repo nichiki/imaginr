@@ -79,7 +79,16 @@ export async function getDatabasePath(): Promise<string> {
 }
 
 /**
- * Get the config file path
+ * Get the unified settings file path
+ */
+export async function getSettingsPath(): Promise<string> {
+  const appData = await getAppDataPath();
+  return joinPath(appData, 'settings.json');
+}
+
+/**
+ * @deprecated Use getSettingsPath() instead
+ * Get the old config file path (for migration)
  */
 export async function getConfigPath(): Promise<string> {
   const appData = await getAppDataPath();

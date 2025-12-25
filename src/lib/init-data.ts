@@ -1,6 +1,7 @@
 // Initial data copy logic for first-time setup
 
 import { getAppDataPath, joinPath } from './tauri-utils';
+import { migrateToUnifiedSettings } from './storage';
 
 /**
  * Get the source data path (bundled resources or project directory)
@@ -92,6 +93,9 @@ export async function initializeAppData(): Promise<void> {
     const folderPath = await joinPath(appDataPath, folder);
     await mkdir(folderPath, { recursive: true });
   }
+
+  // Migrate old settings files to unified settings.json
+  await migrateToUnifiedSettings();
 
   console.log('Initial data setup complete');
 }

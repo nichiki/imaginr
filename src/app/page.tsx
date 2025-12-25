@@ -58,6 +58,7 @@ import { TabBar } from '@/components/tab-bar';
 import { Button } from '@/components/ui/button';
 import { Settings, FileText, PanelTop, PanelBottom, Rows2, Save } from 'lucide-react';
 import { initializeAppData } from '@/lib/init-data';
+import { migrateToUnifiedSettings } from '@/lib/storage';
 
 // 全フォルダのパスを収集
 function collectAllFolders(items: FileTreeItem[]): string[] {
@@ -199,6 +200,9 @@ export default function Home() {
       try {
         // 初回起動時の初期データコピー
         await initializeAppData();
+
+        // 旧設定ファイルを統一設定にマイグレーション
+        await migrateToUnifiedSettings();
 
         // 保存された状態を復元
         const savedState = loadState();

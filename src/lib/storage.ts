@@ -1,11 +1,11 @@
 // ローカルストレージへの永続化ユーティリティ
 // Tauri専用
 
-import { getConfigPath } from './tauri-utils';
+import { getSettingsPath, getAppDataPath, joinPath } from './tauri-utils';
 
 const STORAGE_KEY = 'image-prompt-builder-state';
-const COMFYUI_SETTINGS_KEY = 'image-prompt-builder-comfyui';
-const OLLAMA_SETTINGS_KEY = 'image-prompt-builder-ollama';
+// 後方互換性のためのlocalStorageキー（キャッシュ用）
+const SETTINGS_CACHE_KEY = 'image-prompt-builder-settings-cache';
 
 export type LayoutMode = 'full' | 'upper' | 'lower';
 
@@ -80,6 +80,12 @@ export function saveState(state: Partial<AppState>): void {
   }
 }
 
+// ============================================
+// 言語設定の型定義
+// ============================================
+
+export type SupportedLanguage = 'en' | 'ja';
+
 // ComfyUI設定
 export interface NodeOverride {
   nodeId: string;         // ノードID
@@ -119,132 +125,50 @@ const defaultComfyUISettings: ComfyUISettings = {
 };
 
 /**
- * Load ComfyUI settings from localStorage (client-side cache)
- * For the authoritative settings, use fetchComfyUISettings()
+ * Load ComfyUI settings from cache (synchronous)
  */
 export function loadComfyUISettings(): ComfyUISettings {
-  if (typeof window === 'undefined') return defaultComfyUISettings;
-
-  try {
-    const saved = localStorage.getItem(COMFYUI_SETTINGS_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      return { ...defaultComfyUISettings, ...parsed };
-    }
-  } catch (error) {
-    console.error('Failed to load ComfyUI settings:', error);
-  }
-  return defaultComfyUISettings;
+  const settings = loadSettingsFromCache();
+  return settings.comfyui;
 }
 
 /**
  * Fetch ComfyUI settings from file (Tauri)
- * This is the authoritative source
  */
 export async function fetchComfyUISettings(): Promise<ComfyUISettings> {
-  try {
-    const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
-    const configPath = await getConfigPath();
-
-    let settings: ComfyUISettings;
-    if (await exists(configPath)) {
-      const content = await readTextFile(configPath);
-      settings = JSON.parse(content);
-    } else {
-      settings = defaultComfyUISettings;
-    }
-
-    // Update localStorage cache
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(COMFYUI_SETTINGS_KEY, JSON.stringify(settings));
-    }
-
-    return { ...defaultComfyUISettings, ...settings };
-  } catch (error) {
-    console.error('Failed to fetch ComfyUI settings:', error);
-    // Fall back to localStorage
-    return loadComfyUISettings();
-  }
+  const settings = await fetchSettings();
+  return settings.comfyui;
 }
 
 /**
  * Save ComfyUI settings to file (Tauri)
- * Also updates localStorage cache
  */
 export async function saveComfyUISettingsAsync(settings: Partial<ComfyUISettings>): Promise<ComfyUISettings> {
-  try {
-    // Merge with current settings
-    const current = await fetchComfyUISettings();
-    const newSettings = { ...current, ...settings };
-
-    const { writeTextFile, mkdir, exists } = await import('@tauri-apps/plugin-fs');
-    const { appDataDir } = await import('@tauri-apps/api/path');
-    const configPath = await getConfigPath();
-
-    // Ensure app data directory exists
-    const appData = await appDataDir();
-    if (!(await exists(appData))) {
-      await mkdir(appData, { recursive: true });
-    }
-
-    await writeTextFile(configPath, JSON.stringify(newSettings, null, 2));
-
-    // Update localStorage cache
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(COMFYUI_SETTINGS_KEY, JSON.stringify(newSettings));
-    }
-
-    return newSettings;
-  } catch (error) {
-    console.error('Failed to save ComfyUI settings:', error);
-    throw error;
-  }
+  const current = await fetchSettings();
+  const newComfyUI = { ...current.comfyui, ...settings };
+  await saveSettings({ comfyui: newComfyUI });
+  return newComfyUI;
 }
 
 /**
- * @deprecated Use saveComfyUISettingsAsync instead for persistence to file
- * This only saves to localStorage (client-side cache)
+ * @deprecated Use saveComfyUISettingsAsync instead
  */
 export function saveComfyUISettings(settings: Partial<ComfyUISettings>): void {
   if (typeof window === 'undefined') return;
-
   try {
-    const current = loadComfyUISettings();
-    const newSettings = { ...current, ...settings };
-    localStorage.setItem(COMFYUI_SETTINGS_KEY, JSON.stringify(newSettings));
+    const cached = loadSettingsFromCache();
+    cached.comfyui = { ...cached.comfyui, ...settings };
+    localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(cached));
   } catch (error) {
     console.error('Failed to save ComfyUI settings:', error);
   }
 }
 
 /**
- * Migrate settings from localStorage to file
- * Called once on app initialization
+ * @deprecated Use migrateToUnifiedSettings instead
  */
 export async function migrateLocalStorageToFile(): Promise<void> {
-  if (typeof window === 'undefined') return;
-
-  const migrationKey = 'image-prompt-builder-settings-migrated';
-  if (localStorage.getItem(migrationKey)) {
-    return; // Already migrated
-  }
-
-  try {
-    const localSettings = loadComfyUISettings();
-
-    // Check if there's anything to migrate
-    if (localSettings.workflows.length === 0 && !localSettings.enabled) {
-      localStorage.setItem(migrationKey, 'true');
-      return;
-    }
-
-    // Migrate to file
-    await saveComfyUISettingsAsync(localSettings);
-    localStorage.setItem(migrationKey, 'true');
-    console.log('Settings migrated from localStorage to file');
-  } catch (error) {
-    console.error('Failed to migrate settings:', error);
-  }
+  await migrateToUnifiedSettings();
 }
 
 // アクティブなワークフロー設定を取得
@@ -362,94 +286,29 @@ const defaultOllamaSettings: OllamaSettings = {
 };
 
 /**
- * Load Ollama settings from localStorage (client-side cache)
+ * Load Ollama settings from cache (synchronous)
  */
 export function loadOllamaSettings(): OllamaSettings {
-  if (typeof window === 'undefined') return defaultOllamaSettings;
-
-  try {
-    const saved = localStorage.getItem(OLLAMA_SETTINGS_KEY);
-    if (saved) {
-      const parsed = JSON.parse(saved);
-      // 組み込みプリセットをマージ（更新された場合に反映）
-      const mergedPresets = mergeEnhancerPresets(
-        parsed.enhancerPresets || [],
-        builtInEnhancerPresets
-      );
-      return { ...defaultOllamaSettings, ...parsed, enhancerPresets: mergedPresets };
-    }
-  } catch (error) {
-    console.error('Failed to load Ollama settings:', error);
-  }
-  return defaultOllamaSettings;
+  const settings = loadSettingsFromCache();
+  return settings.ollama;
 }
 
 /**
  * Fetch Ollama settings from file (Tauri)
  */
 export async function fetchOllamaSettings(): Promise<OllamaSettings> {
-  try {
-    const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
-    const { appDataDir, join } = await import('@tauri-apps/api/path');
-    const appData = await appDataDir();
-    const configPath = await join(appData, 'ollama-settings.json');
-
-    let settings: OllamaSettings;
-    if (await exists(configPath)) {
-      const content = await readTextFile(configPath);
-      settings = JSON.parse(content);
-    } else {
-      settings = defaultOllamaSettings;
-    }
-
-    // 組み込みプリセットをマージ
-    const mergedPresets = mergeEnhancerPresets(
-      settings.enhancerPresets || [],
-      builtInEnhancerPresets
-    );
-    settings = { ...defaultOllamaSettings, ...settings, enhancerPresets: mergedPresets };
-
-    // Update localStorage cache
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(OLLAMA_SETTINGS_KEY, JSON.stringify(settings));
-    }
-
-    return settings;
-  } catch (error) {
-    console.error('Failed to fetch Ollama settings:', error);
-    return loadOllamaSettings();
-  }
+  const settings = await fetchSettings();
+  return settings.ollama;
 }
 
 /**
  * Save Ollama settings to file (Tauri)
  */
 export async function saveOllamaSettingsAsync(settings: Partial<OllamaSettings>): Promise<OllamaSettings> {
-  try {
-    const current = await fetchOllamaSettings();
-    const newSettings = { ...current, ...settings };
-
-    const { writeTextFile, mkdir, exists } = await import('@tauri-apps/plugin-fs');
-    const { appDataDir, join } = await import('@tauri-apps/api/path');
-    const appData = await appDataDir();
-    const configPath = await join(appData, 'ollama-settings.json');
-
-    if (!(await exists(appData))) {
-      await mkdir(appData, { recursive: true });
-    }
-
-    await writeTextFile(configPath, JSON.stringify(newSettings, null, 2));
-
-    // Update localStorage cache
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(OLLAMA_SETTINGS_KEY, JSON.stringify(newSettings));
-    }
-
-    return newSettings;
-  } catch (error) {
-    console.error('Failed to save Ollama settings:', error);
-    throw error;
-  }
+  const current = await fetchSettings();
+  const newOllama = { ...current.ollama, ...settings };
+  await saveSettings({ ollama: newOllama });
+  return newOllama;
 }
 
 /**
@@ -493,37 +352,257 @@ export async function saveActiveEnhancerPresetId(presetId: string): Promise<void
 }
 
 // ============================================
-// Language settings
+// 統一設定 (Unified Settings)
 // ============================================
 
-const LANGUAGE_KEY = 'image-prompt-builder-language';
+export interface Settings {
+  language: SupportedLanguage;
+  comfyui: ComfyUISettings;
+  ollama: OllamaSettings;
+}
 
-export type SupportedLanguage = 'en' | 'ja';
+const defaultSettings: Settings = {
+  language: 'en',
+  comfyui: defaultComfyUISettings,
+  ollama: defaultOllamaSettings,
+};
 
-export function loadLanguage(): SupportedLanguage {
+/**
+ * Get default language based on browser settings
+ */
+function getDefaultLanguage(): SupportedLanguage {
   if (typeof window === 'undefined') return 'en';
-
   try {
-    const saved = localStorage.getItem(LANGUAGE_KEY);
-    if (saved === 'en' || saved === 'ja') {
-      return saved;
-    }
-    // Default to browser language if available
     const browserLang = navigator.language.toLowerCase();
     if (browserLang.startsWith('ja')) {
       return 'ja';
     }
-  } catch (error) {
-    console.error('Failed to load language:', error);
+  } catch {
+    // Ignore errors
   }
   return 'en';
 }
 
-export function saveLanguage(lang: SupportedLanguage): void {
-  if (typeof window === 'undefined') return;
+/**
+ * Load settings from localStorage cache (synchronous, for initial render)
+ */
+export function loadSettingsFromCache(): Settings {
+  if (typeof window === 'undefined') return { ...defaultSettings, language: getDefaultLanguage() };
 
   try {
-    localStorage.setItem(LANGUAGE_KEY, lang);
+    const cached = localStorage.getItem(SETTINGS_CACHE_KEY);
+    if (cached) {
+      const parsed = JSON.parse(cached);
+      // マージして組み込みプリセットを最新に
+      const mergedOllama = {
+        ...defaultOllamaSettings,
+        ...parsed.ollama,
+        enhancerPresets: mergeEnhancerPresets(
+          parsed.ollama?.enhancerPresets || [],
+          builtInEnhancerPresets
+        ),
+      };
+      return {
+        ...defaultSettings,
+        ...parsed,
+        language: parsed.language || getDefaultLanguage(),
+        ollama: mergedOllama,
+      };
+    }
+  } catch (error) {
+    console.error('Failed to load settings from cache:', error);
+  }
+  return { ...defaultSettings, language: getDefaultLanguage() };
+}
+
+/**
+ * Fetch settings from file (async, authoritative source)
+ */
+export async function fetchSettings(): Promise<Settings> {
+  try {
+    const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
+    const settingsPath = await getSettingsPath();
+
+    let settings: Settings;
+    if (await exists(settingsPath)) {
+      const content = await readTextFile(settingsPath);
+      const parsed = JSON.parse(content);
+      // マージして組み込みプリセットを最新に
+      const mergedOllama = {
+        ...defaultOllamaSettings,
+        ...parsed.ollama,
+        enhancerPresets: mergeEnhancerPresets(
+          parsed.ollama?.enhancerPresets || [],
+          builtInEnhancerPresets
+        ),
+      };
+      settings = {
+        ...defaultSettings,
+        ...parsed,
+        language: parsed.language || getDefaultLanguage(),
+        comfyui: { ...defaultComfyUISettings, ...parsed.comfyui },
+        ollama: mergedOllama,
+      };
+    } else {
+      // 新規: デフォルト設定（ブラウザ言語を使用）
+      settings = { ...defaultSettings, language: getDefaultLanguage() };
+    }
+
+    // Update localStorage cache
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(settings));
+    }
+
+    return settings;
+  } catch (error) {
+    console.error('Failed to fetch settings:', error);
+    return loadSettingsFromCache();
+  }
+}
+
+/**
+ * Save settings to file
+ */
+export async function saveSettings(settings: Partial<Settings>): Promise<Settings> {
+  try {
+    const current = await fetchSettings();
+    const newSettings: Settings = {
+      language: settings.language ?? current.language,
+      comfyui: settings.comfyui ? { ...current.comfyui, ...settings.comfyui } : current.comfyui,
+      ollama: settings.ollama ? { ...current.ollama, ...settings.ollama } : current.ollama,
+    };
+
+    const { writeTextFile, mkdir, exists } = await import('@tauri-apps/plugin-fs');
+    const settingsPath = await getSettingsPath();
+    const appData = await getAppDataPath();
+
+    if (!(await exists(appData))) {
+      await mkdir(appData, { recursive: true });
+    }
+
+    await writeTextFile(settingsPath, JSON.stringify(newSettings, null, 2));
+
+    // Update localStorage cache
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(newSettings));
+    }
+
+    return newSettings;
+  } catch (error) {
+    console.error('Failed to save settings:', error);
+    throw error;
+  }
+}
+
+/**
+ * Migrate old settings files to unified settings.json
+ */
+export async function migrateToUnifiedSettings(): Promise<void> {
+  const migrationKey = 'image-prompt-builder-unified-settings-migrated';
+  if (typeof window !== 'undefined' && localStorage.getItem(migrationKey)) {
+    return; // Already migrated
+  }
+
+  try {
+    const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
+    const settingsPath = await getSettingsPath();
+
+    // すでに統一設定があればスキップ
+    if (await exists(settingsPath)) {
+      if (typeof window !== 'undefined') {
+        localStorage.setItem(migrationKey, 'true');
+      }
+      return;
+    }
+
+    const appData = await getAppDataPath();
+    const migratedSettings: Partial<Settings> = {};
+
+    // 旧ComfyUI設定（config.json）を読み込み
+    const oldConfigPath = await joinPath(appData, 'config.json');
+    if (await exists(oldConfigPath)) {
+      try {
+        const content = await readTextFile(oldConfigPath);
+        migratedSettings.comfyui = JSON.parse(content);
+        console.log('Migrated ComfyUI settings from config.json');
+      } catch (e) {
+        console.error('Failed to read old config.json:', e);
+      }
+    }
+
+    // 旧Ollama設定を読み込み
+    const oldOllamaPath = await joinPath(appData, 'ollama-settings.json');
+    if (await exists(oldOllamaPath)) {
+      try {
+        const content = await readTextFile(oldOllamaPath);
+        migratedSettings.ollama = JSON.parse(content);
+        console.log('Migrated Ollama settings from ollama-settings.json');
+      } catch (e) {
+        console.error('Failed to read old ollama-settings.json:', e);
+      }
+    }
+
+    // 旧言語設定（localStorage）を読み込み
+    if (typeof window !== 'undefined') {
+      const oldLangKey = 'image-prompt-builder-language';
+      const savedLang = localStorage.getItem(oldLangKey);
+      if (savedLang === 'en' || savedLang === 'ja') {
+        migratedSettings.language = savedLang;
+        console.log('Migrated language setting from localStorage');
+      }
+    }
+
+    // マイグレーションするデータがあれば保存
+    if (Object.keys(migratedSettings).length > 0) {
+      await saveSettings(migratedSettings);
+      console.log('Settings migration completed');
+
+      // 旧ファイルを削除（任意：コメントアウトで残すことも可能）
+      // try {
+      //   if (await exists(oldConfigPath)) await remove(oldConfigPath);
+      //   if (await exists(oldOllamaPath)) await remove(oldOllamaPath);
+      // } catch (e) {
+      //   console.error('Failed to remove old settings files:', e);
+      // }
+    }
+
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(migrationKey, 'true');
+    }
+  } catch (error) {
+    console.error('Failed to migrate settings:', error);
+  }
+}
+
+// ============================================
+// 後方互換性のための関数（Backward Compatibility）
+// ============================================
+
+/**
+ * Load language from cache (synchronous)
+ */
+export function loadLanguage(): SupportedLanguage {
+  const settings = loadSettingsFromCache();
+  return settings.language;
+}
+
+/**
+ * Save language setting
+ */
+export async function saveLanguageAsync(lang: SupportedLanguage): Promise<void> {
+  await saveSettings({ language: lang });
+}
+
+/**
+ * @deprecated Use saveLanguageAsync instead
+ * Synchronous save to localStorage only (for immediate UI update)
+ */
+export function saveLanguage(lang: SupportedLanguage): void {
+  if (typeof window === 'undefined') return;
+  try {
+    const cached = loadSettingsFromCache();
+    cached.language = lang;
+    localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(cached));
   } catch (error) {
     console.error('Failed to save language:', error);
   }

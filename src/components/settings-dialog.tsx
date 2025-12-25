@@ -48,7 +48,7 @@ import {
   migrateLocalStorageToFile,
   fetchOllamaSettings,
   saveOllamaSettingsAsync,
-  saveLanguage,
+  saveLanguageAsync,
   type ComfyUISettings,
   type WorkflowConfig,
   type OllamaSettings,
@@ -204,7 +204,7 @@ export function SettingsDialog({ open, onOpenChange, onSettingsChange, onDiction
       // 言語が変更された場合
       const languageChanged = pendingLanguage !== i18n.language;
       if (languageChanged) {
-        await saveLanguage(pendingLanguage as SupportedLanguage);
+        await saveLanguageAsync(pendingLanguage as SupportedLanguage);
         changeLanguage(pendingLanguage);
       }
 

@@ -1,6 +1,7 @@
 import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
+import { loadLanguage } from '../storage';
 import en from './locales/en.json';
 import ja from './locales/ja.json';
 
@@ -16,31 +17,12 @@ export const languages: { code: Language; name: string; nativeName: string }[] =
   { code: 'ja', name: 'Japanese', nativeName: '日本語' },
 ];
 
-// Get saved language from localStorage (client-side only)
-function getSavedLanguage(): Language {
-  if (typeof window === 'undefined') return 'en';
-  try {
-    const saved = localStorage.getItem('image-prompt-builder-language');
-    if (saved === 'en' || saved === 'ja') {
-      return saved;
-    }
-    // Default to browser language if available
-    const browserLang = navigator.language.toLowerCase();
-    if (browserLang.startsWith('ja')) {
-      return 'ja';
-    }
-  } catch {
-    // Ignore errors
-  }
-  return 'en';
-}
-
-// Initialize i18n
+// Initialize i18n with saved language from unified settings
 i18n
   .use(initReactI18next)
   .init({
     resources,
-    lng: getSavedLanguage(),
+    lng: loadLanguage(),
     fallbackLng: 'en',
     interpolation: {
       escapeValue: false, // React already escapes values
