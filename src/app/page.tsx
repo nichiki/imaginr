@@ -1780,12 +1780,12 @@ export default function Home() {
       {/* Preview Panel with Variables (Lower Row) */}
       {layoutMode !== 'upper' && (
       <div
-        className={`relative flex ${layoutMode === 'lower' ? 'flex-1' : 'flex-shrink-0'}`}
+        className={`relative flex ${layoutMode === 'lower' ? 'flex-1 min-h-0' : 'flex-shrink-0'}`}
         style={layoutMode === 'lower' ? undefined : { height: previewHeight }}
       >
         {/* Variable Form - always show */}
         <div
-          className="flex-shrink-0 overflow-y-auto"
+          className="flex-shrink-0 overflow-y-auto h-full"
           style={{ width: variablePanelWidth }}
         >
           <VariableForm
@@ -1803,7 +1803,7 @@ export default function Home() {
           onMouseDown={handleVariableResizeStart}
         />
         {/* Prompt/Gallery Panel */}
-        <div className="flex-1 min-w-0">
+        <div className="flex-1 min-w-0 h-full">
           <PromptPanel
             key={settingsKey}
             activeTab={promptActiveTab}
@@ -1829,7 +1829,7 @@ export default function Home() {
         />
         {/* Generation Panel */}
         <div
-          className="flex-shrink-0"
+          className="flex-shrink-0 h-full"
           style={{ width: generationPanelWidth }}
         >
           <GenerationPanel
