@@ -99,8 +99,6 @@ export function FileTree({
   const [isGenerating, setIsGenerating] = useState(false);
   const [generateError, setGenerateError] = useState('');
 
-  // IME composition state (for Mac compatibility)
-  const [isComposing, setIsComposing] = useState(false);
 
   // ファイル名/フォルダ名のバリデーション
   const validateFileName = (name: string): string | null => {
@@ -389,9 +387,11 @@ export function FileTree({
                     setNewFileName(e.target.value);
                     setFileNameError('');
                   }}
-                  onCompositionStart={() => setIsComposing(true)}
-                  onCompositionEnd={() => setIsComposing(false)}
-                  onKeyDown={(e) => e.key === 'Enter' && !isComposing && !aiAssistEnabled && handleCreateFile()}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.nativeEvent.keyCode !== 229 && !aiAssistEnabled) {
+                      handleCreateFile();
+                    }
+                  }}
                   className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] flex-1"
                   autoFocus
                   disabled={isGenerating}
@@ -490,9 +490,11 @@ export function FileTree({
                   setNewFolderName(e.target.value);
                   setFolderNameError('');
                 }}
-                onCompositionStart={() => setIsComposing(true)}
-                onCompositionEnd={() => setIsComposing(false)}
-                onKeyDown={(e) => e.key === 'Enter' && !isComposing && handleCreateFolder()}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && e.nativeEvent.keyCode !== 229) {
+                    handleCreateFolder();
+                  }
+                }}
                 className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4]"
                 autoFocus
               />
@@ -547,9 +549,11 @@ export function FileTree({
                         setNewRenameName(e.target.value);
                         setRenameError('');
                       }}
-                      onCompositionStart={() => setIsComposing(true)}
-                      onCompositionEnd={() => setIsComposing(false)}
-                      onKeyDown={(e) => e.key === 'Enter' && !isComposing && handleRenameSubmit()}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' && e.nativeEvent.keyCode !== 229) {
+                          handleRenameSubmit();
+                        }
+                      }}
                       className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] flex-1"
                       autoFocus
                       disabled={isCheckingReferences || isRenaming}
