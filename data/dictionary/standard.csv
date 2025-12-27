@@ -1,29 +1,68 @@
 ﻿context,key,value,description
-*,aesthetic,editorial photography,雑誌風
-*,aesthetic,fashion photography,ファッション誌風
-*,aesthetic,fine art photography,アート写真
-*,aesthetic,street photography,ストリートスナップ
-*,aesthetic,documentary photography,ドキュメンタリー風
-*,aesthetic,cinematic,映画風
-*,aesthetic,film noir,フィルムノワール
-*,aesthetic,vintage film,ヴィンテージフィルム
-*,aesthetic,impressionism,印象派
-*,aesthetic,art deco,アールデコ
-*,aesthetic,art nouveau,アールヌーヴォー
-*,aesthetic,baroque,バロック
-*,aesthetic,renaissance,ルネサンス
-*,aesthetic,romanticism,ロマン主義
-*,aesthetic,ukiyo-e,浮世絵
-*,aesthetic,cyberpunk,サイバーパンク
-*,aesthetic,vaporwave,ヴェイパーウェイブ
-*,aesthetic,synthwave,シンセウェイブ
-*,aesthetic,minimalist,ミニマル
-*,aesthetic,maximalist,マキシマル
-*,aesthetic,ethereal,幻想的
-*,aesthetic,dreamy,夢幻的
-*,aesthetic,gritty,ざらついた質感
-*,aesthetic,clean,クリーン
-*,aesthetic,moody,ムーディー
+aesthetic,style,editorial photography,雑誌風
+aesthetic,style,fashion photography,ファッション誌風
+aesthetic,style,fine art photography,アート写真
+aesthetic,style,street photography,ストリートスナップ
+aesthetic,style,documentary photography,ドキュメンタリー風
+aesthetic,style,cinematic,映画風
+aesthetic,style,film noir,フィルムノワール
+aesthetic,style,vintage film,ヴィンテージフィルム
+aesthetic,style,impressionism,印象派
+aesthetic,style,art deco,アールデコ
+aesthetic,style,art nouveau,アールヌーヴォー
+aesthetic,style,baroque,バロック
+aesthetic,style,renaissance,ルネサンス
+aesthetic,style,romanticism,ロマン主義
+aesthetic,style,ukiyo-e,浮世絵
+aesthetic,style,cyberpunk,サイバーパンク
+aesthetic,style,vaporwave,ヴェイパーウェイブ
+aesthetic,style,synthwave,シンセウェイブ
+aesthetic,style,minimalist,ミニマル
+aesthetic,style,maximalist,マキシマル
+aesthetic,style,ethereal,幻想的
+aesthetic,style,dreamy,夢幻的
+aesthetic,style,gritty,ざらついた質感
+aesthetic,style,clean,クリーン
+aesthetic,style,moody,ムーディー
+aesthetic,style,anime,アニメ調
+aesthetic,style,realistic,リアル調
+aesthetic,style,painterly,絵画調
+aesthetic,style,sketch,スケッチ
+aesthetic,style,watercolor,水彩画
+aesthetic,style,oil painting,油絵
+aesthetic,style,pixel art,ドット絵
+aesthetic,style,3D render,3DCG
+aesthetic,medium,digital art,デジタルアート
+aesthetic,medium,digital painting,デジタルペイント
+aesthetic,medium,traditional,アナログ
+aesthetic,medium,pencil drawing,鉛筆画
+aesthetic,medium,ink drawing,インク画
+aesthetic,medium,charcoal drawing,木炭画
+aesthetic,medium,pastel drawing,パステル画
+aesthetic,medium,watercolor painting,水彩画
+aesthetic,medium,oil painting,油絵
+aesthetic,medium,acrylic painting,アクリル画
+aesthetic,medium,gouache,ガッシュ
+aesthetic,medium,mixed media,ミクストメディア
+aesthetic,medium,collage,コラージュ
+aesthetic,medium,3D render,3DCG
+aesthetic,medium,CGI,CGI
+aesthetic,medium,vector art,ベクターアート
+aesthetic,color_scheme,warm tones,暖色系
+aesthetic,color_scheme,cool tones,寒色系
+aesthetic,color_scheme,pastel colors,パステル調
+aesthetic,color_scheme,vibrant colors,鮮やかな色彩
+aesthetic,color_scheme,muted colors,くすんだ色調
+aesthetic,color_scheme,desaturated,彩度低め
+aesthetic,color_scheme,high contrast,ハイコントラスト
+aesthetic,color_scheme,low contrast,ローコントラスト
+aesthetic,color_scheme,monochrome,モノクロ
+aesthetic,color_scheme,sepia,セピア
+aesthetic,color_scheme,duotone,デュオトーン
+aesthetic,color_scheme,neon colors,ネオンカラー
+aesthetic,color_scheme,earth tones,アースカラー
+aesthetic,color_scheme,jewel tones,宝石色
+aesthetic,color_scheme,neutral palette,ニュートラル
 hair,length,very short hair,ベリーショート
 hair,length,short hair,ショート
 hair,length,medium hair,ミディアム
@@ -230,6 +269,28 @@ appearance,extras,scar,傷跡
 appearance,extras,sweaty,汗ばんだ
 appearance,extras,wet body,濡れた体
 appearance,extras,oiled skin,オイル肌
+appearance,proportions,chibi,ちび・デフォルメ
+appearance,proportions,2 heads tall,2頭身
+appearance,proportions,3 heads tall,3頭身
+appearance,proportions,normal,通常頭身（5-6頭身）
+appearance,proportions,6 heads tall,6頭身
+appearance,proportions,7 heads tall,7頭身
+appearance,proportions,model proportions,モデル体型（7-8頭身）
+appearance,proportions,8 heads tall,8頭身
+appearance,proportions,exaggerated proportions,誇張された頭身
+appearance,hips,wide hips,広い腰
+appearance,hips,narrow hips,狭い腰
+appearance,hips,curvy hips,カーヴィーヒップ
+appearance,waist,slim waist,細いウエスト
+appearance,waist,narrow waist,くびれたウエスト
+appearance,waist,hourglass waist,砂時計型ウエスト
+appearance,waist,thick waist,太いウエスト
+appearance,legs,long legs,長い脚
+appearance,legs,slender legs,細い脚
+appearance,legs,thick thighs,太もも
+appearance,legs,toned legs,引き締まった脚
+appearance,legs,short legs,短い脚
+appearance,legs,muscular legs,筋肉質な脚
 *,color,black,黒
 *,color,white,白
 *,color,red,赤
@@ -323,6 +384,55 @@ demographics,ethnicity,Southeast Asian,東南アジア系
 demographics,ethnicity,South Asian,南アジア系
 demographics,ethnicity,Northern European,北欧系
 demographics,ethnicity,Southern European,南欧系
+demographics,race,human,人間
+demographics,race,elf,エルフ
+demographics,race,dark elf,ダークエルフ
+demographics,race,half-elf,ハーフエルフ
+demographics,race,demon,悪魔
+demographics,race,succubus,サキュバス
+demographics,race,angel,天使
+demographics,race,fallen angel,堕天使
+demographics,race,vampire,吸血鬼
+demographics,race,werewolf,人狼
+demographics,race,zombie,ゾンビ
+demographics,race,ghost,幽霊
+demographics,race,fairy,妖精
+demographics,race,pixie,ピクシー
+demographics,race,sprite,精霊
+demographics,race,dryad,ドリアード
+demographics,race,nymph,ニンフ
+demographics,race,mermaid,人魚
+demographics,race,siren,セイレーン
+demographics,race,lamia,ラミア
+demographics,race,harpy,ハーピー
+demographics,race,centaur,ケンタウロス
+demographics,race,orc,オーク
+demographics,race,goblin,ゴブリン
+demographics,race,dwarf,ドワーフ
+demographics,race,giant,巨人
+demographics,race,dragon girl,ドラゴン娘
+demographics,race,kitsune,狐娘
+demographics,race,catgirl,猫娘
+demographics,race,bunny girl,うさ耳娘
+demographics,race,wolf girl,狼娘
+demographics,race,dog girl,犬娘
+demographics,race,cow girl,牛娘
+demographics,race,sheep girl,羊娘
+demographics,race,fox girl,狐娘
+demographics,race,kemonomimi,ケモミミ
+demographics,race,nekomimi,猫耳
+demographics,race,inumimi,犬耳
+demographics,race,usagimimi,兎耳
+demographics,race,oni,鬼
+demographics,race,tengu,天狗
+demographics,race,kappa,河童
+demographics,race,yokai,妖怪
+demographics,race,android,アンドロイド
+demographics,race,cyborg,サイボーグ
+demographics,race,robot,ロボット
+demographics,race,alien,宇宙人
+demographics,race,slime girl,スライム娘
+demographics,race,monster girl,モンスター娘
 environment,world,modern,現代
 environment,world,fantasy,ファンタジー
 environment,world,sci-fi,SF
@@ -606,6 +716,144 @@ environment,season,winter,冬
 environment,crowd,no humans,人物なし
 environment,crowd,crowd,人混み
 environment,crowd,audience,観客
+environment,props,chair,椅子
+environment,props,armchair,アームチェア
+environment,props,office chair,オフィスチェア
+environment,props,stool,スツール
+environment,props,bench,ベンチ
+environment,props,table,テーブル
+environment,props,dining table,ダイニングテーブル
+environment,props,coffee table,コーヒーテーブル
+environment,props,desk,机
+environment,props,bed,ベッド
+environment,props,single bed,シングルベッド
+environment,props,double bed,ダブルベッド
+environment,props,canopy bed,天蓋付きベッド
+environment,props,futon,布団
+environment,props,sofa,ソファ
+environment,props,couch,カウチ
+environment,props,loveseat,二人掛けソファ
+environment,props,bookshelf,本棚
+environment,props,wardrobe,ワードローブ
+environment,props,dresser,ドレッサー
+environment,props,nightstand,ナイトスタンド
+environment,props,cabinet,キャビネット
+environment,props,shelf,棚
+environment,props,lamp,ランプ
+environment,props,floor lamp,フロアランプ
+environment,props,desk lamp,デスクランプ
+environment,props,chandelier,シャンデリア
+environment,props,lantern,ランタン
+environment,props,candles,蝋燭
+environment,props,candelabra,燭台
+environment,props,mirror,鏡
+environment,props,full-length mirror,全身鏡
+environment,props,clock,時計
+environment,props,grandfather clock,大時計
+environment,props,painting,絵画
+environment,props,picture frame,額縁
+environment,props,poster,ポスター
+environment,props,tapestry,タペストリー
+environment,props,rug,ラグ
+environment,props,carpet,カーペット
+environment,props,curtain,カーテン
+environment,props,blinds,ブラインド
+environment,props,vase,花瓶
+environment,props,plant,観葉植物
+environment,props,potted plant,鉢植え
+environment,props,flowers,花
+environment,props,flower arrangement,生花
+environment,props,window,窓
+environment,props,stained glass window,ステンドグラス
+environment,props,door,ドア
+environment,props,double door,両開きドア
+environment,props,sliding door,引き戸
+environment,props,gate,門
+environment,props,stairs,階段
+environment,props,spiral staircase,螺旋階段
+environment,props,pillar,柱
+environment,props,column,円柱
+environment,props,arch,アーチ
+environment,props,balcony,バルコニー
+environment,props,railing,手すり
+environment,props,fireplace,暖炉
+environment,props,throne,玉座
+environment,props,altar,祭壇
+environment,props,pedestal,台座
+environment,props,statue,彫像
+environment,props,fountain,噴水
+environment,props,aquarium,水槽
+environment,props,birdcage,鳥かご
+environment,props,treasure chest,宝箱
+environment,props,coffin,棺
+environment,props,cross,十字架
+environment,props,torii,鳥居
+environment,props,books,本
+environment,props,stack of books,積み重なった本
+environment,props,globe,地球儀
+environment,props,hourglass,砂時計
+environment,props,telescope,望遠鏡
+environment,props,microscope,顕微鏡
+environment,props,computer,コンピュータ
+environment,props,monitor,モニター
+environment,props,television,テレビ
+environment,props,radio,ラジオ
+environment,props,gramophone,蓄音機
+environment,props,piano,ピアノ
+environment,props,grand piano,グランドピアノ
+environment,props,violin,バイオリン
+environment,props,guitar,ギター
+environment,props,drums,ドラム
+environment,props,chess board,チェス盤
+environment,props,cards,トランプ
+environment,props,dice,サイコロ
+environment,props,tree,木
+environment,props,cherry blossom tree,桜の木
+environment,props,willow tree,柳の木
+environment,props,palm tree,ヤシの木
+environment,props,bamboo,竹
+environment,props,bushes,茂み
+environment,props,grass,草
+environment,props,rocks,岩
+environment,props,boulder,大岩
+environment,props,fallen leaves,落ち葉
+environment,props,petals,花びら
+environment,props,snow,雪
+environment,props,ice,氷
+environment,props,crystals,水晶
+environment,props,mushrooms,キノコ
+environment,props,moss,苔
+environment,props,pond,池
+environment,props,stream,小川
+environment,props,waterfall,滝
+environment,props,waves,波
+environment,props,puddle,水たまり
+environment,props,rain,雨
+environment,props,raindrops,雨粒
+environment,props,car,車
+environment,props,motorcycle,バイク
+environment,props,bicycle,自転車
+environment,props,train,電車
+environment,props,bus,バス
+environment,props,airplane,飛行機
+environment,props,helicopter,ヘリコプター
+environment,props,ship,船
+environment,props,boat,ボート
+environment,props,yacht,ヨット
+environment,props,spaceship,宇宙船
+environment,props,flag,旗
+environment,props,banner,バナー
+environment,props,sign,看板
+environment,props,neon sign,ネオンサイン
+environment,props,graffiti,落書き
+environment,props,scaffolding,足場
+environment,props,crane,クレーン
+environment,props,power lines,電線
+environment,props,street lamp,街灯
+environment,props,traffic light,信号機
+environment,props,mailbox,郵便ポスト
+environment,props,vending machine,自動販売機
+environment,props,phone booth,電話ボックス
 expression,emotion,happy,幸せ
 expression,emotion,sad,悲しい
 expression,emotion,angry,怒り
@@ -1233,6 +1481,216 @@ outfit,state,clothes pull,服を引っ張る
 outfit,state,clothes lift,服をめくる
 outfit,state,skirt lift,スカートめくり
 outfit,state,shirt lift,シャツめくり
+outfit,costume,maid,メイド
+outfit,costume,french maid,フレンチメイド
+outfit,costume,victorian maid,ヴィクトリアンメイド
+outfit,costume,nurse,ナース
+outfit,costume,schoolgirl,女学生
+outfit,costume,sailor uniform,セーラー服
+outfit,costume,blazer uniform,ブレザー制服
+outfit,costume,school uniform,学生服
+outfit,costume,witch,魔女
+outfit,costume,bunny girl,バニーガール
+outfit,costume,playboy bunny,プレイボーイバニー
+outfit,costume,idol,アイドル
+outfit,costume,magical girl,魔法少女
+outfit,costume,princess,お姫様
+outfit,costume,queen,女王
+outfit,costume,knight,騎士
+outfit,costume,samurai,侍
+outfit,costume,ninja,忍者
+outfit,costume,kunoichi,くノ一
+outfit,costume,shrine maiden,巫女
+outfit,costume,police officer,警察官
+outfit,costume,military uniform,軍服
+outfit,costume,sailor,水兵
+outfit,costume,pilot,パイロット
+outfit,costume,flight attendant,客室乗務員
+outfit,costume,firefighter,消防士
+outfit,costume,doctor,医者
+outfit,costume,scientist,科学者
+outfit,costume,cheerleader,チアリーダー
+outfit,costume,ballerina,バレリーナ
+outfit,costume,figure skater,フィギュアスケーター
+outfit,costume,tennis player,テニスプレイヤー
+outfit,costume,swimmer,水泳選手
+outfit,costume,wrestler,レスラー
+outfit,costume,boxer,ボクサー
+outfit,costume,race queen,レースクイーン
+outfit,costume,cowgirl,カウガール
+outfit,costume,pirate,海賊
+outfit,costume,vampire,ヴァンパイア衣装
+outfit,costume,angel costume,天使コスチューム
+outfit,costume,demon costume,悪魔コスチューム
+outfit,costume,devil costume,デビルコスチューム
+outfit,costume,cat costume,猫コスチューム
+outfit,costume,animal costume,動物コスチューム
+outfit,costume,santa costume,サンタ衣装
+outfit,costume,chinese dress,チャイナドレス
+outfit,costume,waitress,ウェイトレス
+outfit,headwear,hat,帽子
+outfit,headwear,crown,王冠
+outfit,headwear,tiara,ティアラ
+outfit,headwear,beret,ベレー帽
+outfit,headwear,cap,キャップ
+outfit,headwear,baseball cap,野球帽
+outfit,headwear,newsboy cap,キャスケット
+outfit,headwear,fedora,フェドーラ
+outfit,headwear,bowler hat,ボーラーハット
+outfit,headwear,top hat,シルクハット
+outfit,headwear,witch hat,魔女帽
+outfit,headwear,wizard hat,魔法使い帽
+outfit,headwear,santa hat,サンタ帽
+outfit,headwear,nurse cap,ナースキャップ
+outfit,headwear,maid headdress,メイドヘッドドレス
+outfit,headwear,hairband,カチューシャ
+outfit,headwear,headband,ヘアバンド
+outfit,headwear,ribbon,リボン
+outfit,headwear,hair bow,髪飾りリボン
+outfit,headwear,hood,フード
+outfit,headwear,veil,ベール
+outfit,headwear,halo,天使の輪
+outfit,headwear,horns,角
+outfit,headwear,demon horns,悪魔の角
+outfit,headwear,animal ears,動物耳
+outfit,headwear,cat ears,猫耳
+outfit,headwear,bunny ears,うさぎ耳
+outfit,headwear,fox ears,狐耳
+outfit,headwear,headphones,ヘッドフォン
+outfit,headwear,hair ornament,髪飾り
+outfit,headwear,kanzashi,かんざし
+outfit,props,sword,剣
+outfit,props,katana,刀
+outfit,props,spear,槍
+outfit,props,staff,杖
+outfit,props,magic wand,魔法の杖
+outfit,props,bow,弓
+outfit,props,gun,銃
+outfit,props,pistol,拳銃
+outfit,props,rifle,ライフル
+outfit,props,shield,盾
+outfit,props,umbrella,傘
+outfit,props,parasol,日傘
+outfit,props,fan,扇子
+outfit,props,folding fan,扇子
+outfit,props,paper fan,団扇
+outfit,props,book,本
+outfit,props,notebook,ノート
+outfit,props,smartphone,スマートフォン
+outfit,props,tablet,タブレット
+outfit,props,laptop,ノートパソコン
+outfit,props,camera,カメラ
+outfit,props,microphone,マイク
+outfit,props,headset,ヘッドセット
+outfit,props,bag,バッグ
+outfit,props,school bag,スクールバッグ
+outfit,props,briefcase,ブリーフケース
+outfit,props,cup,カップ
+outfit,props,wine glass,ワイングラス
+outfit,props,bottle,ボトル
+outfit,props,cigarette,タバコ
+outfit,props,guitar,ギター
+outfit,props,violin,バイオリン
+outfit,props,flowers,花
+outfit,props,bouquet,花束
+outfit,props,rose,薔薇
+outfit,props,balloon,風船
+outfit,props,plush toy,ぬいぐるみ
+outfit,props,teddy bear,テディベア
+outfit,props,pillow,枕
+outfit,props,food,食べ物
+outfit,props,ice cream,アイスクリーム
+outfit,props,lollipop,ペロペロキャンディー
+outfit,props,pocky,ポッキー
+outfit,props,broom,箒
+outfit,props,mop,モップ
+outfit,props,tray,トレイ
+outfit,pattern,solid,無地
+outfit,pattern,stripes,ストライプ
+outfit,pattern,vertical stripes,縦縞
+outfit,pattern,horizontal stripes,横縞
+outfit,pattern,pinstripes,ピンストライプ
+outfit,pattern,plaid,チェック柄
+outfit,pattern,tartan,タータンチェック
+outfit,pattern,gingham,ギンガムチェック
+outfit,pattern,houndstooth,千鳥格子
+outfit,pattern,polka dots,ドット柄
+outfit,pattern,floral,花柄
+outfit,pattern,paisley,ペイズリー
+outfit,pattern,geometric,幾何学模様
+outfit,pattern,abstract,抽象柄
+outfit,pattern,animal print,アニマル柄
+outfit,pattern,leopard print,レオパード柄
+outfit,pattern,zebra print,ゼブラ柄
+outfit,pattern,camouflage,迷彩柄
+outfit,pattern,argyle,アーガイル
+outfit,pattern,herringbone,ヘリンボーン
+outfit,pattern,stars,星柄
+outfit,pattern,hearts,ハート柄
+outfit,pattern,skulls,スカル柄
+outfit,pattern,lace pattern,レース柄
+outfit,pattern,embroidered,刺繍
+outfit,neckline,crew neck,クルーネック
+outfit,neckline,v-neck,Vネック
+outfit,neckline,deep v-neck,深いVネック
+outfit,neckline,scoop neck,スクープネック
+outfit,neckline,boat neck,ボートネック
+outfit,neckline,square neck,スクエアネック
+outfit,neckline,sweetheart neckline,スウィートハートネック
+outfit,neckline,halter neck,ホルターネック
+outfit,neckline,off-shoulder,オフショルダー
+outfit,neckline,one shoulder,ワンショルダー
+outfit,neckline,strapless,ストラップレス
+outfit,neckline,turtleneck,タートルネック
+outfit,neckline,mock neck,モックネック
+outfit,neckline,cowl neck,カウルネック
+outfit,neckline,collared,襟付き
+outfit,neckline,peter pan collar,丸襟
+outfit,neckline,sailor collar,セーラー襟
+outfit,neckline,mandarin collar,マンダリンカラー
+outfit,neckline,keyhole,キーホール
+outfit,neckline,backless,バックレス
+outfit,neckline,plunging neckline,プランジングネックライン
+outfit,sleeve,sleeveless,ノースリーブ
+outfit,sleeve,cap sleeve,キャップスリーブ
+outfit,sleeve,short sleeve,半袖
+outfit,sleeve,three-quarter sleeve,七分袖
+outfit,sleeve,long sleeve,長袖
+outfit,sleeve,puff sleeve,パフスリーブ
+outfit,sleeve,bell sleeve,ベルスリーブ
+outfit,sleeve,bishop sleeve,ビショップスリーブ
+outfit,sleeve,balloon sleeve,バルーンスリーブ
+outfit,sleeve,raglan sleeve,ラグランスリーブ
+outfit,sleeve,dolman sleeve,ドルマンスリーブ
+outfit,sleeve,kimono sleeve,キモノスリーブ
+outfit,sleeve,flutter sleeve,フラッタースリーブ
+outfit,sleeve,cold shoulder,コールドショルダー
+outfit,sleeve,detached sleeves,デタッチドスリーブ
+outfit,length,micro,マイクロ
+outfit,length,mini,ミニ
+outfit,length,above knee,膝上
+outfit,length,knee length,膝丈
+outfit,length,midi,ミディ
+outfit,length,below knee,膝下
+outfit,length,maxi,マキシ
+outfit,length,floor length,床丈
+outfit,length,cropped,クロップド
+outfit,length,ankle length,足首丈
+outfit,color_scheme,monochrome,モノクロ
+outfit,color_scheme,black and white,白黒
+outfit,color_scheme,pastel colors,パステルカラー
+outfit,color_scheme,neon colors,ネオンカラー
+outfit,color_scheme,earth tones,アースカラー
+outfit,color_scheme,jewel tones,ジュエルトーン
+outfit,color_scheme,metallic,メタリック
+outfit,color_scheme,gradient,グラデーション
+outfit,color_scheme,two-tone,ツートーン
+outfit,color_scheme,multicolor,マルチカラー
+outfit,color_scheme,complementary colors,補色
+outfit,color_scheme,analogous colors,類似色
+outfit,color_scheme,triadic colors,トライアド配色
+outfit,color_scheme,warm colors,暖色系
+outfit,color_scheme,cool colors,寒色系
 photography,shot_with,shot on 35mm film,35mmフィルムで撮影
 photography,shot_with,shot on medium format film,中判フィルムで撮影
 photography,shot_with,shot on large format,大判で撮影
@@ -1387,3 +1845,312 @@ pose,legs,spread legs,開脚
 *,subject,product,製品、商品
 *,subject,food,食べ物
 *,subject,abstract,抽象
+*,effects,sparkles,キラキラ
+*,effects,glitter,グリッター
+*,effects,shimmer,きらめき
+*,effects,glow,グロー
+*,effects,bloom,ブルーム
+*,effects,light rays,光線
+*,effects,god rays,ゴッドレイ
+*,effects,sun rays,太陽光線
+*,effects,volumetric lighting,ボリュームライト
+*,effects,lens flare,レンズフレア
+*,effects,anamorphic flare,アナモルフィックフレア
+*,effects,halo,ハロー
+*,effects,rainbow,虹
+*,effects,prism,プリズム
+*,effects,light leak,光漏れ
+*,effects,neon glow,ネオングロー
+*,effects,bokeh,ボケ
+*,effects,circular bokeh,丸ボケ
+*,effects,hexagonal bokeh,六角ボケ
+*,effects,swirly bokeh,渦巻きボケ
+*,effects,soft focus,ソフトフォーカス
+*,effects,tilt-shift effect,ミニチュア効果
+*,effects,radial blur,放射ブラー
+*,effects,motion blur,モーションブラー
+*,effects,zoom blur,ズームブラー
+*,effects,chromatic aberration,色収差
+*,effects,vignette,周辺減光
+*,effects,film grain,フィルム粒子
+*,effects,noise,ノイズ
+*,effects,glitch,グリッチ
+*,effects,pixelation,ピクセレーション
+*,effects,halftone,ハーフトーン
+*,effects,posterization,ポスタリゼーション
+*,effects,color grading,カラーグレーディング
+*,effects,cross process,クロスプロセス
+*,effects,split toning,スプリットトーニング
+*,effects,duotone,デュオトーン
+*,effects,particles,パーティクル
+*,effects,dust particles,粉塵
+*,effects,floating dust,浮遊粉塵
+*,effects,embers,火の粉
+*,effects,fireflies,蛍
+*,effects,bubbles,泡
+*,effects,confetti,紙吹雪
+*,effects,snow,雪
+*,effects,snowflakes,雪の結晶
+*,effects,rain,雨
+*,effects,raindrops,雨滴
+*,effects,water droplets,水滴
+*,effects,splash,水しぶき
+*,effects,petals,花びら
+*,effects,falling petals,舞い散る花びら
+*,effects,cherry blossoms,桜吹雪
+*,effects,falling leaves,落ち葉
+*,effects,feathers,羽根
+*,effects,smoke,煙
+*,effects,mist,霧
+*,effects,fog,霧
+*,effects,steam,蒸気
+*,effects,clouds,雲
+*,effects,magic particles,魔法パーティクル
+*,effects,stars,星
+*,effects,floating hearts,浮遊ハート
+*,effects,floating music notes,浮遊音符
+*,effects,magic circle,魔法陣
+*,effects,runes,ルーン文字
+*,effects,energy,エネルギー
+*,effects,aura,オーラ
+*,effects,flames,炎
+*,effects,fire,火
+*,effects,lightning,雷
+*,effects,electricity,電気
+*,effects,wind effect,風エフェクト
+*,effects,ice crystals,氷の結晶
+*,effects,frozen,凍結
+*,effects,shatter,粉砕
+*,effects,explosion,爆発
+*,effects,impact,衝撃波
+*,effects,speed lines,スピードライン
+*,effects,action lines,アクションライン
+*,effects,emphasis lines,集中線
+*,effects,screentone,スクリーントーン
+*,effects,shadow,影
+*,effects,silhouette,シルエット
+*,effects,reflection,反射
+*,effects,refraction,屈折
+*,effects,caustics,コースティクス
+*,effects,underwater effect,水中効果
+*,effects,heat haze,陽炎
+*,effects,sunbeam,木漏れ日
+*,effects,dappled sunlight,斑点光
+*,effects,dramatic shadow,ドラマチックな影
+*,negative,worst quality,最低品質
+*,negative,low quality,低品質
+*,negative,normal quality,普通品質
+*,negative,jpeg artifacts,JPEG圧縮ノイズ
+*,negative,compression artifacts,圧縮ノイズ
+*,negative,blurry,ぼやけ
+*,negative,out of focus,ピンボケ
+*,negative,poorly drawn,下手な描写
+*,negative,bad art,低品質アート
+*,negative,amateur,素人っぽい
+*,negative,bad anatomy,おかしな体型
+*,negative,wrong anatomy,間違った解剖学
+*,negative,deformed,変形
+*,negative,disfigured,歪んだ
+*,negative,mutated,変異
+*,negative,malformed,奇形
+*,negative,mutilated,切断された
+*,negative,bad proportions,おかしなプロポーション
+*,negative,long neck,長すぎる首
+*,negative,long body,長すぎる体
+*,negative,bad face,おかしな顔
+*,negative,ugly face,醜い顔
+*,negative,deformed face,変形した顔
+*,negative,asymmetrical face,左右非対称な顔
+*,negative,cross-eyed,寄り目
+*,negative,wall-eyed,離れ目
+*,negative,bad eyes,おかしな目
+*,negative,extra eyes,余分な目
+*,negative,missing eyes,目が欠けている
+*,negative,bad mouth,おかしな口
+*,negative,bad teeth,おかしな歯
+*,negative,bad nose,おかしな鼻
+*,negative,bad ears,おかしな耳
+*,negative,bad hands,おかしな手
+*,negative,missing hands,手が欠けている
+*,negative,extra hands,余分な手
+*,negative,mutated hands,変異した手
+*,negative,poorly drawn hands,下手な手
+*,negative,bad fingers,おかしな指
+*,negative,extra fingers,余分な指
+*,negative,missing fingers,指が欠けている
+*,negative,too many fingers,指が多すぎ
+*,negative,fused fingers,融合した指
+*,negative,long fingers,長すぎる指
+*,negative,extra digit,余分な指
+*,negative,bad arms,おかしな腕
+*,negative,extra arms,余分な腕
+*,negative,missing arms,腕が欠けている
+*,negative,extra limbs,余分な四肢
+*,negative,missing limbs,四肢が欠けている
+*,negative,bad legs,おかしな脚
+*,negative,extra legs,余分な脚
+*,negative,missing legs,脚が欠けている
+*,negative,bad feet,おかしな足
+*,negative,extra feet,余分な足
+*,negative,missing feet,足が欠けている
+*,negative,cropped,切れている
+*,negative,out of frame,フレーム外
+*,negative,cut off,途切れている
+*,negative,clipped,クリップされている
+*,negative,off-center,中心がずれている
+*,negative,poorly framed,フレーミング不良
+*,negative,tilted,傾いている
+*,negative,dutch angle,不自然な傾き
+*,negative,duplicate,重複
+*,negative,clone,クローン
+*,negative,twins,双子（意図しない）
+*,negative,double,ダブり
+*,negative,multiple bodies,複数の体
+*,negative,extra body,余分な体
+*,negative,conjoined,結合した
+*,negative,text,テキスト
+*,negative,watermark,透かし
+*,negative,signature,サイン
+*,negative,artist name,アーティスト名
+*,negative,username,ユーザー名
+*,negative,logo,ロゴ
+*,negative,copyright,著作権表示
+*,negative,title,タイトル
+*,negative,caption,キャプション
+*,negative,border,枠線
+*,negative,frame,フレーム
+*,negative,ugly,醜い
+*,negative,gross,気持ち悪い
+*,negative,disgusting,不快
+*,negative,creepy,不気味
+*,negative,horror,ホラー
+*,negative,scary,怖い
+*,negative,dead,死んだ
+*,negative,corpse,死体
+*,negative,zombie,ゾンビ（意図しない）
+*,negative,grainy,粒状
+*,negative,pixelated,ピクセル化
+*,negative,oversaturated,過飽和
+*,negative,undersaturated,低飽和
+*,negative,overexposed,露出オーバー
+*,negative,underexposed,露出アンダー
+*,negative,noisy,ノイズ
+*,negative,distorted,歪み
+*,negative,warped,歪曲
+*,negative,3d render,3Dレンダー（写実的でない）
+*,negative,cgi,CGI
+*,negative,plastic,プラスチックっぽい
+*,negative,artificial,人工的
+*,negative,uncanny valley,不気味の谷
+*,negative,sketch,スケッチ（意図しない）
+*,negative,unfinished,未完成
+*,negative,draft,下書き
+*,negative,simple,シンプルすぎる
+*,negative,boring,退屈
+*,negative,plain,平凡
+*,negative,generic,ありきたり
+*,negative,nsfw,成人向け
+*,negative,nude,裸（意図しない）
+*,negative,naked,裸体（意図しない）
+*,interaction,holding hands,手をつなぐ
+*,interaction,interlocked fingers,指を絡める
+*,interaction,hugging,抱き合う
+*,interaction,embrace,抱擁
+*,interaction,cuddling,寄り添う
+*,interaction,leaning on,もたれかかる
+*,interaction,resting head on shoulder,肩に頭を乗せる
+*,interaction,head on lap,膝枕
+*,interaction,lap pillow,膝枕
+*,interaction,hand on shoulder,肩に手を置く
+*,interaction,hand on head,頭に手を置く
+*,interaction,patting head,頭を撫でる
+*,interaction,hand on cheek,頬に手を触れる
+*,interaction,hand on back,背中に手を置く
+*,interaction,arm around waist,腰に腕を回す
+*,interaction,arm around shoulder,肩に腕を回す
+*,interaction,hand holding arm,腕を掴む
+*,interaction,linking arms,腕を組む
+*,interaction,kissing,キス
+*,interaction,cheek kiss,頬にキス
+*,interaction,forehead kiss,額にキス
+*,interaction,hand kiss,手にキス
+*,interaction,peck on lips,軽いキス
+*,interaction,deep kiss,ディープキス
+*,interaction,pocky kiss,ポッキーゲーム
+*,interaction,sharing food,食べ物を分ける
+*,interaction,feeding,食べさせる
+*,interaction,facing each other,向かい合う
+*,interaction,back to back,背中合わせ
+*,interaction,side by side,並んで
+*,interaction,shoulder to shoulder,肩を並べて
+*,interaction,one behind another,前後に並ぶ
+*,interaction,piggyback,おんぶ
+*,interaction,princess carry,お姫様抱っこ
+*,interaction,bridal carry,お姫様抱っこ
+*,interaction,carrying,抱えている
+*,interaction,sitting on lap,膝の上に座る
+*,interaction,straddling,跨る
+*,interaction,looking at each other,見つめ合う
+*,interaction,eye contact,アイコンタクト
+*,interaction,gazing,見つめる
+*,interaction,staring,じっと見る
+*,interaction,glancing,ちらっと見る
+*,interaction,looking away from each other,互いに目を逸らす
+*,interaction,whispering,囁く
+*,interaction,talking,話している
+*,interaction,laughing together,一緒に笑う
+*,interaction,smiling at each other,笑い合う
+*,interaction,arguing,口論
+*,interaction,shouting,叫ぶ
+*,interaction,yelling at,怒鳴る
+*,interaction,pointing at,指さす
+*,interaction,dancing together,一緒に踊る
+*,interaction,walking together,一緒に歩く
+*,interaction,running together,一緒に走る
+*,interaction,playing,遊んでいる
+*,interaction,play fighting,じゃれ合い
+*,interaction,wrestling,取っ組み合い
+*,interaction,fighting,戦っている
+*,interaction,sword fighting,剣を交える
+*,interaction,sparring,スパーリング
+*,interaction,pulling,引っ張る
+*,interaction,pushing,押す
+*,interaction,chasing,追いかける
+*,interaction,catching,捕まえる
+*,interaction,tickling,くすぐる
+*,interaction,teasing,からかう
+*,interaction,helping up,起こしてあげる
+*,interaction,supporting,支える
+*,interaction,protecting,守る
+*,interaction,shielding,かばう
+*,interaction,hiding behind,後ろに隠れる
+*,interaction,working together,一緒に作業
+*,interaction,studying together,一緒に勉強
+*,interaction,cooking together,一緒に料理
+*,interaction,reading together,一緒に読書
+*,interaction,watching together,一緒に見る
+*,interaction,taking selfie,セルフィーを撮る
+*,interaction,photo together,一緒に写真
+*,interaction,posing together,一緒にポーズ
+*,interaction,matching outfits,お揃いの服
+*,interaction,matching poses,お揃いのポーズ
+*,interaction,comforting,慰める
+*,interaction,consoling,なぐさめる
+*,interaction,crying on shoulder,肩で泣く
+*,interaction,wiping tears,涙を拭く
+*,interaction,cheering up,励ます
+*,interaction,surprising,驚かせる
+*,interaction,scaring,怖がらせる
+*,interaction,jealous,嫉妬
+*,interaction,shy together,一緒に照れる
+*,interaction,blushing at each other,互いに赤面
+*,interaction,giving gift,プレゼントを渡す
+*,interaction,receiving gift,プレゼントを受け取る
+*,interaction,offering hand,手を差し出す
+*,interaction,reaching out,手を伸ばす
+*,interaction,waving at,手を振る
+*,interaction,saluting,敬礼
+*,interaction,high five,ハイタッチ
+*,interaction,fist bump,拳を合わせる
+*,interaction,pinky promise,指切り
+*,interaction,handshake,握手

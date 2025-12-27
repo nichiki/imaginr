@@ -351,8 +351,8 @@ entries:
   # ========================================
   - parent: photography
     children:
-      - key: camera
-        description: カメラ種類
+      - key: shot_with
+        description: 撮影機材
       - key: lens
         description: レンズ
       - key: film

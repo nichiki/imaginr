@@ -503,13 +503,13 @@ composition:
 
 | キー | 説明 | 例 |
 |------|------|------|
-| `camera` | カメラ種類 | `DSLR`, `mirrorless`, `film camera`, `polaroid`, `smartphone` |
+| `shot_with` | 撮影機材 | `DSLR`, `mirrorless`, `film camera`, `polaroid`, `smartphone` |
 | `lens` | レンズ | `wide angle`, `telephoto`, `fisheye`, `macro`, `85mm portrait` |
 | `film` | フィルム感 | `warm tones`, `grainy`, `faded`, `high contrast` |
 
 ```yaml
 photography:
-  camera: film camera
+  shot_with: film camera
   lens: 85mm portrait
   film: warm tones
 ```
