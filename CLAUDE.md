@@ -198,6 +198,9 @@ interface NodeOverride {
 - [x] t2p: テキストからYAPSプロンプト生成（自然言語 → 構造化YAML）
 - [ ] i2p: 画像からYAPSプロンプト生成（ビジョンモデル使用）
 
+**ファイル管理**
+- [ ] 参照更新機能（リネーム・移動・フォルダ名変更時に_base/_layersの参照を自動更新）
+
 ## Ollama連携（LLMエンハンサー）
 
 構造化YAMLを自然言語プロンプトに変換するLLM機能。Ollama経由でローカルLLMを使用。

@@ -7,7 +7,7 @@ import { SnippetPanel } from '@/components/snippet-panel';
 import { PromptPanel, type PromptTab, type PromptSubTab } from '@/components/prompt-panel';
 import { GenerationPanel } from '@/components/generation-panel';
 import { YamlEditor, YamlEditorRef } from '@/components/yaml-editor';
-import { fileAPI, FileTreeItem, RenameResult } from '@/lib/file-api';
+import { fileAPI, FileTreeItem } from '@/lib/file-api';
 import yaml from 'js-yaml';
 import {
   resolveAndMergeAsync,
@@ -1268,23 +1268,17 @@ export default function Home() {
     }
   }, [openTabs, activeTab, t]);
 
-  // 参照検索ハンドラ
-  const handleFindReferences = useCallback(async (path: string): Promise<string[]> => {
-    return await fileAPI.findReferences(path);
-  }, []);
-
   // リネームハンドラ
   const handleRenameFile = useCallback(async (
     path: string,
-    newName: string,
-    updateReferences: boolean
-  ): Promise<RenameResult> => {
-    const result = await fileAPI.renameFile(path, newName, updateReferences);
+    newName: string
+  ): Promise<void> => {
+    const newPath = await fileAPI.renameFile(path, newName);
     // プリセットのパスも更新
     if (path.endsWith('.yaml') || path.endsWith('.yml')) {
-      await presetAPI.updatePresetTemplatePath(path, result.newPath);
+      await presetAPI.updatePresetTemplatePath(path, newPath);
     } else {
-      await presetAPI.updatePresetFolderPath(path, result.newPath);
+      await presetAPI.updatePresetFolderPath(path, newPath);
     }
 
     // ファイルツリーを再読み込み
@@ -1296,12 +1290,10 @@ export default function Home() {
       const next: Record<string, string> = {};
       for (const [key, value] of Object.entries(prev)) {
         if (key === path) {
-          next[result.newPath] = value;
+          next[newPath] = value;
         } else if (key.startsWith(path + '/')) {
           const relativePath = key.substring(path.length);
-          next[result.newPath + relativePath] = value;
-        } else if (result.updatedFiles.includes(key)) {
-          // 参照が更新されたファイルはキャッシュから削除（次回選択時に再読み込み）
+          next[newPath + relativePath] = value;
         } else {
           next[key] = value;
         }
@@ -1311,10 +1303,10 @@ export default function Home() {
 
     // タブのパスを更新
     const newTabs = openTabs.map((t) => {
-      if (t === path) return result.newPath;
+      if (t === path) return newPath;
       if (t.startsWith(path + '/')) {
         const relativePath = t.substring(path.length);
-        return result.newPath + relativePath;
+        return newPath + relativePath;
       }
       return t;
     });
@@ -1325,10 +1317,10 @@ export default function Home() {
       const next: Record<string, VariableValues> = {};
       for (const [key, value] of Object.entries(prev)) {
         if (key === path) {
-          next[result.newPath] = value;
+          next[newPath] = value;
         } else if (key.startsWith(path + '/')) {
           const relativePath = key.substring(path.length);
-          next[result.newPath + relativePath] = value;
+          next[newPath + relativePath] = value;
         } else {
           next[key] = value;
         }
@@ -1341,10 +1333,10 @@ export default function Home() {
       const next = new Set<string>();
       for (const p of prev) {
         if (p === path) {
-          next.add(result.newPath);
+          next.add(newPath);
         } else if (p.startsWith(path + '/')) {
           const relativePath = p.substring(path.length);
-          next.add(result.newPath + relativePath);
+          next.add(newPath + relativePath);
         } else {
           next.add(p);
         }
@@ -1355,20 +1347,12 @@ export default function Home() {
     // アクティブタブのパスを更新
     let newActiveTab = activeTab;
     if (activeTab === path) {
-      newActiveTab = result.newPath;
-      setActiveTab(result.newPath);
+      newActiveTab = newPath;
+      setActiveTab(newPath);
     } else if (activeTab.startsWith(path + '/')) {
       const relativePath = activeTab.substring(path.length);
-      newActiveTab = result.newPath + relativePath;
+      newActiveTab = newPath + relativePath;
       setActiveTab(newActiveTab);
-    } else if (result.updatedFiles.includes(activeTab)) {
-      // アクティブタブの参照が更新された場合、再読み込み
-      try {
-        const updatedContent = await fileAPI.readFile(activeTab);
-        setFiles((prev) => ({ ...prev, [activeTab]: updatedContent }));
-      } catch (e) {
-        console.error('Failed to reload updated file:', e);
-      }
     }
 
     // 展開状態を更新（フォルダの場合）
@@ -1376,10 +1360,10 @@ export default function Home() {
       const next = new Set<string>();
       for (const p of prev) {
         if (p === path) {
-          next.add(result.newPath);
+          next.add(newPath);
         } else if (p.startsWith(path + '/')) {
           const relativePath = p.substring(path.length);
-          next.add(result.newPath + relativePath);
+          next.add(newPath + relativePath);
         } else {
           next.add(p);
         }
@@ -1389,8 +1373,6 @@ export default function Home() {
       }
       return next;
     });
-
-    return result;
   }, [openTabs, activeTab]);
 
   // エディタ変更ハンドラ
@@ -1688,7 +1670,6 @@ export default function Home() {
             onDeleteFolder={handleDeleteFolder}
             onMoveFile={handleMoveFile}
             onRenameFile={handleRenameFile}
-            onFindReferences={handleFindReferences}
             onDuplicateFile={handleDuplicateFile}
             ollamaSettings={ollamaSettings ?? undefined}
           />

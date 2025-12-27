@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
-import { FileTreeItem, RenameResult } from '@/lib/file-api';
+import { FileTreeItem } from '@/lib/file-api';
 import { cn } from '@/lib/utils';
 import { ChevronRight, FileIcon, FolderIcon, FolderPlus, Plus, Trash2, Pencil, Columns2, Copy, Sparkles, Loader2 } from 'lucide-react';
 import {
@@ -49,8 +49,7 @@ interface FileTreeProps {
   onDeleteFile: (path: string) => void;
   onDeleteFolder: (path: string) => void;
   onMoveFile?: (from: string, to: string) => void;
-  onRenameFile?: (path: string, newName: string, updateReferences: boolean) => Promise<RenameResult>;
-  onFindReferences?: (path: string) => Promise<string[]>;
+  onRenameFile?: (path: string, newName: string) => Promise<void>;
   onDuplicateFile?: (path: string) => void;
   ollamaSettings?: OllamaSettings;
 }
@@ -69,7 +68,6 @@ export function FileTree({
   onDeleteFolder,
   onMoveFile,
   onRenameFile,
-  onFindReferences,
   onDuplicateFile,
   ollamaSettings,
 }: FileTreeProps) {
@@ -85,9 +83,6 @@ export function FileTree({
   const [isRenameDialogOpen, setIsRenameDialogOpen] = useState(false);
   const [renameTarget, setRenameTarget] = useState<{ path: string; name: string; type: 'file' | 'folder' } | null>(null);
   const [newRenameName, setNewRenameName] = useState('');
-  const [references, setReferences] = useState<string[]>([]);
-  const [isCheckingReferences, setIsCheckingReferences] = useState(false);
-  const [showReferenceWarning, setShowReferenceWarning] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [fileNameError, setFileNameError] = useState('');
   const [folderNameError, setFolderNameError] = useState('');
@@ -217,8 +212,6 @@ export function FileTree({
     // ファイルの場合は拡張子を除去して表示
     const displayName = type === 'file' ? name.replace(/\.(yaml|yml)$/, '') : name;
     setNewRenameName(displayName);
-    setReferences([]);
-    setShowReferenceWarning(false);
     setRenameError('');
     setIsRenameDialogOpen(true);
   };
@@ -238,38 +231,10 @@ export function FileTree({
       return;
     }
 
-    // ファイルの場合のみ参照チェック
-    if (renameTarget.type === 'file' && onFindReferences && !showReferenceWarning) {
-      setIsCheckingReferences(true);
-      try {
-        const refs = await onFindReferences(renameTarget.path);
-        if (refs.length > 0) {
-          setReferences(refs);
-          setShowReferenceWarning(true);
-          setIsCheckingReferences(false);
-          return;
-        }
-      } catch {
-        // 参照チェック失敗してもリネームは続行
-      }
-      setIsCheckingReferences(false);
-    }
-
-    // リネーム実行（参照更新なし）
-    await executeRename(false);
-  };
-
-  const executeRename = async (updateReferences: boolean) => {
-    if (!renameTarget || !newRenameName.trim() || !onRenameFile) return;
-
-    // ファイルの場合は拡張子を付ける
-    const fullNewName = renameTarget.type === 'file' ? `${newRenameName}.yaml` : newRenameName;
-
     setIsRenaming(true);
     try {
-      await onRenameFile(renameTarget.path, fullNewName, updateReferences);
+      await onRenameFile(renameTarget.path, fullNewName);
       setIsRenameDialogOpen(false);
-      setShowReferenceWarning(false);
     } catch (error) {
       const { showError } = await import('@/lib/dialog');
       await showError(error instanceof Error ? error.message : t('fileTree.renameFailed'));
@@ -526,60 +491,37 @@ export function FileTree({
         </Dialog>
 
         {/* Rename Dialog */}
-        <Dialog open={isRenameDialogOpen} onOpenChange={(open) => {
-          if (!open) {
-            setShowReferenceWarning(false);
-          }
-          setIsRenameDialogOpen(open);
-        }}>
+        <Dialog open={isRenameDialogOpen} onOpenChange={setIsRenameDialogOpen}>
           <DialogContent className="bg-[#252526] border-[#333] text-[#d4d4d4]">
             <DialogHeader>
               <DialogTitle className="text-white">
-                {showReferenceWarning ? t('fileTree.referencesFound') : (renameTarget?.type === 'folder' ? t('fileTree.renameFolder') : t('fileTree.renameFile'))}
+                {renameTarget?.type === 'folder' ? t('fileTree.renameFolder') : t('fileTree.renameFile')}
               </DialogTitle>
             </DialogHeader>
             <div className="py-4">
-              {!showReferenceWarning ? (
-                <>
-                  <div className="flex items-center gap-1">
-                    <Input
-                      placeholder={renameTarget?.type === 'folder' ? t('fileTree.folderNamePlaceholder') : t('fileTree.fileNamePlaceholder')}
-                      value={newRenameName}
-                      onChange={(e) => {
-                        setNewRenameName(e.target.value);
-                        setRenameError('');
-                      }}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' && e.nativeEvent.keyCode !== 229) {
-                          handleRenameSubmit();
-                        }
-                      }}
-                      className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] flex-1"
-                      autoFocus
-                      disabled={isCheckingReferences || isRenaming}
-                    />
-                    {renameTarget?.type === 'file' && (
-                      <span className="text-[#888] text-sm">.yaml</span>
-                    )}
-                  </div>
-                  {renameError && (
-                    <p className="text-xs text-red-400 mt-2">{renameError}</p>
-                  )}
-                </>
-              ) : (
-                <div className="space-y-3">
-                  <p className="text-sm text-yellow-400">
-                    {t('fileTree.referencedBy', { count: references.length })}
-                  </p>
-                  <ul className="text-xs text-[#888] max-h-32 overflow-y-auto space-y-1 bg-[#1e1e1e] p-2 rounded">
-                    {references.map((ref) => (
-                      <li key={ref}>{ref}</li>
-                    ))}
-                  </ul>
-                  <p className="text-sm text-[#d4d4d4]">
-                    {t('fileTree.updateReferencesQuestion')}
-                  </p>
-                </div>
+              <div className="flex items-center gap-1">
+                <Input
+                  placeholder={renameTarget?.type === 'folder' ? t('fileTree.folderNamePlaceholder') : t('fileTree.fileNamePlaceholder')}
+                  value={newRenameName}
+                  onChange={(e) => {
+                    setNewRenameName(e.target.value);
+                    setRenameError('');
+                  }}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter' && e.nativeEvent.keyCode !== 229) {
+                      handleRenameSubmit();
+                    }
+                  }}
+                  className="bg-[#3c3c3c] border-[#555] text-[#d4d4d4] flex-1"
+                  autoFocus
+                  disabled={isRenaming}
+                />
+                {renameTarget?.type === 'file' && (
+                  <span className="text-[#888] text-sm">.yaml</span>
+                )}
+              </div>
+              {renameError && (
+                <p className="text-xs text-red-400 mt-2">{renameError}</p>
               )}
               {renameTarget && (
                 <p className="text-xs text-[#888] mt-2">
@@ -588,51 +530,21 @@ export function FileTree({
               )}
             </div>
             <DialogFooter>
-              {!showReferenceWarning ? (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsRenameDialogOpen(false)}
-                    className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
-                    disabled={isCheckingReferences || isRenaming}
-                  >
-                    {t('common.cancel')}
-                  </Button>
-                  <Button
-                    onClick={handleRenameSubmit}
-                    className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
-                    disabled={isCheckingReferences || isRenaming || !newRenameName.trim()}
-                  >
-                    {isCheckingReferences ? t('fileTree.checking') : isRenaming ? t('fileTree.renaming') : t('common.rename')}
-                  </Button>
-                </>
-              ) : (
-                <>
-                  <Button
-                    variant="outline"
-                    onClick={() => setIsRenameDialogOpen(false)}
-                    className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
-                    disabled={isRenaming}
-                  >
-                    {t('common.cancel')}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    onClick={() => executeRename(false)}
-                    className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
-                    disabled={isRenaming}
-                  >
-                    {isRenaming ? t('fileTree.renaming') : t('fileTree.renameOnly')}
-                  </Button>
-                  <Button
-                    onClick={() => executeRename(true)}
-                    className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
-                    disabled={isRenaming}
-                  >
-                    {isRenaming ? t('fileTree.updating') : t('fileTree.updateReferences')}
-                  </Button>
-                </>
-              )}
+              <Button
+                variant="outline"
+                onClick={() => setIsRenameDialogOpen(false)}
+                className="bg-transparent border-[#555] text-[#d4d4d4] hover:bg-[#3c3c3c]"
+                disabled={isRenaming}
+              >
+                {t('common.cancel')}
+              </Button>
+              <Button
+                onClick={handleRenameSubmit}
+                className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
+                disabled={isRenaming || !newRenameName.trim()}
+              >
+                {isRenaming ? t('fileTree.renaming') : t('common.rename')}
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

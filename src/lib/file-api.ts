@@ -20,10 +20,6 @@ export interface FileTreeItem {
   children?: FileTreeItem[];
 }
 
-export interface RenameResult {
-  newPath: string;
-  updatedFiles: string[];
-}
 
 export interface FileAPI {
   listFiles(): Promise<FileTreeItem[]>;
@@ -34,8 +30,7 @@ export interface FileAPI {
   deleteFile(path: string): Promise<void>;
   deleteFolder(path: string): Promise<void>;
   moveFile(from: string, to: string): Promise<string>; // returns new path
-  findReferences(path: string): Promise<string[]>; // find files that reference this path
-  renameFile(path: string, newName: string, updateReferences?: boolean): Promise<RenameResult>;
+  renameFile(path: string, newName: string): Promise<string>; // returns new path
   duplicateFile(path: string): Promise<string>; // returns new path
 }
 
@@ -188,74 +183,11 @@ class TauriFileAPI implements FileAPI {
     return resultPath;
   }
 
-  async findReferences(path: string): Promise<string[]> {
-    // Search all YAML files for references to this path
-    const references: string[] = [];
-    const basePath = await this.getBasePath();
-
-    const searchInDir = async (dirPath: string, relativePath: string) => {
-      try {
-        const entries = await readDir(dirPath);
-
-        for (const entry of entries) {
-          if (entry.name.startsWith('.')) continue;
-
-          const entryRelativePath = relativePath ? `${relativePath}/${entry.name}` : entry.name;
-          const entryFullPath = await joinPath(dirPath, entry.name);
-
-          if (entry.isDirectory) {
-            await searchInDir(entryFullPath, entryRelativePath);
-          } else if (entry.name.endsWith('.yaml') || entry.name.endsWith('.yml')) {
-            const content = await readTextFile(entryFullPath);
-            if (content.includes(path)) {
-              references.push(entryRelativePath);
-            }
-          }
-        }
-      } catch (error) {
-        console.error('Error searching directory:', dirPath, error);
-      }
-    };
-
-    await searchInDir(basePath, '');
-    return references;
-  }
-
-  async renameFile(path: string, newName: string, updateReferences = false): Promise<RenameResult> {
-    const oldPath = path;
+  async renameFile(path: string, newName: string): Promise<string> {
     const parentPath = path.substring(0, path.lastIndexOf('/'));
     const newPath = parentPath ? `${parentPath}/${newName}` : newName;
-
-    // Find references before renaming
-    const references = updateReferences ? await this.findReferences(oldPath) : [];
-
-    // Rename the file
-    await this.moveFile(oldPath, newPath);
-
-    // Update references if requested
-    const updatedFiles: string[] = [];
-    if (updateReferences && references.length > 0) {
-      for (const refPath of references) {
-        if (refPath === newPath) continue; // Skip the renamed file itself
-
-        try {
-          const content = await this.readFile(refPath);
-          const updatedContent = content.replace(
-            new RegExp(oldPath.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'),
-            newPath
-          );
-
-          if (content !== updatedContent) {
-            await this.writeFile(refPath, updatedContent);
-            updatedFiles.push(refPath);
-          }
-        } catch (error) {
-          console.error(`Failed to update reference in ${refPath}:`, error);
-        }
-      }
-    }
-
-    return { newPath, updatedFiles };
+    await this.moveFile(path, newPath);
+    return newPath;
   }
 
   async duplicateFile(path: string): Promise<string> {
