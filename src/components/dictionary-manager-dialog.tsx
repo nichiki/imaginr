@@ -10,10 +10,19 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Search, Download, Upload, Plus } from 'lucide-react';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+import { Label } from '@/components/ui/label';
+import { Search, Download, Upload, Plus, Loader2 } from 'lucide-react';
 import { DictionaryContextTree } from './dictionary-context-tree';
 import { DictionaryEntryList } from './dictionary-entry-list';
 import * as dictAPI from '@/lib/dictionary-db-api';
+
+// Import dialog state
+type ImportDialogState =
+  | { status: 'idle'; filePath: string; mode: 'merge' | 'replace' }
+  | { status: 'importing' }
+  | { status: 'completed'; result: { added: number; updated: number; skipped: number } }
+  | { status: 'error'; message: string };
 
 interface DictionaryManagerDialogProps {
   open: boolean;
@@ -36,6 +45,7 @@ export function DictionaryManagerDialog({
   const [showNewKeyDialog, setShowNewKeyDialog] = useState(false);
   const [newKeyContext, setNewKeyContext] = useState('');
   const [newKeyName, setNewKeyName] = useState('');
+  const [importDialogState, setImportDialogState] = useState<ImportDialogState | null>(null);
 
   // Load tree data on open
   useEffect(() => {
@@ -147,17 +157,17 @@ export function DictionaryManagerDialog({
 
   const handleExport = async () => {
     try {
-      const yamlContent = await dictAPI.exportToYaml();
+      const csvContent = await dictAPI.exportToCsv();
       const { save } = await import('@tauri-apps/plugin-dialog');
       const { writeTextFile } = await import('@tauri-apps/plugin-fs');
 
       const filePath = await save({
-        filters: [{ name: 'YAML', extensions: ['yaml', 'yml'] }],
-        defaultPath: 'dictionary-export.yaml',
+        filters: [{ name: 'CSV', extensions: ['csv'] }],
+        defaultPath: 'dictionary-export.csv',
       });
 
       if (filePath) {
-        await writeTextFile(filePath, yamlContent);
+        await writeTextFile(filePath, csvContent);
         const { showInfo } = await import('@/lib/dialog');
         await showInfo(t('dictionary.exportSuccess'));
       }
@@ -171,36 +181,49 @@ export function DictionaryManagerDialog({
   const handleImport = async () => {
     try {
       const { open } = await import('@tauri-apps/plugin-dialog');
-      const { readTextFile } = await import('@tauri-apps/plugin-fs');
 
       const filePath = await open({
-        filters: [{ name: 'YAML', extensions: ['yaml', 'yml'] }],
+        filters: [{ name: 'CSV', extensions: ['csv'] }],
         multiple: false,
       });
 
       if (!filePath || typeof filePath !== 'string') return;
 
+      // Open the import mode selection dialog
+      setImportDialogState({ status: 'idle', filePath, mode: 'merge' });
+    } catch (e) {
+      console.error('Failed to open file dialog:', e);
+    }
+  };
+
+  const handleImportConfirm = async () => {
+    if (!importDialogState || importDialogState.status !== 'idle') return;
+
+    const { filePath, mode } = importDialogState;
+    setImportDialogState({ status: 'importing' });
+
+    try {
+      const { readTextFile } = await import('@tauri-apps/plugin-fs');
       const content = await readTextFile(filePath);
 
-      // Ask for import mode
-      const { showConfirm } = await import('@/lib/dialog');
-      const replaceMode = await showConfirm(
-        t('dictionary.importMethod'),
-        { okLabel: t('common.replace'), cancelLabel: t('common.merge') }
-      );
-
-      const result = await dictAPI.importFromYaml(content, replaceMode ? 'replace' : 'merge');
+      const result = await dictAPI.importFromCsv(content, mode);
       await loadTreeData();
       onDictionaryChange?.();
 
-      const { showInfo } = await import('@/lib/dialog');
-      await showInfo(
-        t('dictionary.importResult', { added: result.added, updated: result.updated, skipped: result.skipped })
-      );
+      setImportDialogState({ status: 'completed', result });
     } catch (e) {
       console.error('Failed to import dictionary:', e);
-      const { showError } = await import('@/lib/dialog');
-      await showError(t('dictionary.importFailed') + ': ' + (e instanceof Error ? e.message : ''));
+      setImportDialogState({
+        status: 'error',
+        message: e instanceof Error ? e.message : String(e),
+      });
+    }
+  };
+
+  const handleImportDialogClose = () => {
+    // Only allow closing if not importing
+    if (importDialogState?.status !== 'importing') {
+      setImportDialogState(null);
     }
   };
 
@@ -359,6 +382,116 @@ export function DictionaryManagerDialog({
               </Button>
             </div>
           </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Import Dialog */}
+      <Dialog open={importDialogState !== null} onOpenChange={handleImportDialogClose}>
+        <DialogContent className="max-w-sm bg-[#252526] border-[#454545]">
+          <DialogHeader>
+            <DialogTitle className="text-[#cccccc]">{t('dictionary.importTitle')}</DialogTitle>
+          </DialogHeader>
+
+          {/* Idle: Mode selection */}
+          {importDialogState?.status === 'idle' && (
+            <div className="space-y-4">
+              <RadioGroup
+                value={importDialogState.mode}
+                onValueChange={(value: 'merge' | 'replace') =>
+                  setImportDialogState({ ...importDialogState, mode: value })
+                }
+                className="space-y-3"
+              >
+                <div className="flex items-center space-x-3">
+                  <RadioGroupItem
+                    value="merge"
+                    id="import-merge"
+                    className="border-[#888] text-[#0e639c] data-[state=checked]:border-[#0e639c]"
+                  />
+                  <Label htmlFor="import-merge" className="text-[#cccccc] cursor-pointer">
+                    {t('dictionary.importModeAdd')}
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-3">
+                  <RadioGroupItem
+                    value="replace"
+                    id="import-replace"
+                    className="border-[#888] text-[#0e639c] data-[state=checked]:border-[#0e639c]"
+                  />
+                  <Label htmlFor="import-replace" className="text-[#cccccc] cursor-pointer">
+                    {t('dictionary.importModeReplace')}
+                  </Label>
+                </div>
+              </RadioGroup>
+              <div className="flex justify-end gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleImportDialogClose}
+                  className="text-[#cccccc]"
+                >
+                  {t('common.cancel')}
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={handleImportConfirm}
+                  className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
+                >
+                  {t('common.import')}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Importing: Progress indicator */}
+          {importDialogState?.status === 'importing' && (
+            <div className="flex flex-col items-center gap-3 py-4">
+              <Loader2 className="h-8 w-8 text-[#0e639c] animate-spin" />
+              <p className="text-[#cccccc] text-sm">{t('dictionary.importing')}</p>
+            </div>
+          )}
+
+          {/* Completed: Result display */}
+          {importDialogState?.status === 'completed' && (
+            <div className="space-y-4">
+              <p className="text-[#4ec9b0] text-sm font-medium">{t('dictionary.importComplete')}</p>
+              <p className="text-[#cccccc] text-sm whitespace-pre-line">
+                {t('dictionary.importResult', {
+                  added: importDialogState.result.added,
+                  updated: importDialogState.result.updated,
+                  skipped: importDialogState.result.skipped,
+                })}
+              </p>
+              <div className="flex justify-end">
+                <Button
+                  size="sm"
+                  onClick={handleImportDialogClose}
+                  className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
+                >
+                  {t('common.close')}
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {/* Error: Error message */}
+          {importDialogState?.status === 'error' && (
+            <div className="space-y-4">
+              <p className="text-[#f14c4c] text-sm">{t('dictionary.importFailed')}</p>
+              <p className="text-[#cccccc] text-xs bg-[#3c3c3c] p-2 rounded">
+                {importDialogState.message}
+              </p>
+              <div className="flex justify-end">
+                <Button
+                  size="sm"
+                  onClick={handleImportDialogClose}
+                  className="bg-[#0e639c] hover:bg-[#1177bb] text-white"
+                >
+                  {t('common.close')}
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </>

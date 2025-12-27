@@ -1,0 +1,1389 @@
+﻿context,key,value,description
+*,aesthetic,editorial photography,雑誌風
+*,aesthetic,fashion photography,ファッション誌風
+*,aesthetic,fine art photography,アート写真
+*,aesthetic,street photography,ストリートスナップ
+*,aesthetic,documentary photography,ドキュメンタリー風
+*,aesthetic,cinematic,映画風
+*,aesthetic,film noir,フィルムノワール
+*,aesthetic,vintage film,ヴィンテージフィルム
+*,aesthetic,impressionism,印象派
+*,aesthetic,art deco,アールデコ
+*,aesthetic,art nouveau,アールヌーヴォー
+*,aesthetic,baroque,バロック
+*,aesthetic,renaissance,ルネサンス
+*,aesthetic,romanticism,ロマン主義
+*,aesthetic,ukiyo-e,浮世絵
+*,aesthetic,cyberpunk,サイバーパンク
+*,aesthetic,vaporwave,ヴェイパーウェイブ
+*,aesthetic,synthwave,シンセウェイブ
+*,aesthetic,minimalist,ミニマル
+*,aesthetic,maximalist,マキシマル
+*,aesthetic,ethereal,幻想的
+*,aesthetic,dreamy,夢幻的
+*,aesthetic,gritty,ざらついた質感
+*,aesthetic,clean,クリーン
+*,aesthetic,moody,ムーディー
+hair,length,very short hair,ベリーショート
+hair,length,short hair,ショート
+hair,length,medium hair,ミディアム
+hair,length,long hair,ロング
+hair,length,very long hair,ベリーロング
+hair,length,absurdly long hair,超ロング、地面に届く
+hair,length,big hair,ボリューム強調
+hair,style,straight hair,ストレート
+hair,style,wavy hair,ウェーブ
+hair,style,curly hair,カーリー
+hair,style,messy hair,無造作、ぼさぼさ
+hair,style,bob cut,ボブ
+hair,style,pixie cut,ピクシーカット
+hair,style,hime cut,姫カット
+hair,style,bowl cut,おかっぱ
+hair,style,buzz cut,丸刈り
+hair,style,crew cut,軍人カット
+hair,style,flattop,角刈り
+hair,style,undercut,ツーブロック
+hair,style,mohawk,モヒカン
+hair,style,afro,アフロ
+hair,style,pompadour,ポンパドール
+hair,style,mullet,マレット、襟足長め
+hair,style,flipped hair,外ハネ
+hair,style,cornrows,コーンロウ
+hair,style,dreadlocks,ドレッド
+hair,style,spiked hair,つんつん髪
+hair,style,slicked back,オールバック
+hair,style,comb over,なでつけ髪
+hair,style,hair down,下ろした髪
+hair,style,hair up,アップスタイル
+hair,style,asymmetrical hair,左右非対称
+hair,style,sidecut,サイドカット
+hair,style,blunt ends,毛先揃え
+hair,style,short hair with long locks,横髪長め
+hair,style,ponytail,ポニーテール
+hair,style,high ponytail,高い位置のポニテ
+hair,style,low ponytail,低い位置のポニテ
+hair,style,side ponytail,サイドポニテ
+hair,style,short ponytail,短いポニテ
+hair,style,folded ponytail,折り返しポニテ
+hair,style,twintails,ツインテール
+hair,style,low twintails,低い位置のツインテ
+hair,style,short twintails,短いツインテ
+hair,style,two side up,サイドアップ
+hair,style,one side up,ワンサイドアップ
+hair,style,braid,三つ編み
+hair,style,single braid,一本三つ編み
+hair,style,twin braids,二本三つ編み
+hair,style,side braid,サイド三つ編み
+hair,style,french braid,フレンチブレイド
+hair,style,crown braid,クラウンブレイド
+hair,style,hair bun,お団子
+hair,style,single hair bun,一つお団子
+hair,style,double bun,二つお団子
+hair,style,braided bun,編み込みお団子
+hair,style,half updo,ハーフアップ
+hair,style,topknot,トップノット
+hair,style,hair rings,輪っか結び
+hair,style,bow-shaped hair,リボン結び
+hair,style,drill hair,ドリルヘア
+hair,style,twin drills,ツインドリル
+hair,style,ringlets,縦ロール
+hair,style,pointy hair,突き出した髪
+hair,style,hair flaps,猫耳風ハネ
+hair,color,black hair,黒
+hair,color,dark brown hair,ダークブラウン
+hair,color,brown hair,ブラウン
+hair,color,chestnut hair,栗色
+hair,color,light brown hair,ライトブラウン
+hair,color,blonde hair,ブロンド
+hair,color,platinum blonde hair,プラチナブロンド
+hair,color,red hair,赤毛
+hair,color,auburn hair,赤褐色
+hair,color,orange hair,オレンジ
+hair,color,gray hair,グレー
+hair,color,white hair,白
+hair,color,silver hair,シルバー
+hair,color,pink hair,ピンク
+hair,color,blue hair,青
+hair,color,light blue hair,水色
+hair,color,purple hair,紫
+hair,color,green hair,緑
+hair,color,aqua hair,アクア
+hair,color,multicolored hair,マルチカラー
+hair,color,gradient hair,グラデーション
+hair,color,split-color hair,左右二色
+hair,color,two-tone hair,ツートーン
+hair,color,colored inner hair,インナーカラー
+hair,color,streaked hair,メッシュ
+hair,color,colored tips,毛先染め
+hair,color,rainbow hair,虹色
+hair,bangs,bangs,前髪あり
+hair,bangs,blunt bangs,ぱっつん
+hair,bangs,swept bangs,横流し
+hair,bangs,parted bangs,真ん中分け
+hair,bangs,asymmetrical bangs,左右非対称
+hair,bangs,hair between eyes,M字バング
+hair,bangs,hair over eyes,両目隠れ
+hair,bangs,hair over one eye,片目隠れ
+hair,bangs,crossed bangs,クロス前髪
+hair,bangs,hair intakes,エアインテーク
+hair,bangs,forehead,おでこ出し
+hair,bangs,no bangs,前髪なし
+hair,bangs,braided bangs,編み込み前髪
+hair,extras,ahoge,アホ毛
+hair,extras,huge ahoge,大きいアホ毛
+hair,extras,heart ahoge,ハート型アホ毛
+hair,extras,antenna hair,触角ヘア
+hair,extras,floating hair,ふわっとなびく
+hair,extras,hair spread out,広がった髪
+hair,extras,wind,風になびく
+hair,extras,wet hair,濡れ髪
+hair,extras,shiny hair,艶髪
+hair,extras,metallic hair,メタリック
+hair,extras,disheveled hair,乱れ髪
+hair,extras,sidelocks,もみあげ長め
+hair,extras,lone nape hair,後れ毛
+hair,extras,widow's peak,富士額
+eyes,color,black eyes,黒
+eyes,color,dark brown eyes,ダークブラウン
+eyes,color,brown eyes,ブラウン
+eyes,color,light brown eyes,ライトブラウン
+eyes,color,hazel eyes,ヘーゼル
+eyes,color,amber eyes,琥珀色
+eyes,color,green eyes,緑
+eyes,color,blue eyes,青
+eyes,color,gray eyes,グレー
+eyes,color,red eyes,赤
+eyes,color,purple eyes,紫
+eyes,color,pink eyes,ピンク
+eyes,color,golden eyes,金色
+eyes,color,silver eyes,銀色
+eyes,color,aqua eyes,アクア
+eyes,color,heterochromia,オッドアイ
+eyes,color,gradient eyes,グラデーション
+appearance,skin,fair skin,色白
+appearance,skin,light skin,明るい肌
+appearance,skin,medium skin,中間
+appearance,skin,olive skin,オリーブ色
+appearance,skin,tan skin,日焼け肌
+appearance,skin,dark skin,ダーク
+appearance,skin,pale skin,青白い
+appearance,skin,porcelain skin,陶器のような
+appearance,skin,freckles,そばかす
+appearance,skin,smooth skin,滑らか
+appearance,skin,glowing skin,輝く
+appearance,build,slim,スリム
+appearance,build,slender,ほっそり
+appearance,build,petite,小柄
+appearance,build,average build,標準
+appearance,build,athletic,アスレチック
+appearance,build,muscular,筋肉質
+appearance,build,curvy,カーヴィー
+appearance,build,tall,長身
+appearance,build,short,小柄
+appearance,face,oval face,卵型
+appearance,face,round face,丸顔
+appearance,face,square face,四角顔
+appearance,face,heart-shaped face,ハート型
+appearance,face,diamond face,ダイヤモンド型
+appearance,face,long face,面長
+appearance,face,angular face,角ばった
+appearance,face,soft features,柔らかい顔立ち
+appearance,face,sharp features,シャープな顔立ち
+appearance,face,delicate features,繊細な顔立ち
+appearance,face,strong jawline,強い顎ライン
+appearance,face,high cheekbones,高い頬骨
+appearance,breast,flat chest,平ら
+appearance,breast,small breasts,小さい
+appearance,breast,medium breasts,普通
+appearance,breast,large breasts,大きい
+appearance,breast,huge breasts,とても大きい
+appearance,makeup,no makeup,ノーメイク
+appearance,makeup,natural makeup,ナチュラル
+appearance,makeup,light makeup,薄化粧
+appearance,makeup,glamorous makeup,グラマラス
+appearance,makeup,heavy makeup,濃いメイク
+appearance,makeup,smoky eyes,スモーキーアイ
+appearance,makeup,red lipstick,赤リップ
+appearance,makeup,pink lipstick,ピンクリップ
+appearance,makeup,nude lipstick,ヌードリップ
+appearance,makeup,glossy lips,グロスリップ
+appearance,makeup,bold eyeliner,太いアイライン
+appearance,makeup,cat eye makeup,キャットアイ
+appearance,makeup,false eyelashes,つけまつ毛
+appearance,makeup,long eyelashes,長いまつ毛
+appearance,makeup,blush,チーク
+appearance,makeup,contoured face,コントゥアリング
+appearance,extras,long legs,脚が長い
+appearance,extras,slim waist,細いウエスト
+appearance,extras,wide hips,広いヒップ
+appearance,extras,toned body,引き締まった体
+appearance,extras,abs,腹筋
+appearance,extras,tattoo,タトゥー
+appearance,extras,arm tattoo,腕タトゥー
+appearance,extras,back tattoo,背中タトゥー
+appearance,extras,piercing,ピアス
+appearance,extras,ear piercing,イヤーピアス
+appearance,extras,navel piercing,へそピアス
+appearance,extras,mole,ほくろ
+appearance,extras,beauty mark,泣きぼくろ
+appearance,extras,scar,傷跡
+appearance,extras,sweaty,汗ばんだ
+appearance,extras,wet body,濡れた体
+appearance,extras,oiled skin,オイル肌
+*,color,black,黒
+*,color,white,白
+*,color,red,赤
+*,color,blue,青
+*,color,deep blue,深い青
+*,color,navy,紺
+*,color,green,緑
+*,color,yellow,黄
+*,color,orange,オレンジ
+*,color,purple,紫
+*,color,pink,ピンク
+*,color,brown,茶
+*,color,gray,グレー
+*,color,beige,ベージュ
+*,color,cream,クリーム
+*,color,gold,ゴールド
+*,color,silver,シルバー
+*,color,matte black,マットブラック
+*,direction,frontal,正面
+*,direction,profile,横顔
+*,direction,three-quarter,斜め
+*,direction,back,後ろ
+*,direction,side,横
+*,direction,top,上から
+*,direction,low angle,下から
+*,quality,soft,柔らかい
+*,quality,sharp,シャープ
+*,quality,smooth,滑らか
+*,quality,rough,粗い
+*,quality,glossy,光沢
+*,quality,matte,マット
+*,quality,subtle,控えめ
+*,quality,strong,強い
+*,quality,minimal,最小限
+composition,shot,headshot,顔のみ
+composition,shot,close-up,顔〜首
+composition,shot,bust shot,胸上
+composition,shot,portrait,頭〜上半身
+composition,shot,upper body,上半身
+composition,shot,medium shot,腰上
+composition,shot,cowboy shot,腿上
+composition,shot,three quarter,膝上
+composition,shot,full body,全身
+composition,shot,wide shot,被写体＋周囲環境
+composition,shot,extreme wide shot,風景主体
+composition,angle,eye level,目線の高さ
+composition,angle,from above,上から
+composition,angle,from below,下から
+composition,angle,high angle,フカン（見下ろし）
+composition,angle,low angle,アオリ（見上げ）
+composition,angle,dutch angle,傾き構図
+composition,angle,overhead,真上から
+composition,angle,birds eye view,高所から斜め下
+composition,angle,worms eye view,低所から見上げ
+composition,method,rule of thirds,三分割法
+composition,method,centered,中央配置
+composition,method,symmetrical,左右対称
+composition,method,golden ratio,黄金比
+composition,method,diagonal,対角線配置
+composition,method,leading lines,導線
+composition,method,framing,フレーミング
+demographics,gender,woman,女性
+demographics,gender,man,男性
+demographics,gender,girl,少女
+demographics,gender,boy,少年
+demographics,gender,androgynous,中性的
+demographics,gender,non-binary,ノンバイナリー
+demographics,age,young,若い
+demographics,age,young adult,若い大人
+demographics,age,middle-aged,中年
+demographics,age,elderly,高齢
+demographics,age,teenage,10代
+demographics,age,20 years old,20歳
+demographics,age,25 years old,25歳
+demographics,age,30 years old,30歳
+demographics,age,in her 20s,20代女性
+demographics,age,in his 20s,20代男性
+demographics,age,in her 30s,30代女性
+demographics,age,in his 30s,30代男性
+demographics,age,early 20s,20代前半
+demographics,age,late 20s,20代後半
+demographics,ethnicity,Asian,アジア系
+demographics,ethnicity,Caucasian,白人
+demographics,ethnicity,African,アフリカ系
+demographics,ethnicity,Hispanic,ヒスパニック
+demographics,ethnicity,Middle Eastern,中東系
+demographics,ethnicity,Mixed,ミックス
+demographics,ethnicity,Japanese,日本人
+demographics,ethnicity,East Asian,東アジア系
+demographics,ethnicity,Southeast Asian,東南アジア系
+demographics,ethnicity,South Asian,南アジア系
+demographics,ethnicity,Northern European,北欧系
+demographics,ethnicity,Southern European,南欧系
+environment,world,modern,現代
+environment,world,fantasy,ファンタジー
+environment,world,sci-fi,SF
+environment,world,historical,歴史
+environment,world,cyberpunk,サイバーパンク
+environment,world,steampunk,スチームパンク
+environment,world,dystopian,ディストピア
+environment,world,post-apocalyptic,ポストアポカリプス
+environment,world,medieval,中世
+environment,world,victorian,ヴィクトリアン
+environment,world,1920s,1920年代
+environment,world,1950s,1950年代
+environment,world,1980s,1980年代
+environment,background,simple background,単色背景
+environment,background,white background,白背景
+environment,background,black background,黒背景
+environment,background,gray background,グレー背景
+environment,background,colorful background,カラフル背景
+environment,background,gradient background,グラデーション背景
+environment,background,two-tone background,ツートーン背景
+environment,background,rainbow background,レインボー背景
+environment,background,dark background,暗い背景
+environment,background,bright background,明るい背景
+environment,background,abstract background,抽象的背景
+environment,background,blurry background,ボケ背景
+environment,background,photo background,写真背景
+environment,background,zoom layer,ズームレイヤー
+environment,background,3d background,3D背景
+environment,background,collage background,コラージュ背景
+environment,background,paper background,紙背景
+environment,background,sketch background,スケッチ背景
+environment,background,watercolor background,水彩画背景
+environment,background,bubble background,泡背景
+environment,background,butterfly background,蝶々背景
+environment,background,floral background,フローラル背景
+environment,background,rose background,薔薇背景
+environment,background,heart background,ハート背景
+environment,background,leaf background,葉っぱ背景
+environment,background,sparkle background,キラキラ背景
+environment,background,star symbol background,星柄背景
+environment,background,starry sky background,星空背景
+environment,background,snowflake background,雪の結晶背景
+environment,background,cloud background,雲背景
+environment,background,fiery background,炎背景
+environment,background,lightning background,雷背景
+environment,background,halftone background,ハーフトーン背景
+environment,background,mosaic background,モザイク背景
+environment,location,indoors,屋内
+environment,location,living room,リビング
+environment,location,bedroom,寝室
+environment,location,bathroom,バスルーム
+environment,location,bathtub,バスタブ
+environment,location,shower,シャワールーム
+environment,location,toilet stall,トイレ個室
+environment,location,kitchen,キッチン
+environment,location,dining room,ダイニング
+environment,location,hallway,廊下
+environment,location,staircase,階段
+environment,location,closet,クローゼット
+environment,location,messy room,散らかった部屋
+environment,location,otaku room,オタク部屋
+environment,location,studio,スタジオ
+environment,location,office,オフィス
+environment,location,classroom,教室
+environment,location,library,図書館
+environment,location,school,学校
+environment,location,clubroom,部室
+environment,location,infirmary,保健室
+environment,location,gym storeroom,体育倉庫
+environment,location,laboratory,研究室
+environment,location,workshop,作業室
+environment,location,storage room,倉庫
+environment,location,cafe,カフェ
+environment,location,restaurant,レストラン
+environment,location,bar,バー
+environment,location,izakaya,居酒屋
+environment,location,bakery,ベーカリー
+environment,location,bookstore,書店
+environment,location,convenience store,コンビニ
+environment,location,supermarket,スーパー
+environment,location,mall,ショッピングモール
+environment,location,shop,ショップ
+environment,location,arcade,ゲームセンター
+environment,location,salon,美容室
+environment,location,hotel room,ホテル客室
+environment,location,hotel lobby,ホテルロビー
+environment,location,hotel,ホテル
+environment,location,gallery,ギャラリー
+environment,location,museum,美術館
+environment,location,theater,劇場
+environment,location,casino,カジノ
+environment,location,nightclub,ナイトクラブ
+environment,location,bowling alley,ボウリング場
+environment,location,aquarium,水族館
+environment,location,planetarium,プラネタリウム
+environment,location,gym,ジム
+environment,location,pool,プール
+environment,location,poolside,プールサイド
+environment,location,locker room,ロッカールーム
+environment,location,changing room,更衣室
+environment,location,dressing room,ドレスルーム
+environment,location,fitting room,フィッティングルーム
+environment,location,stage,ステージ
+environment,location,on stage,ステージ上
+environment,location,cockpit,コックピット
+environment,location,dungeon,ダンジョン
+environment,location,prison cell,監獄
+environment,location,church,教会
+environment,location,shrine,神社
+environment,location,on train,電車内
+environment,location,on bus,バス内
+environment,location,on car,車内
+environment,location,car interior,車内装
+environment,location,train interior,電車内装
+environment,location,outdoors,屋外
+environment,location,scenery,風景
+environment,location,nature,自然
+environment,location,beach,ビーチ
+environment,location,shore,海岸
+environment,location,ocean,海
+environment,location,seafloor,海底
+environment,location,forest,森
+environment,location,bamboo forest,竹林
+environment,location,jungle,ジャングル
+environment,location,mountain,山
+environment,location,volcano,火山
+environment,location,hill,丘
+environment,location,cliff,崖
+environment,location,canyon,渓谷
+environment,location,cave,洞窟
+environment,location,lake,湖
+environment,location,pond,池
+environment,location,river,川
+environment,location,stream,渓流
+environment,location,waterfall,滝
+environment,location,wetland,湿原
+environment,location,field,野原
+environment,location,meadow,草原
+environment,location,flower field,花畑
+environment,location,wheat field,麦畑
+environment,location,rice paddy,田園
+environment,location,garden,庭園
+environment,location,park,公園
+environment,location,playground,遊び場
+environment,location,desert,砂漠
+environment,location,savannah,サバンナ
+environment,location,snowscape,雪景色
+environment,location,glacier,氷河
+environment,location,island,島
+environment,location,floating island,浮島
+environment,location,city,都市
+environment,location,cityscape,都市景観
+environment,location,town,町
+environment,location,village,村
+environment,location,rural,田舎
+environment,location,street,ストリート
+environment,location,city street,街路
+environment,location,alley,路地
+environment,location,crosswalk,横断歩道
+environment,location,sidewalk,歩道
+environment,location,road,道路
+environment,location,highway,ハイウェイ
+environment,location,path,小道
+environment,location,dirt road,ダート道
+environment,location,stone walkway,石畳
+environment,location,shopping district,商店街
+environment,location,plaza,広場
+environment,location,market,市場
+environment,location,train station,駅
+environment,location,bus stop,バス停
+environment,location,airport,空港
+environment,location,airfield,滑走路
+environment,location,runway,滑走路
+environment,location,harbor,港
+environment,location,dock,埠頭
+environment,location,shipyard,造船所
+environment,location,parking lot,駐車場
+environment,location,garage,ガレージ
+environment,location,gas station,ガソリンスタンド
+environment,location,railroad tracks,線路
+environment,location,railroad crossing,踏切
+environment,location,bridge,橋
+environment,location,tunnel,トンネル
+environment,location,rooftop,屋上
+environment,location,balcony,バルコニー
+environment,location,doorway,玄関
+environment,location,house,家
+environment,location,apartment,マンション
+environment,location,skyscraper,高層ビル
+environment,location,buildings,ビル群
+environment,location,castle,城
+environment,location,floating castle,空飛ぶ城
+environment,location,pagoda,五重塔
+environment,location,bell tower,鐘楼
+environment,location,clock tower,時計塔
+environment,location,lighthouse,灯台
+environment,location,windmill,風車
+environment,location,warehouse,倉庫
+environment,location,factory,工場
+environment,location,barn,納屋
+environment,location,greenhouse,温室
+environment,location,conservatory,植物園温室
+environment,location,gazebo,東屋
+environment,location,ruins,廃墟
+environment,location,construction site,工事現場
+environment,location,amusement park,遊園地
+environment,location,carousel,メリーゴーラウンド
+environment,location,ferris wheel,観覧車
+environment,location,roller coaster,ジェットコースター
+environment,location,waterpark,ウォーターパーク
+environment,location,stadium,スタジアム
+environment,location,arena,アリーナ
+environment,location,soccer field,サッカー場
+environment,location,running track,陸上トラック
+environment,location,skating rink,スケートリンク
+environment,location,zoo,動物園
+environment,location,summer festival,夏祭り
+environment,location,military base,軍事基地
+environment,location,hangar,格納庫
+environment,location,control tower,管制塔
+environment,location,graveyard,墓地
+environment,location,fountain,噴水
+environment,location,well,井戸
+environment,location,onsen,温泉
+environment,location,sky,空
+environment,location,blue sky,青空
+environment,location,cloudy sky,曇り空
+environment,location,clear sky,晴天
+environment,location,night sky,夜空
+environment,location,starry sky,星空
+environment,location,skyline,都市の地平線
+environment,location,horizon,地平線
+environment,location,space,宇宙
+environment,location,underwater,水中
+environment,location,in the sky,空中
+environment,location,fantasy world,ファンタジー世界
+environment,time,day,日中
+environment,time,dawn,夜明け
+environment,time,sunrise,日の出
+environment,time,early morning,早朝
+environment,time,morning,朝
+environment,time,midday,正午
+environment,time,afternoon,午後
+environment,time,evening,夕方
+environment,time,golden hour,ゴールデンアワー
+environment,time,sunset,日没
+environment,time,dusk,夕暮れ
+environment,time,twilight,黄昏
+environment,time,night,夜
+environment,time,late night,深夜
+environment,time,midnight,真夜中
+environment,time,blue hour,ブルーアワー
+environment,time,night view,夜景
+environment,weather,sunny,晴れ
+environment,weather,clear sky,快晴
+environment,weather,partly cloudy,晴れ時々曇り
+environment,weather,sunlight,太陽光
+environment,weather,sun,太陽
+environment,weather,cloudy,曇り
+environment,weather,overcast,どんより曇り
+environment,weather,cloudy sky,曇り空
+environment,weather,light rain,小雨
+environment,weather,rain,雨
+environment,weather,heavy rain,大雨
+environment,weather,thunderstorm,雷雨
+environment,weather,after rain,雨上がり
+environment,weather,snow,雪
+environment,weather,heavy snow,大雪
+environment,weather,blizzard,吹雪
+environment,weather,fog,霧
+environment,weather,mist,もや
+environment,weather,haze,霞
+environment,weather,windy,風
+environment,weather,stormy,嵐
+environment,weather,moonlight,月光
+environment,weather,moon,月
+environment,season,spring (season),春
+environment,season,summer,夏
+environment,season,autumn,秋
+environment,season,winter,冬
+environment,crowd,no humans,人物なし
+environment,crowd,crowd,人混み
+environment,crowd,audience,観客
+expression,emotion,happy,幸せ
+expression,emotion,sad,悲しい
+expression,emotion,angry,怒り
+expression,emotion,embarrassed,恥ずかしい
+expression,emotion,surprised,驚き
+expression,emotion,shy,内気
+expression,emotion,scared,恐怖
+expression,emotion,excited,興奮
+expression,emotion,nervous,緊張
+expression,emotion,lonely,孤独
+expression,emotion,confident,自信
+expression,emotion,bored,退屈
+expression,emotion,serene,穏やか
+expression,emotion,mysterious,ミステリアス
+expression,face,smile,笑顔
+expression,face,light smile,微笑
+expression,face,grin,にやり
+expression,face,smug,ドヤ顔
+expression,face,smirk,含み笑い
+expression,face,laugh,笑う
+expression,face,evil smile,悪い笑み
+expression,face,seductive smile,誘惑の笑み
+expression,face,frown,眉をひそめる
+expression,face,pout,口を尖らせる
+expression,face,scowl,しかめっ面
+expression,face,glaring,睨む
+expression,face,tears,涙
+expression,face,crying,泣く
+expression,face,blush,赤面
+expression,face,expressionless,無表情
+expression,face,blank stare,放心
+expression,type,joyful,喜び
+expression,type,melancholic,憂い
+expression,type,fierce,獰猛
+expression,type,gentle,優しい
+expression,type,playful,遊び心
+expression,type,sultry,艶やか
+expression,type,innocent,無邪気
+expression,type,mischievous,いたずらっぽい
+expression,type,stoic,冷静
+expression,type,dreamy,夢見がち
+expression,eyes,closed eyes,閉じた目
+expression,eyes,half-closed eyes,半目
+expression,eyes,one eye closed,片目閉じ
+expression,eyes,wide-eyed,見開いた目
+expression,eyes,looking at viewer,カメラ目線
+expression,eyes,looking away,視線を逸らす
+expression,eyes,looking down,下を見る
+expression,eyes,looking up,上を見る
+expression,eyes,looking to the side,横を見る
+expression,eyes,looking back,振り返る
+expression,eyes,looking afar,遠くを見る
+expression,eyes,eye contact,アイコンタクト
+expression,eyes,sparkling eyes,輝く目
+expression,eyes,glowing eyes,光る目
+expression,eyes,empty eyes,虚ろな目
+expression,eyes,dreamy eyes,夢見がち
+expression,eyes,bedroom eyes,流し目
+expression,eyes,crazy eyes,狂気の目
+expression,eyes,heart-shaped pupils,ハート瞳
+expression,eyes,spiral eyes,ぐるぐる目
+expression,eyes,teary eyes,涙目
+expression,eyes,streaming tears,涙が流れる
+expression,eyes,floating tears,浮かぶ涙
+expression,eyes,raised eyebrows,ハの字眉
+expression,eyes,v-shaped eyebrows,V字眉
+expression,eyes,furrowed brow,眉をひそめる
+expression,mouth,closed mouth,閉じた口
+expression,mouth,parted lips,少し開いた
+expression,mouth,open mouth,開いた口
+expression,mouth,gaping,大きく開いた
+expression,mouth,smile,笑み
+expression,mouth,grin,歯を見せる笑み
+expression,mouth,clenched teeth,歯を食いしばる
+expression,mouth,pout,口を尖らせる
+expression,mouth,wavy mouth,波打つ口
+expression,mouth,tongue out,舌を出す
+expression,mouth,licking lips,唇を舐める
+expression,mouth,biting lip,唇を噛む
+expression,mouth,drooling,よだれ
+expression,mouth,:3,猫口
+expression,mouth,:o,驚き口
+expression,mouth,:d,にっこり
+expression,mouth,;p,ウインク舌出し
+lighting,base,natural,自然光風
+lighting,base,professional,プロフェッショナル
+lighting,base,dramatic,ドラマチック
+lighting,base,soft,ソフト
+lighting,base,studio,スタジオ照明
+lighting,base,moody,ムーディー
+lighting,base,cinematic,映画的
+lighting,source,sunlight,太陽光
+lighting,source,moonlight,月光
+lighting,source,natural daylight,自然光（昼）
+lighting,source,golden hour,ゴールデンアワー
+lighting,source,blue hour,ブルーアワー
+lighting,source,overcast,曇り空の光
+lighting,source,window light,窓からの光
+lighting,source,neon light,ネオン光
+lighting,source,candlelight,キャンドルライト
+lighting,source,spotlight,スポットライト
+lighting,source,fluorescent,蛍光灯
+lighting,source,street light,街灯
+lighting,source,fire light,焚き火の光
+lighting,technique,high-key,明るめ、影少なめ
+lighting,technique,low-key,暗め、コントラスト強
+lighting,technique,Rembrandt,レンブラント照明
+lighting,technique,split lighting,スプリットライティング
+lighting,technique,butterfly lighting,バタフライライティング
+lighting,technique,rim light,リムライト（輪郭光）
+lighting,technique,backlight,バックライト（逆光）
+lighting,technique,three-point lighting,三点照明
+lighting,technique,silhouette,シルエット
+lighting,color,warm,暖色
+lighting,color,cool,寒色
+lighting,color,golden,ゴールデン
+lighting,color,blue hour,ブルーアワー
+lighting,color,neutral,ニュートラル
+lighting,color,amber,アンバー
+lighting,color,cyan,シアン
+lighting,color,magenta,マゼンタ
+lighting,shadow,soft shadow,ソフトな影
+lighting,shadow,hard shadow,ハードな影
+lighting,shadow,no shadow,影なし
+lighting,shadow,rim light,輪郭光
+lighting,shadow,deep shadows,深い影
+lighting,shadow,minimal shadows,影最小限
+*,mood,serene,穏やか
+*,mood,peaceful,平和
+*,mood,joyful,喜び
+*,mood,hopeful,希望
+*,mood,playful,遊び心
+*,mood,whimsical,気まぐれ
+*,mood,romantic,ロマンチック
+*,mood,warm,暖かい
+*,mood,energetic,エネルギッシュ
+*,mood,melancholic,憂鬱
+*,mood,somber,陰鬱
+*,mood,tense,緊張
+*,mood,eerie,不気味
+*,mood,dark,ダーク
+*,mood,cold,冷たい
+*,mood,mysterious,神秘的
+*,mood,dramatic,ドラマチック
+*,mood,nostalgic,ノスタルジック
+*,mood,contemplative,沈思的
+*,mood,intimate,親密
+*,mood,epic,壮大
+*,mood,surreal,シュール
+outfit,top,white shirt,白シャツ
+outfit,top,oxford shirt,オックスフォードシャツ
+outfit,top,flannel shirt,フランネルシャツ
+outfit,top,western shirt,ウエスタンシャツ
+outfit,top,military shirt,ミリタリーシャツ
+outfit,top,safari shirt,サファリシャツ
+outfit,top,aloha shirt,アロハシャツ
+outfit,top,camp shirt,キャンプシャツ
+outfit,top,bowling shirt,ボウリングシャツ
+outfit,top,baseball shirt,ベースボールシャツ
+outfit,top,pajamas shirt,パジャマシャツ
+outfit,top,sheer shirt,シアーシャツ
+outfit,top,overshirt,オーバーシャツ
+outfit,top,tie front shirt,前結びシャツ
+outfit,top,t-shirt,Tシャツ
+outfit,top,tight t-shirt,タイトTシャツ
+outfit,top,sleeveless shirt,ノースリーブシャツ
+outfit,top,ringer t-shirt,リンガーTシャツ
+outfit,top,henley shirt,ヘンリーシャツ
+outfit,top,polo shirt,ポロシャツ
+outfit,top,rugby shirt,ラガーシャツ
+outfit,top,cycling jersey,サイクルジャージ
+outfit,top,tailored blouse,テーラードブラウス
+outfit,top,peplum blouse,ペプラムブラウス
+outfit,top,smock blouse,スモックブラウス
+outfit,top,victorian blouse,ヴィクトリアンブラウス
+outfit,top,peasant blouse,ペザントブラウス
+outfit,top,gypsy blouse,ジプシーブラウス
+outfit,top,pirate blouse,パイレーツブラウス
+outfit,top,bohemian blouse,ボヘミアンブラウス
+outfit,top,prairie blouse,プレーリーブラウス
+outfit,top,middy blouse,ミディブラウス
+outfit,top,china blouse,チャイナブラウス
+outfit,top,sweater,セーター
+outfit,top,cardigan,カーディガン
+outfit,top,hoodie,パーカー
+outfit,top,cowichan sweater,カウチンセーター
+outfit,top,fisherman sweater,フィッシャーマンセーター
+outfit,top,nordic sweater,ノルディックセーター
+outfit,top,bolero,ボレロ
+outfit,top,shrug,シュラグ
+outfit,top,tank top,タンクトップ
+outfit,top,camisole,キャミソール
+outfit,top,tube top,チューブトップ
+outfit,top,bustier,ビスチェ
+outfit,top,crop top,クロップトップ
+outfit,top,midriff top,へそ出しトップ
+outfit,top,bare top,ベアトップ
+outfit,top,halter top,ホルタートップ
+outfit,top,bratop,ブラトップ
+outfit,top,scrub,スクラブ
+outfit,top,cook coat,コックコート
+outfit,top,jeogori,チョゴリ
+outfit,bottom,straight skirt,ストレートスカート
+outfit,bottom,tight skirt,タイトスカート
+outfit,bottom,pencil skirt,ペンシルスカート
+outfit,bottom,tube skirt,チューブスカート
+outfit,bottom,peplum skirt,ペプラムスカート
+outfit,bottom,fishtail skirt,フィッシュテールスカート
+outfit,bottom,mermaid skirt,マーメイドスカート
+outfit,bottom,hobble skirt,ホブルスカート
+outfit,bottom,flare skirt,フレアスカート
+outfit,bottom,circular skirt,サーキュラースカート
+outfit,bottom,pleated skirt,プリーツスカート
+outfit,bottom,tiered skirt,ティアードスカート
+outfit,bottom,gypsy skirt,ジプシースカート
+outfit,bottom,prairie skirt,プレーリースカート
+outfit,bottom,dirndl skirt,ダーンドルスカート
+outfit,bottom,full skirt,フルスカート
+outfit,bottom,swing skirt,スイングスカート
+outfit,bottom,ballroom skirt,ボールルームスカート
+outfit,bottom,mini skirt,ミニスカート
+outfit,bottom,midi skirt,ミディスカート
+outfit,bottom,long skirt,ロングスカート
+outfit,bottom,high waist skirt,ハイウエストスカート
+outfit,bottom,wrap skirt,ラップスカート
+outfit,bottom,tulip skirt,チューリップスカート
+outfit,bottom,balloon skirt,バルーンスカート
+outfit,bottom,tulle skirt,チュールスカート
+outfit,bottom,tutu skirt,チュチュスカート
+outfit,bottom,ruffled skirt,フリルスカート
+outfit,bottom,kilt skirt,キルトスカート
+outfit,bottom,culotte skirt,キュロットスカート
+outfit,bottom,skort,スコート
+outfit,bottom,suspender skirt,サスペンダースカート
+outfit,bottom,chima,チマ
+outfit,bottom,denim pants,デニムパンツ
+outfit,bottom,jeans,ジーンズ
+outfit,bottom,skinny jeans,スキニージーンズ
+outfit,bottom,boyfriend jeans,ボーイフレンドジーンズ
+outfit,bottom,ripped jeans,ダメージジーンズ
+outfit,bottom,bootcut jeans,ブーツカットジーンズ
+outfit,bottom,bell bottom pants,ベルボトム
+outfit,bottom,cargo pants,カーゴパンツ
+outfit,bottom,chino pants,チノパン
+outfit,bottom,slacks,スラックス
+outfit,bottom,jogger pants,ジョガーパンツ
+outfit,bottom,sweatpants,スウェットパンツ
+outfit,bottom,leggings,レギンス
+outfit,bottom,jeggings,ジェギンス
+outfit,bottom,wide pants,ワイドパンツ
+outfit,bottom,palazzo pants,パラッツォパンツ
+outfit,bottom,baggy pants,バギーパンツ
+outfit,bottom,gaucho pants,ガウチョパンツ
+outfit,bottom,harem pants,ハーレムパンツ
+outfit,bottom,sarrouel pants,サルエルパンツ
+outfit,bottom,shorts,ショートパンツ
+outfit,bottom,hot pants,ホットパンツ
+outfit,bottom,bermuda shorts,バミューダパンツ
+outfit,bottom,cycling shorts,サイクリングショーツ
+outfit,bottom,denim shorts,デニムショーツ
+outfit,bottom,capri pants,カプリパンツ
+outfit,bottom,cropped pants,クロップドパンツ
+outfit,bottom,tapered pants,テーパードパンツ
+outfit,bottom,high waist pants,ハイウエストパンツ
+outfit,bottom,suspender pants,サスペンダーパンツ
+outfit,bottom,overalls,オーバーオール
+outfit,bottom,hakama pants,袴パンツ
+outfit,bottom,bloomers,ブルマー
+outfit,bottom,jodhpurs,乗馬パンツ
+outfit,bottom,sailor pants,セーラーパンツ
+outfit,bottom,lederhosen,レーダーホーゼン
+outfit,dress,a-line dress,Aラインドレス
+outfit,dress,empire dress,エンパイアドレス
+outfit,dress,sheath dress,シースドレス
+outfit,dress,shift dress,シフトドレス
+outfit,dress,mermaid dress,マーメイドドレス
+outfit,dress,princess dress,プリンセスドレス
+outfit,dress,ball gown,ボールガウン
+outfit,dress,cocoon dress,コクーンドレス
+outfit,dress,hourglass dress,アワーグラスドレス
+outfit,dress,shirt dress,シャツワンピース
+outfit,dress,t-shirt dress,Tシャツワンピース
+outfit,dress,sweater dress,ニットワンピース
+outfit,dress,tank dress,タンクワンピース
+outfit,dress,camisole dress,キャミワンピース
+outfit,dress,slip dress,スリップドレス
+outfit,dress,sundress,サンドレス
+outfit,dress,skater dress,スケータードレス
+outfit,dress,wrap dress,ラップドレス
+outfit,dress,tunic,チュニック
+outfit,dress,evening dress,イブニングドレス
+outfit,dress,cocktail dress,カクテルドレス
+outfit,dress,little black dress,リトルブラックドレス
+outfit,dress,wedding dress,ウェディングドレス
+outfit,dress,prom dress,プロムドレス
+outfit,dress,bohemian dress,ボヘミアンドレス
+outfit,dress,peasant dress,ペザントドレス
+outfit,dress,vintage dress,ヴィンテージドレス
+outfit,dress,flapper dress,フラッパードレス
+outfit,dress,pinafore dress,ジャンパースカート
+outfit,dress,jumper dress,ジャンパードレス
+outfit,dress,apron dress,エプロンドレス
+outfit,dress,tiered dress,ティアードワンピース
+outfit,dress,layered dress,レイヤードドレス
+outfit,dress,fringe dress,フリンジドレス
+outfit,dress,backless dress,バックレスドレス
+outfit,dress,one shoulder dress,ワンショルダードレス
+outfit,dress,corset dress,コルセットドレス
+outfit,dress,hoop dress,フープドレス
+outfit,dress,jumpsuit,ジャンプスーツ
+outfit,dress,rompers,ロンパース
+outfit,dress,catsuit,キャットスーツ
+outfit,dress,bodysuit,ボディスーツ
+outfit,dress,leotard,レオタード
+outfit,dress,kimono,着物
+outfit,dress,yukata,浴衣
+outfit,dress,kimono dress,着物ドレス
+outfit,dress,cheongsam,チャイナドレス
+outfit,dress,qipao,チーパオ
+outfit,dress,ao dai,アオザイ
+outfit,dress,hanbok,韓服
+outfit,dress,saree,サリー
+outfit,dress,dirndl,ディアンドル
+outfit,outerwear,jacket,ジャケット
+outfit,outerwear,blazer,ブレザー
+outfit,outerwear,denim jacket,デニムジャケット
+outfit,outerwear,leather jacket,レザージャケット
+outfit,outerwear,bomber jacket,ボンバージャケット
+outfit,outerwear,military jacket,ミリタリージャケット
+outfit,outerwear,safari jacket,サファリジャケット
+outfit,outerwear,varsity jacket,スタジャン
+outfit,outerwear,biker jacket,ライダースジャケット
+outfit,outerwear,track jacket,トラックジャケット
+outfit,outerwear,puffer jacket,ダウンジャケット
+outfit,outerwear,quilted jacket,キルティングジャケット
+outfit,outerwear,bolero jacket,ボレロジャケット
+outfit,outerwear,coat,コート
+outfit,outerwear,trench coat,トレンチコート
+outfit,outerwear,pea coat,ピーコート
+outfit,outerwear,duffle coat,ダッフルコート
+outfit,outerwear,overcoat,オーバーコート
+outfit,outerwear,fur coat,ファーコート
+outfit,outerwear,raincoat,レインコート
+outfit,outerwear,lab coat,白衣
+outfit,outerwear,cape,ケープ
+outfit,outerwear,cloak,マント
+outfit,outerwear,poncho,ポンチョ
+outfit,outerwear,shawl,ショール
+outfit,outerwear,vest,ベスト
+outfit,outerwear,waistcoat,ウエストコート
+outfit,outerwear,down vest,ダウンベスト
+outfit,legwear,socks,ソックス
+outfit,legwear,ankle socks,アンクルソックス
+outfit,legwear,crew socks,クルーソックス
+outfit,legwear,knee socks,ニーソックス
+outfit,legwear,knee highs,ニーハイ
+outfit,legwear,over knee socks,オーバーニーソックス
+outfit,legwear,thigh highs,サイハイソックス
+outfit,legwear,loose socks,ルーズソックス
+outfit,legwear,tube socks,チューブソックス
+outfit,legwear,toe socks,五本指ソックス
+outfit,legwear,tabi,足袋
+outfit,legwear,stockings,ストッキング
+outfit,legwear,pantyhose,パンスト
+outfit,legwear,tights,タイツ
+outfit,legwear,fishnet tights,網タイツ
+outfit,legwear,lace tights,レースタイツ
+outfit,legwear,sheer tights,シアータイツ
+outfit,legwear,opaque tights,厚手タイツ
+outfit,legwear,patterned tights,柄タイツ
+outfit,legwear,garter belt,ガーターベルト
+outfit,legwear,garter straps,ガーターストラップ
+outfit,legwear,thigh strap,太ももストラップ
+outfit,legwear,leg warmers,レッグウォーマー
+outfit,legwear,hold ups,ホールドアップ
+outfit,footwear,high heels,ハイヒール
+outfit,footwear,stiletto heels,ピンヒール
+outfit,footwear,pumps,パンプス
+outfit,footwear,kitten heels,キトンヒール
+outfit,footwear,wedge heels,ウェッジヒール
+outfit,footwear,platform heels,厚底ヒール
+outfit,footwear,block heels,チャンキーヒール
+outfit,footwear,slingback heels,スリングバック
+outfit,footwear,ankle strap heels,アンクルストラップ
+outfit,footwear,mary janes,メリージェーン
+outfit,footwear,boots,ブーツ
+outfit,footwear,ankle boots,アンクルブーツ
+outfit,footwear,knee boots,ニーブーツ
+outfit,footwear,thigh high boots,サイハイブーツ
+outfit,footwear,over knee boots,ニーハイブーツ
+outfit,footwear,combat boots,コンバットブーツ
+outfit,footwear,cowboy boots,カウボーイブーツ
+outfit,footwear,chelsea boots,チェルシーブーツ
+outfit,footwear,rain boots,レインブーツ
+outfit,footwear,ugg boots,ムートンブーツ
+outfit,footwear,riding boots,ジョッキーブーツ
+outfit,footwear,flats,フラットシューズ
+outfit,footwear,ballet flats,バレエシューズ
+outfit,footwear,loafers,ローファー
+outfit,footwear,oxfords,オックスフォード
+outfit,footwear,moccasins,モカシン
+outfit,footwear,espadrilles,エスパドリーユ
+outfit,footwear,sneakers,スニーカー
+outfit,footwear,high top sneakers,ハイカットスニーカー
+outfit,footwear,low top sneakers,ローカットスニーカー
+outfit,footwear,canvas sneakers,キャンバススニーカー
+outfit,footwear,running shoes,ランニングシューズ
+outfit,footwear,sandals,サンダル
+outfit,footwear,flip flops,ビーチサンダル
+outfit,footwear,gladiator sandals,グラディエーターサンダル
+outfit,footwear,wedge sandals,ウェッジサンダル
+outfit,footwear,platform sandals,厚底サンダル
+outfit,footwear,slides,スライドサンダル
+outfit,footwear,slippers,スリッパ
+outfit,footwear,barefoot,裸足
+outfit,footwear,geta,下駄
+outfit,footwear,zori,草履
+outfit,footwear,uwabaki,上履き
+outfit,swimwear,bikini,ビキニ
+outfit,swimwear,string bikini,紐ビキニ
+outfit,swimwear,triangle bikini,トライアングルビキニ
+outfit,swimwear,bandeau bikini,バンドゥビキニ
+outfit,swimwear,halter bikini,ホルタービキニ
+outfit,swimwear,high neck bikini,ハイネックビキニ
+outfit,swimwear,brazilian bikini,ブラジリアンビキニ
+outfit,swimwear,micro bikini,マイクロビキニ
+outfit,swimwear,fringe bikini,フリンジビキニ
+outfit,swimwear,tie side bikini,サイド紐ビキニ
+outfit,swimwear,one piece swimsuit,ワンピース水着
+outfit,swimwear,monokini,モノキニ
+outfit,swimwear,tankini,タンキニ
+outfit,swimwear,competition swimsuit,競泳水着
+outfit,swimwear,school swimsuit,スクール水着
+outfit,swimwear,rash guard,ラッシュガード
+outfit,swimwear,wetsuit,ウェットスーツ
+outfit,swimwear,surf shorts,サーフパンツ
+outfit,swimwear,swim trunks,水泳パンツ
+outfit,swimwear,pareo,パレオ
+outfit,swimwear,cover up,カバーアップ
+outfit,underwear,bra,ブラジャー
+outfit,underwear,bralette,ブラレット
+outfit,underwear,sports bra,スポーツブラ
+outfit,underwear,push up bra,寄せ上げブラ
+outfit,underwear,strapless bra,ストラップレスブラ
+outfit,underwear,balconette bra,バルコネットブラ
+outfit,underwear,plunge bra,プランジブラ
+outfit,underwear,demi cup bra,デミカップブラ
+outfit,underwear,front closure bra,前留めブラ
+outfit,underwear,panties,ショーツ
+outfit,underwear,thong,Tバック
+outfit,underwear,g string,Gストリング
+outfit,underwear,boyshorts,ボーイレッグ
+outfit,underwear,hipster panties,ヒップハンガー
+outfit,underwear,high waist panties,ハイウエストショーツ
+outfit,underwear,briefs,ブリーフ
+outfit,underwear,lingerie,ランジェリー
+outfit,underwear,babydoll,ベビードール
+outfit,underwear,chemise,シュミーズ
+outfit,underwear,teddy,テディ
+outfit,underwear,slip,スリップ
+outfit,underwear,negligee,ネグリジェ
+outfit,underwear,corset,コルセット
+outfit,underwear,bustier,ビスチェ
+outfit,underwear,girdle,ガードル
+outfit,underwear,waist cincher,ウエストニッパー
+outfit,underwear,petticoat,ペチコート
+outfit,underwear,crinoline,クリノリン
+outfit,accessories,necklace,ネックレス
+outfit,accessories,choker,チョーカー
+outfit,accessories,pendant,ペンダント
+outfit,accessories,pearl necklace,パールネックレス
+outfit,accessories,chain necklace,チェーンネックレス
+outfit,accessories,earrings,イヤリング
+outfit,accessories,stud earrings,スタッドピアス
+outfit,accessories,hoop earrings,フープピアス
+outfit,accessories,drop earrings,ドロップピアス
+outfit,accessories,bracelet,ブレスレット
+outfit,accessories,bangle,バングル
+outfit,accessories,anklet,アンクレット
+outfit,accessories,ring,指輪
+outfit,accessories,wedding ring,結婚指輪
+outfit,accessories,watch,腕時計
+outfit,accessories,hair ribbon,ヘアリボン
+outfit,accessories,hairband,カチューシャ
+outfit,accessories,hair clip,ヘアクリップ
+outfit,accessories,scrunchie,シュシュ
+outfit,accessories,barrette,バレッタ
+outfit,accessories,hair pin,ヘアピン
+outfit,accessories,tiara,ティアラ
+outfit,accessories,hair flower,髪飾り花
+outfit,accessories,hat,帽子
+outfit,accessories,beret,ベレー帽
+outfit,accessories,cap,キャップ
+outfit,accessories,beanie,ニット帽
+outfit,accessories,fedora,中折れ帽
+outfit,accessories,sun hat,日よけ帽
+outfit,accessories,straw hat,麦わら帽子
+outfit,accessories,bucket hat,バケットハット
+outfit,accessories,wide brim hat,つば広帽子
+outfit,accessories,cowboy hat,カウボーイハット
+outfit,accessories,top hat,シルクハット
+outfit,accessories,glasses,眼鏡
+outfit,accessories,sunglasses,サングラス
+outfit,accessories,round glasses,丸眼鏡
+outfit,accessories,handbag,ハンドバッグ
+outfit,accessories,shoulder bag,ショルダーバッグ
+outfit,accessories,tote bag,トートバッグ
+outfit,accessories,clutch bag,クラッチバッグ
+outfit,accessories,backpack,リュック
+outfit,accessories,scarf,スカーフ
+outfit,accessories,necktie,ネクタイ
+outfit,accessories,bow tie,蝶ネクタイ
+outfit,accessories,belt,ベルト
+outfit,accessories,suspenders,サスペンダー
+outfit,accessories,gloves,手袋
+outfit,accessories,elbow gloves,ロング手袋
+outfit,accessories,umbrella,傘
+outfit,accessories,fan,扇子
+outfit,style,casual,カジュアル
+outfit,style,formal,フォーマル
+outfit,style,smart casual,スマートカジュアル
+outfit,style,business casual,ビジネスカジュアル
+outfit,style,streetwear,ストリート
+outfit,style,sporty,スポーティー
+outfit,style,athleisure,アスレジャー
+outfit,style,elegant,エレガント
+outfit,style,glamorous,グラマラス
+outfit,style,chic,シック
+outfit,style,sophisticated,洗練された
+outfit,style,classic,クラシック
+outfit,style,preppy,プレッピー
+outfit,style,bohemian,ボヘミアン
+outfit,style,vintage,ヴィンテージ
+outfit,style,retro,レトロ
+outfit,style,gothic,ゴシック
+outfit,style,punk,パンク
+outfit,style,grunge,グランジ
+outfit,style,kawaii,可愛い系
+outfit,style,lolita,ロリータ
+outfit,style,gyaru,ギャル
+outfit,style,dark academia,ダークアカデミア
+outfit,style,cottagecore,コテージコア
+outfit,style,ethnic,エスニック
+outfit,style,western,ウエスタン
+outfit,style,oriental,オリエンタル
+outfit,style,beachwear,ビーチウェア
+outfit,style,resort wear,リゾートウェア
+outfit,style,activewear,アクティブウェア
+outfit,style,loungewear,ルームウェア
+outfit,style,sleepwear,寝間着
+outfit,style,workwear,ワークウェア
+outfit,color,white,白
+outfit,color,black,黒
+outfit,color,gray,グレー
+outfit,color,navy,ネイビー
+outfit,color,beige,ベージュ
+outfit,color,brown,ブラウン
+outfit,color,cream,クリーム
+outfit,color,red,赤
+outfit,color,pink,ピンク
+outfit,color,orange,オレンジ
+outfit,color,yellow,黄色
+outfit,color,burgundy,バーガンディ
+outfit,color,blue,青
+outfit,color,light blue,水色
+outfit,color,turquoise,ターコイズ
+outfit,color,green,緑
+outfit,color,olive,オリーブ
+outfit,color,khaki,カーキ
+outfit,color,purple,紫
+outfit,color,lavender,ラベンダー
+outfit,color,gold,ゴールド
+outfit,color,silver,シルバー
+outfit,color,striped,ストライプ
+outfit,color,plaid,チェック
+outfit,color,polka dot,水玉
+outfit,color,floral,花柄
+outfit,color,animal print,アニマル柄
+outfit,color,camouflage,迷彩
+outfit,material,cotton,コットン
+outfit,material,linen,リネン
+outfit,material,silk,シルク
+outfit,material,wool,ウール
+outfit,material,cashmere,カシミア
+outfit,material,leather,レザー
+outfit,material,suede,スエード
+outfit,material,fur,ファー
+outfit,material,denim,デニム
+outfit,material,polyester,ポリエステル
+outfit,material,nylon,ナイロン
+outfit,material,latex,ラテックス
+outfit,material,pvc,PVC
+outfit,material,lace,レース
+outfit,material,velvet,ベルベット
+outfit,material,satin,サテン
+outfit,material,chiffon,シフォン
+outfit,material,tulle,チュール
+outfit,material,sequin,スパンコール
+outfit,material,mesh,メッシュ
+outfit,material,sheer,シースルー
+outfit,material,knit,ニット
+outfit,material,tweed,ツイード
+outfit,material,corduroy,コーデュロイ
+outfit,material,fleece,フリース
+outfit,fit,tight,タイト
+outfit,fit,fitted,フィット
+outfit,fit,slim,スリム
+outfit,fit,regular,レギュラー
+outfit,fit,relaxed,リラックス
+outfit,fit,loose,ルーズ
+outfit,fit,oversized,オーバーサイズ
+outfit,fit,cropped,丈短め
+outfit,fit,longline,丈長め
+outfit,state,wet clothes,濡れた服
+outfit,state,torn clothes,破れた服
+outfit,state,disheveled clothes,乱れた服
+outfit,state,unbuttoned,ボタン開け
+outfit,state,open jacket,前開きジャケット
+outfit,state,lifted shirt,まくり上げたシャツ
+outfit,state,rolled up sleeves,腕まくり
+outfit,state,tucked in,インした
+outfit,state,untucked,出した
+outfit,state,off shoulder,肩出し
+outfit,state,clothes pull,服を引っ張る
+outfit,state,clothes lift,服をめくる
+outfit,state,skirt lift,スカートめくり
+outfit,state,shirt lift,シャツめくり
+photography,shot_with,shot on 35mm film,35mmフィルムで撮影
+photography,shot_with,shot on medium format film,中判フィルムで撮影
+photography,shot_with,shot on large format,大判で撮影
+photography,shot_with,shot on instant film,インスタントフィルムで撮影
+photography,shot_with,shot on Polaroid,ポラロイドで撮影
+photography,shot_with,shot on DSLR,デジタル一眼レフで撮影
+photography,shot_with,shot on mirrorless camera,ミラーレスで撮影
+photography,shot_with,shot on full frame sensor,フルサイズセンサーで撮影
+photography,shot_with,shot on medium format digital,中判デジタルで撮影
+photography,shot_with,shot on smartphone,スマートフォンで撮影
+photography,shot_with,shot on action camera,アクションカメラで撮影
+photography,shot_with,aerial photography,ドローン空撮
+photography,lens,24mm wide angle,広角
+photography,lens,35mm lens,準広角
+photography,lens,50mm lens,標準
+photography,lens,85mm lens,中望遠、ポートレート向き
+photography,lens,135mm lens,望遠
+photography,lens,200mm telephoto,望遠
+photography,lens,macro lens,マクロ
+photography,lens,fisheye lens,魚眼
+photography,lens,tilt-shift lens,ティルトシフト
+photography,lens,anamorphic lens,アナモフィック
+photography,lens,85mm f/1.2,大口径ポートレート
+photography,lens,85mm f/1.4,ポートレート定番
+photography,lens,50mm f/1.4,標準大口径
+photography,lens,35mm f/1.4,広角大口径
+photography,film,Kodak Portra 400,ポートレート定番
+photography,film,Kodak Portra 800,高感度ポートレート
+photography,film,Kodak Portra 160,低感度ポートレート
+photography,film,Kodak Ektar 100,高彩度
+photography,film,Kodak Gold 200,暖色系
+photography,film,Fuji Pro 400H,柔らかい色調
+photography,film,Fuji Superia 400,スナップ向き
+photography,film,Cinestill 800T,タングステン、映画風
+photography,film,Ilford HP5 Plus,モノクロ定番
+photography,film,Ilford Delta 3200,高感度モノクロ
+photography,film,Kodak Tri-X 400,モノクロ定番
+photography,film,Kodak T-Max 100,微粒子モノクロ
+photography,film,Fuji Velvia 50,高彩度スライド
+photography,film,Kodak Ektachrome E100,スライド
+photography,effects,shallow depth of field,浅い被写界深度
+photography,effects,deep depth of field,深い被写界深度
+photography,effects,creamy bokeh,クリーミーなボケ
+photography,effects,swirly bokeh,渦巻きボケ
+photography,effects,smooth bokeh,滑らかなボケ
+photography,effects,soft focus,ソフトフォーカス
+photography,effects,selective focus,選択的フォーカス
+photography,effects,tack sharp,シャープ
+photography,effects,motion blur,モーションブラー
+photography,effects,radial blur,放射状ブラー
+photography,effects,lens flare,レンズフレア
+photography,effects,chromatic aberration,色収差
+photography,effects,vignette,周辺減光
+photography,effects,film grain,フィルム粒子
+photography,effects,light leaks,光漏れ
+pose,base,standing,立ち
+pose,base,standing on one leg,片足立ち
+pose,base,contrapposto,片足重心
+pose,base,tiptoes,つま先立ち
+pose,base,sitting,座り
+pose,base,sitting on chair,椅子に座る
+pose,base,sitting on floor,床に座る
+pose,base,seiza,正座
+pose,base,wariza,ぺたんこ座り
+pose,base,indian style,あぐら
+pose,base,knees up,体育座り
+pose,base,squatting,しゃがむ
+pose,base,lying,横たわる
+pose,base,on back,仰向け
+pose,base,on stomach,うつ伏せ
+pose,base,on side,横向き
+pose,base,the pose,うつ伏せ足上げ
+pose,base,reclining,もたれる
+pose,base,kneeling,膝立ち
+pose,base,on one knee,片膝
+pose,base,all fours,四つん這い
+pose,base,walking,歩行
+pose,base,running,走る
+pose,base,jumping,ジャンプ
+pose,base,dancing,踊る
+pose,base,dynamic pose,躍動感
+pose,facing,facing viewer,正面向き
+pose,facing,from side,横から
+pose,facing,from behind,後ろから
+pose,facing,three-quarter view,斜め
+pose,facing,facing away,向こう向き
+pose,facing,turned away,背を向ける
+pose,facing,profile,横顔
+pose,facing,looking at viewer,カメラ目線
+pose,facing,looking back,振り向き
+pose,facing,looking away,視線逸らし
+pose,facing,looking down,見下ろし
+pose,facing,looking up,見上げ
+pose,facing,looking to the side,横を見る
+pose,facing,looking afar,遠くを見る
+pose,action,walking,歩く
+pose,action,running,走る
+pose,action,dancing,踊る
+pose,action,fighting,戦う
+pose,action,sleeping,寝る
+pose,action,eating,食べる
+pose,action,stretching,ストレッチ
+pose,action,yawning,あくび
+pose,action,leaning forward,前傾
+pose,action,leaning back,後傾
+pose,action,arched back,反り返り
+pose,action,bent over,前屈み
+pose,action,holding,何かを持つ
+pose,action,hug,ハグ
+pose,action,self hug,自分を抱く
+pose,head,head tilt,首傾げ
+pose,head,head down,うつむき
+pose,head,head up,顔上げ
+pose,head,looking up,見上げ
+pose,head,looking down,見下ろし
+pose,head,chin rest,顎を手に乗せる
+pose,arms,arms up,腕上げ
+pose,arms,arms crossed,腕組み
+pose,arms,arm behind head,頭の後ろに手
+pose,arms,arms behind back,後ろ手
+pose,arms,reaching out,手を伸ばす
+pose,arms,hands on hips,腰に手
+pose,arms,hand in own hair,髪をかき上げ
+pose,arms,tucking hair,髪を耳にかける
+pose,arms,hand on own cheek,頬に手
+pose,arms,hand to own mouth,口に手
+pose,arms,head rest,頬杖
+pose,hands,peace sign,ピース
+pose,hands,thumbs up,サムズアップ
+pose,hands,waving,手を振る
+pose,hands,salute,敬礼
+pose,hands,heart hands,ハート手
+pose,hands,paw pose,猫の手
+pose,hands,claw pose,がおー
+pose,hands,pointing at viewer,指さし
+pose,hands,fist,握り拳
+pose,hands,open palm,手のひら
+pose,legs,legs together,脚閉じ
+pose,legs,legs apart,脚開き
+pose,legs,crossed legs,脚組み
+pose,legs,leg up,片足上げ
+pose,legs,knees together feet apart,内股
+pose,legs,one knee up,片膝立て
+pose,legs,spread legs,開脚
+*,subject,person,人物、単独
+*,subject,group,複数人
+*,subject,couple,2人
+*,subject,animal,動物
+*,subject,landscape,風景
+*,subject,still life,静物
+*,subject,architecture,建築物
+*,subject,product,製品、商品
+*,subject,food,食べ物
+*,subject,abstract,抽象

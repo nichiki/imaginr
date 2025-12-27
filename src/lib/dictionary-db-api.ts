@@ -312,10 +312,198 @@ export async function exportToYaml(): Promise<string> {
 }
 
 // ================================
+// CSV Import / Export
+// ================================
+
+// BOM for UTF-8 (helps Excel recognize encoding)
+const UTF8_BOM = '\uFEFF';
+
+// CSV header
+const CSV_HEADER = 'context,key,value,description';
+
+// Escape a field for CSV (RFC 4180)
+function escapeCsvField(field: string): string {
+  if (field.includes(',') || field.includes('"') || field.includes('\n') || field.includes('\r')) {
+    // Escape double quotes by doubling them
+    return '"' + field.replace(/"/g, '""') + '"';
+  }
+  return field;
+}
+
+// Parse a CSV line respecting quoted fields
+function parseCsvLine(line: string): string[] {
+  const fields: string[] = [];
+  let current = '';
+  let inQuotes = false;
+  let i = 0;
+
+  while (i < line.length) {
+    const char = line[i];
+
+    if (inQuotes) {
+      if (char === '"') {
+        // Check for escaped quote
+        if (i + 1 < line.length && line[i + 1] === '"') {
+          current += '"';
+          i += 2;
+        } else {
+          // End of quoted field
+          inQuotes = false;
+          i++;
+        }
+      } else {
+        current += char;
+        i++;
+      }
+    } else {
+      if (char === '"') {
+        inQuotes = true;
+        i++;
+      } else if (char === ',') {
+        fields.push(current);
+        current = '';
+        i++;
+      } else {
+        current += char;
+        i++;
+      }
+    }
+  }
+
+  // Don't forget the last field
+  fields.push(current);
+
+  return fields;
+}
+
+// Import from CSV content
+export async function importFromCsv(
+  csvContent: string,
+  mode: 'merge' | 'replace'
+): Promise<{ added: number; updated: number; skipped: number }> {
+  const { getDatabase } = await import('./db/tauri-db');
+  const db = await getDatabase();
+
+  // Remove BOM if present
+  let content = csvContent;
+  if (content.startsWith(UTF8_BOM)) {
+    content = content.slice(1);
+  }
+
+  // Split into lines (handle both \r\n and \n)
+  const lines = content.split(/\r?\n/).filter((line) => line.trim() !== '');
+
+  if (lines.length === 0) {
+    throw new Error('Empty CSV file');
+  }
+
+  // Check header
+  const header = lines[0].toLowerCase();
+  if (!header.startsWith('context,key,value')) {
+    throw new Error('Invalid CSV format: missing required columns (context, key, value)');
+  }
+
+  let added = 0;
+  let updated = 0;
+  let skipped = 0;
+
+  if (mode === 'replace') {
+    await db.execute('DELETE FROM dictionary');
+  }
+
+  const now = new Date().toISOString();
+
+  // Process data rows (skip header)
+  for (let i = 1; i < lines.length; i++) {
+    const fields = parseCsvLine(lines[i]);
+
+    if (fields.length < 3) {
+      skipped++;
+      continue;
+    }
+
+    const [context, key, value, description] = fields;
+
+    if (!context || !key || !value) {
+      skipped++;
+      continue;
+    }
+
+    try {
+      if (mode === 'merge') {
+        // Check if entry exists
+        const existing = await db.select<{ id: number }>(
+          'SELECT id FROM dictionary WHERE context = ? AND key = ? AND value = ?',
+          [context, key, value]
+        );
+
+        if (existing.length > 0) {
+          // Update description if provided
+          if (description) {
+            await db.execute('UPDATE dictionary SET description = ? WHERE id = ?', [
+              description,
+              existing[0].id,
+            ]);
+            updated++;
+          } else {
+            skipped++;
+          }
+        } else {
+          await db.execute(
+            `INSERT INTO dictionary (context, key, value, description, created_at)
+             VALUES (?, ?, ?, ?, ?)`,
+            [context, key, value, description || null, now]
+          );
+          added++;
+        }
+      } else {
+        // Replace mode: just insert
+        await db.execute(
+          `INSERT INTO dictionary (context, key, value, description, created_at)
+           VALUES (?, ?, ?, ?, ?)`,
+          [context, key, value, description || null, now]
+        );
+        added++;
+      }
+    } catch {
+      // Likely a duplicate in replace mode, skip
+      skipped++;
+    }
+  }
+
+  return { added, updated, skipped };
+}
+
+// Export to CSV format (BOM-prefixed UTF-8)
+export async function exportToCsv(): Promise<string> {
+  const { getDatabase } = await import('./db/tauri-db');
+  const db = await getDatabase();
+
+  const rows = await db.select<DictionaryRow>(
+    'SELECT * FROM dictionary ORDER BY context, key, value'
+  );
+
+  const lines: string[] = [CSV_HEADER];
+
+  for (const row of rows) {
+    const fields = [
+      escapeCsvField(row.context),
+      escapeCsvField(row.key),
+      escapeCsvField(row.value),
+      escapeCsvField(row.description || ''),
+    ];
+    lines.push(fields.join(','));
+  }
+
+  // Add BOM for Excel compatibility
+  return UTF8_BOM + lines.join('\n');
+}
+
+// ================================
 // Initial data import
 // ================================
 
-// Import from bundled dictionary files (first launch only)
+// Import from bundled dictionary CSV (first launch only)
 // Reads directly from app bundle resources, NOT from user data folder
 export async function initializeFromBundledFiles(): Promise<boolean> {
   const { getDatabase } = await import('./db/tauri-db');
@@ -335,55 +523,46 @@ export async function initializeFromBundledFiles(): Promise<boolean> {
     return false;
   }
 
-  // Load dictionary files from bundled resources (NOT user data folder)
+  // Load dictionary CSV from bundled resources (NOT user data folder)
   const { resolveResource, join } = await import('@tauri-apps/api/path');
-  const { readTextFile, readDir, exists } = await import('@tauri-apps/plugin-fs');
+  const { readTextFile, exists } = await import('@tauri-apps/plugin-fs');
 
-  // Try to find bundled dictionary directory
-  let standardDir: string;
+  // Try to find bundled dictionary CSV
+  let csvPath: string;
   try {
     // Production: bundled resources
-    const resourcePath = await resolveResource('data/dictionary/standard');
+    const resourcePath = await resolveResource('data/dictionary/standard.csv');
     if (await exists(resourcePath)) {
-      standardDir = resourcePath;
+      csvPath = resourcePath;
     } else {
       // Dev mode: go up from debug folder to project root
       const debugPath = await resolveResource('.');
-      standardDir = await join(debugPath, '..', '..', '..', 'data', 'dictionary', 'standard');
+      csvPath = await join(debugPath, '..', '..', '..', 'data', 'dictionary', 'standard.csv');
     }
   } catch {
     // Fallback for dev mode
     const debugPath = await resolveResource('.');
-    standardDir = await join(debugPath, '..', '..', '..', 'data', 'dictionary', 'standard');
+    csvPath = await join(debugPath, '..', '..', '..', 'data', 'dictionary', 'standard.csv');
   }
 
-  if (!(await exists(standardDir))) {
-    console.warn('Bundled dictionary not found:', standardDir);
+  if (!(await exists(csvPath))) {
+    console.warn('Bundled dictionary CSV not found:', csvPath);
     await markMigrationCompletedAsync(db, 'initial_dictionary_import');
     return false;
   }
 
-  const files = await readDir(standardDir);
-  const yamlFiles = files.filter(
-    (f) => !f.isDirectory && (f.name?.endsWith('.yaml') || f.name?.endsWith('.yml'))
-  );
-
   let totalImported = 0;
 
-  for (const file of yamlFiles) {
-    if (!file.name) continue;
-    try {
-      const filePath = await join(standardDir, file.name);
-      const content = await readTextFile(filePath);
-      const result = await importFromYaml(content, 'merge');
-      totalImported += result.added;
-    } catch (err) {
-      console.error(`Error importing dictionary file ${file.name}:`, err);
-    }
+  try {
+    const content = await readTextFile(csvPath);
+    const result = await importFromCsv(content, 'merge');
+    totalImported = result.added;
+  } catch (err) {
+    console.error('Error importing bundled dictionary CSV:', err);
   }
 
   await markMigrationCompletedAsync(db, 'initial_dictionary_import');
-  console.log(`Imported ${totalImported} dictionary entries from bundled resources`);
+  console.log(`Imported ${totalImported} dictionary entries from bundled CSV`);
 
   return true;
 }
