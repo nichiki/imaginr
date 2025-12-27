@@ -6,6 +6,7 @@ import Editor, { OnMount, OnChange } from '@monaco-editor/react';
 import type { editor, languages, Position, IDisposable } from 'monaco-editor';
 import type { Snippet } from '@/lib/snippet-api';
 import type { DictionaryEntry } from '@/lib/dictionary-api';
+import { lookupDictionary as lookupDictionaryFromCache } from '@/lib/dictionary-api';
 import type { KeyDictionaryEntry } from '@/lib/key-dictionary-api';
 import { lookupKeysFromCache } from '@/lib/key-dictionary-api';
 import { DictionaryQuickAddDialog } from './dictionary-quick-add-dialog';
@@ -127,38 +128,11 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
     return contextPath;
   }, []);
 
-  // 辞書からエントリを検索（具体的なコンテキストから汎用へフォールバック）
-  // 例: contextPath=["fashion", "outfit"], key="type" の場合
-  // 1. outfit.type を検索（直近の親）
-  // 2. fashion.outfit.type を検索（フルパス）
-  // 3. *.type を検索（汎用）
+  // 辞書からエントリを検索（具体的なコンテキストと汎用をマージして返す）
   const lookupDictionary = useCallback((contextPath: string[], key: string): DictionaryEntry[] => {
     const cache = dictionaryCacheRef.current;
     if (!cache) return [];
-
-    // まず直近の親コンテキストで検索（最も一般的なケース）
-    if (contextPath.length > 0) {
-      const immediateParent = contextPath[contextPath.length - 1];
-      const immediateKey = `${immediateParent}.${key}`;
-      const immediateEntries = cache.get(immediateKey);
-      if (immediateEntries && immediateEntries.length > 0) {
-        return immediateEntries;
-      }
-    }
-
-    // 次にフルパスで検索（より具体的なコンテキスト）
-    if (contextPath.length > 1) {
-      const fullPath = contextPath.join('.');
-      const fullKey = `${fullPath}.${key}`;
-      const fullEntries = cache.get(fullKey);
-      if (fullEntries && fullEntries.length > 0) {
-        return fullEntries;
-      }
-    }
-
-    // 最後に汎用コンテキストを検索
-    const wildcardKey = `*.${key}`;
-    return cache.get(wildcardKey) || [];
+    return lookupDictionaryFromCache(cache, contextPath, key);
   }, []);
 
   // カーソル位置から現在のキーを取得
@@ -362,11 +336,12 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
                     insertText = ` ${entry.value}`;
                   }
                   const showDesc = i18n.language === 'ja' && entry.description;
+                  const fallbackSource = `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`;
                   return {
                     label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
                     kind: monaco.languages.CompletionItemKind.Value,
                     insertText,
-                    detail: `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`,
+                    detail: entry.source || fallbackSource,
                     range: {
                       startLineNumber: position.lineNumber,
                       startColumn: position.column - typedValue.length,
@@ -458,11 +433,12 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
                   }
                   // 日本語UIの場合のみ説明を表示
                   const showDesc = i18n.language === 'ja' && entry.description;
+                  const fallbackSource = `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`;
                   return {
                     label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
                     kind: monaco.languages.CompletionItemKind.Value,
                     insertText,
-                    detail: `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`,
+                    detail: entry.source || fallbackSource,
                     range: {
                       startLineNumber: position.lineNumber,
                       startColumn: position.column - typedValue.length,
@@ -555,7 +531,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
                     label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
                     kind: monaco.languages.CompletionItemKind.Value,
                     insertText: entry.value,
-                    detail: `${lookupContext.length > 0 ? lookupContext.join('.') + '.' : ''}${parentKey}`,
+                    detail: entry.source,
                     range: {
                       startLineNumber: position.lineNumber,
                       startColumn: position.column - typedValue.length,

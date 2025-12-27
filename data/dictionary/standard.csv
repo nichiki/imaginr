@@ -147,13 +147,32 @@ hair,color,light blue hair,水色
 hair,color,purple hair,紫
 hair,color,green hair,緑
 hair,color,aqua hair,アクア
+hair,color,ash brown hair,アッシュブラウン
+hair,color,ash gray hair,アッシュグレー
+hair,color,ash blonde hair,アッシュブロンド
+hair,color,ash pink hair,アッシュピンク
+hair,color,ash blue hair,アッシュブルー
+hair,color,dirty blonde hair,ダーティブロンド
+hair,color,strawberry blonde hair,ストロベリーブロンド
+hair,color,honey blonde hair,ハニーブロンド
+hair,color,caramel hair,キャラメル
+hair,color,copper hair,カッパー
+hair,color,burgundy hair,バーガンディ
+hair,color,magenta hair,マゼンタ
+hair,color,lavender hair,ラベンダー
+hair,color,pastel hair,パステル
 hair,color,multicolored hair,マルチカラー
 hair,color,gradient hair,グラデーション
+hair,color,ombre hair,オンブレ
 hair,color,split-color hair,左右二色
 hair,color,two-tone hair,ツートーン
 hair,color,colored inner hair,インナーカラー
 hair,color,streaked hair,メッシュ
+hair,color,highlighted hair,ハイライト
+hair,color,lowlighted hair,ローライト
+hair,color,balayage hair,バレイヤージュ
 hair,color,colored tips,毛先染め
+hair,color,roots showing,根元見え
 hair,color,rainbow hair,虹色
 hair,bangs,bangs,前髪あり
 hair,bangs,blunt bangs,ぱっつん
@@ -197,8 +216,18 @@ eyes,color,pink eyes,ピンク
 eyes,color,golden eyes,金色
 eyes,color,silver eyes,銀色
 eyes,color,aqua eyes,アクア
+eyes,color,teal eyes,ティール
+eyes,color,turquoise eyes,ターコイズ
+eyes,color,violet eyes,バイオレット
+eyes,color,crimson eyes,深紅
+eyes,color,ruby eyes,ルビー
+eyes,color,sapphire eyes,サファイア
+eyes,color,emerald eyes,エメラルド
 eyes,color,heterochromia,オッドアイ
 eyes,color,gradient eyes,グラデーション
+eyes,color,multicolored eyes,マルチカラー
+eyes,color,glowing eyes,発光する目
+eyes,color,ringed eyes,虹彩リング
 appearance,skin,fair skin,色白
 appearance,skin,light skin,明るい肌
 appearance,skin,medium skin,中間
@@ -293,29 +322,75 @@ appearance,legs,short legs,短い脚
 appearance,legs,muscular legs,筋肉質な脚
 *,color,black,黒
 *,color,white,白
+*,color,off-white,オフホワイト
+*,color,ivory,アイボリー
+*,color,cream,クリーム
+*,color,beige,ベージュ
+*,color,tan,タン
+*,color,gray,グレー
+*,color,charcoal,チャコール
 *,color,red,赤
+*,color,crimson,深紅
+*,color,scarlet,スカーレット
+*,color,maroon,マルーン
+*,color,burgundy,バーガンディ
+*,color,wine,ワインレッド
+*,color,coral,コーラル
+*,color,salmon,サーモンピンク
+*,color,pink,ピンク
+*,color,hot pink,ホットピンク
+*,color,rose,ローズ
+*,color,magenta,マゼンタ
+*,color,fuchsia,フューシャ
+*,color,orange,オレンジ
+*,color,peach,ピーチ
+*,color,apricot,アプリコット
+*,color,amber,アンバー
+*,color,yellow,黄
+*,color,lemon,レモン
+*,color,mustard,マスタード
+*,color,gold,ゴールド
+*,color,champagne,シャンパン
+*,color,bronze,ブロンズ
+*,color,copper,カッパー
+*,color,brown,茶
+*,color,chocolate,チョコレート
+*,color,coffee,コーヒー
+*,color,caramel,キャラメル
+*,color,chestnut,栗色
+*,color,green,緑
+*,color,lime,ライム
+*,color,mint,ミント
+*,color,emerald,エメラルド
+*,color,forest green,フォレストグリーン
+*,color,olive,オリーブ
+*,color,khaki,カーキ
+*,color,teal,ティール
+*,color,cyan,シアン
+*,color,turquoise,ターコイズ
+*,color,aqua,アクア
 *,color,blue,青
+*,color,sky blue,スカイブルー
+*,color,light blue,水色
+*,color,powder blue,パウダーブルー
+*,color,azure,アジュール
+*,color,cobalt,コバルト
+*,color,royal blue,ロイヤルブルー
 *,color,deep blue,深い青
 *,color,navy,紺
-*,color,green,緑
-*,color,yellow,黄
-*,color,orange,オレンジ
+*,color,midnight blue,ミッドナイトブルー
+*,color,indigo,インディゴ
 *,color,purple,紫
-*,color,pink,ピンク
-*,color,brown,茶
-*,color,gray,グレー
-*,color,beige,ベージュ
-*,color,cream,クリーム
-*,color,gold,ゴールド
+*,color,violet,バイオレット
+*,color,lavender,ラベンダー
+*,color,lilac,ライラック
+*,color,plum,プラム
 *,color,silver,シルバー
-*,color,matte black,マットブラック
-*,direction,frontal,正面
-*,direction,profile,横顔
-*,direction,three-quarter,斜め
-*,direction,back,後ろ
-*,direction,side,横
-*,direction,top,上から
-*,direction,low angle,下から
+*,color,platinum,プラチナ
+*,color,metallic,メタリック
+*,color,iridescent,虹色光沢
+*,color,transparent,透明
+*,color,translucent,半透明
 *,quality,soft,柔らかい
 *,quality,sharp,シャープ
 *,quality,smooth,滑らか
@@ -480,6 +555,23 @@ environment,background,fiery background,炎背景
 environment,background,lightning background,雷背景
 environment,background,halftone background,ハーフトーン背景
 environment,background,mosaic background,モザイク背景
+environment,color,solid color,単色
+environment,color,gradient,グラデーション
+environment,color,radial gradient,放射状グラデ
+environment,color,linear gradient,線形グラデ
+environment,color,two-tone,ツートーン
+environment,color,multicolor,マルチカラー
+environment,color,monochrome,モノトーン
+environment,color,pastel,パステル
+environment,color,vivid,ビビッド
+environment,color,muted,くすんだ
+environment,color,dark,暗い
+environment,color,light,明るい
+environment,color,warm tones,暖色系
+environment,color,cool tones,寒色系
+environment,color,neutral,ニュートラル
+environment,color,desaturated,彩度低め
+environment,color,high contrast,ハイコントラスト
 environment,location,indoors,屋内
 environment,location,living room,リビング
 environment,location,bedroom,寝室
@@ -868,6 +960,15 @@ expression,emotion,confident,自信
 expression,emotion,bored,退屈
 expression,emotion,serene,穏やか
 expression,emotion,mysterious,ミステリアス
+expression,emotion,melancholic,憂い
+expression,emotion,fierce,獰猛
+expression,emotion,gentle,優しい
+expression,emotion,playful,遊び心
+expression,emotion,sultry,艶やか
+expression,emotion,innocent,無邪気
+expression,emotion,mischievous,いたずらっぽい
+expression,emotion,stoic,冷静
+expression,emotion,dreamy,夢見がち
 expression,face,smile,笑顔
 expression,face,light smile,微笑
 expression,face,grin,にやり
@@ -885,16 +986,6 @@ expression,face,crying,泣く
 expression,face,blush,赤面
 expression,face,expressionless,無表情
 expression,face,blank stare,放心
-expression,type,joyful,喜び
-expression,type,melancholic,憂い
-expression,type,fierce,獰猛
-expression,type,gentle,優しい
-expression,type,playful,遊び心
-expression,type,sultry,艶やか
-expression,type,innocent,無邪気
-expression,type,mischievous,いたずらっぽい
-expression,type,stoic,冷静
-expression,type,dreamy,夢見がち
 expression,eyes,closed eyes,閉じた目
 expression,eyes,half-closed eyes,半目
 expression,eyes,one eye closed,片目閉じ
@@ -975,6 +1066,15 @@ lighting,color,neutral,ニュートラル
 lighting,color,amber,アンバー
 lighting,color,cyan,シアン
 lighting,color,magenta,マゼンタ
+lighting,color,golden hour,ゴールデンアワー
+lighting,color,sunrise,朝焼け
+lighting,color,sunset,夕焼け
+lighting,color,tungsten,タングステン
+lighting,color,fluorescent,蛍光灯
+lighting,color,neon,ネオン
+lighting,color,mixed lighting,ミックス光源
+lighting,color,colored gel,カラージェル
+lighting,color,rgb,RGB照明
 lighting,shadow,soft shadow,ソフトな影
 lighting,shadow,hard shadow,ハードな影
 lighting,shadow,no shadow,影なし
@@ -1405,34 +1505,22 @@ outfit,style,activewear,アクティブウェア
 outfit,style,loungewear,ルームウェア
 outfit,style,sleepwear,寝間着
 outfit,style,workwear,ワークウェア
-outfit,color,white,白
-outfit,color,black,黒
-outfit,color,gray,グレー
-outfit,color,navy,ネイビー
-outfit,color,beige,ベージュ
-outfit,color,brown,ブラウン
-outfit,color,cream,クリーム
-outfit,color,red,赤
-outfit,color,pink,ピンク
-outfit,color,orange,オレンジ
-outfit,color,yellow,黄色
-outfit,color,burgundy,バーガンディ
-outfit,color,blue,青
-outfit,color,light blue,水色
-outfit,color,turquoise,ターコイズ
-outfit,color,green,緑
-outfit,color,olive,オリーブ
-outfit,color,khaki,カーキ
-outfit,color,purple,紫
-outfit,color,lavender,ラベンダー
-outfit,color,gold,ゴールド
-outfit,color,silver,シルバー
-outfit,color,striped,ストライプ
-outfit,color,plaid,チェック
-outfit,color,polka dot,水玉
-outfit,color,floral,花柄
-outfit,color,animal print,アニマル柄
-outfit,color,camouflage,迷彩
+outfit,color,monochrome,モノトーン
+outfit,color,bicolor,バイカラー
+outfit,color,tricolor,トリコロール
+outfit,color,multicolor,マルチカラー
+outfit,color,color block,カラーブロック
+outfit,color,gradient,グラデーション
+outfit,color,ombre,オンブレ
+outfit,color,faded,色褪せ
+outfit,color,washed,ウォッシュド加工
+outfit,color,acid wash,アシッドウォッシュ
+outfit,color,bleached,ブリーチ
+outfit,color,dyed,染め
+outfit,color,tie-dye,タイダイ
+outfit,color,dip-dye,ディップダイ
+outfit,color,contrast trim,差し色トリム
+outfit,color,two-tone,ツートーン
 outfit,material,cotton,コットン
 outfit,material,linen,リネン
 outfit,material,silk,シルク
@@ -1731,21 +1819,6 @@ photography,film,Kodak Tri-X 400,モノクロ定番
 photography,film,Kodak T-Max 100,微粒子モノクロ
 photography,film,Fuji Velvia 50,高彩度スライド
 photography,film,Kodak Ektachrome E100,スライド
-photography,effects,shallow depth of field,浅い被写界深度
-photography,effects,deep depth of field,深い被写界深度
-photography,effects,creamy bokeh,クリーミーなボケ
-photography,effects,swirly bokeh,渦巻きボケ
-photography,effects,smooth bokeh,滑らかなボケ
-photography,effects,soft focus,ソフトフォーカス
-photography,effects,selective focus,選択的フォーカス
-photography,effects,tack sharp,シャープ
-photography,effects,motion blur,モーションブラー
-photography,effects,radial blur,放射状ブラー
-photography,effects,lens flare,レンズフレア
-photography,effects,chromatic aberration,色収差
-photography,effects,vignette,周辺減光
-photography,effects,film grain,フィルム粒子
-photography,effects,light leaks,光漏れ
 pose,base,standing,立ち
 pose,base,standing on one leg,片足立ち
 pose,base,contrapposto,片足重心
@@ -1865,7 +1938,13 @@ pose,legs,spread legs,開脚
 *,effects,circular bokeh,丸ボケ
 *,effects,hexagonal bokeh,六角ボケ
 *,effects,swirly bokeh,渦巻きボケ
+*,effects,creamy bokeh,クリーミーなボケ
+*,effects,smooth bokeh,滑らかなボケ
+*,effects,shallow depth of field,浅い被写界深度
+*,effects,deep depth of field,深い被写界深度
 *,effects,soft focus,ソフトフォーカス
+*,effects,selective focus,選択的フォーカス
+*,effects,tack sharp,シャープ
 *,effects,tilt-shift effect,ミニチュア効果
 *,effects,radial blur,放射ブラー
 *,effects,motion blur,モーションブラー

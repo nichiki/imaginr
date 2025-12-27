@@ -4,6 +4,7 @@
 export interface DictionaryEntry {
   value: string;
   description?: string;  // 補足説明（省略可）
+  source?: string;       // 由来元コンテキスト (例: "outfit.color", "*.color")
 }
 
 // フラット化された辞書エントリ（API経由で取得する形式）
@@ -60,38 +61,48 @@ export function buildDictionaryCache(
 }
 
 // コンテキストに応じた辞書エントリを検索
-// 具体的なコンテキストから汎用へフォールバック
-// 例: contextPath=["outfit", "jacket"], key="style" の場合
-// 1. outfit.jacket.style を検索（フルパス - 最も具体的）
-// 2. jacket.style を検索（直近の親）
-// 3. outfit.style を検索（上位の親）
-// 4. *.style を検索（汎用）
+// 具体的なコンテキストと汎用コンテキストをマージして返す
+// 例: contextPath=["outfit", "jacket"], key="color" の場合
+// 以下を全てマージして返す:
+// 1. outfit.jacket.color（フルパス - 最も具体的）
+// 2. jacket.color（直近の親）
+// 3. outfit.color（上位の親）
+// 4. *.color（汎用 - 常に含める）
 export function lookupDictionary(
   cache: Map<string, DictionaryEntry[]>,
   contextPath: string[], // 親キーの配列 (例: ["outfit", "jacket"])
   key: string
 ): DictionaryEntry[] {
+  const results: DictionaryEntry[] = [];
+  const seenValues = new Set<string>(); // 重複排除用
+
+  const addEntries = (entries: DictionaryEntry[] | undefined, source: string) => {
+    if (!entries) return;
+    for (const entry of entries) {
+      if (!seenValues.has(entry.value)) {
+        seenValues.add(entry.value);
+        results.push({ ...entry, source });
+      }
+    }
+  };
+
   // 1. フルパスで検索（最も具体的）
   if (contextPath.length > 0) {
     const fullPath = contextPath.join('.');
     const fullKey = `${fullPath}.${key}`;
-    const entries = cache.get(fullKey);
-    if (entries && entries.length > 0) {
-      return entries;
-    }
+    addEntries(cache.get(fullKey), fullKey);
   }
 
   // 2. 各親コンテキストを後ろから順に検索
-  // ["outfit", "jacket"] → "jacket.style", "outfit.style"
+  // ["outfit", "jacket"] → "jacket.color", "outfit.color"
   for (let i = contextPath.length - 1; i >= 0; i--) {
     const contextKey = `${contextPath[i]}.${key}`;
-    const entries = cache.get(contextKey);
-    if (entries && entries.length > 0) {
-      return entries;
-    }
+    addEntries(cache.get(contextKey), contextKey);
   }
 
-  // 3. 最後に汎用コンテキストを検索
+  // 3. 汎用コンテキストを常に追加
   const wildcardKey = `*.${key}`;
-  return cache.get(wildcardKey) || [];
+  addEntries(cache.get(wildcardKey), wildcardKey);
+
+  return results;
 }

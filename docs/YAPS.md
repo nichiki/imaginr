@@ -121,14 +121,14 @@ subject: cityscape
 | キー | 説明 | 例 |
 |------|------|------|
 | `gender` | 性別 | `woman`, `man`, `girl`, `boy`, `androgynous` |
-| `ethnicity` | 人種・民族 | `japanese`, `asian`, `caucasian`, `dark-skinned` |
+| `ethnicity` | 人種・民族 | `Japanese`, `Asian`, `Caucasian`, `African`, `Hispanic` |
 | `race` | ファンタジー種族 | `human`, `elf`, `demon`, `angel`, `catgirl`, `kemonomimi` |
-| `age` | 年齢層 | `child`, `teen`, `young`, `adult`, `mature`, `elderly` |
+| `age` | 年齢層 | `teenage`, `young`, `young adult`, `middle-aged`, `elderly` |
 
 ```yaml
 demographics:
   gender: woman
-  ethnicity: japanese
+  ethnicity: Japanese
   race: elf
   age: young
 ```
@@ -152,7 +152,7 @@ demographics:
 | `action` | 動作 | `walking`, `dancing`, `fighting`, `sleeping`, `eating` |
 | `head` | 頭の動き | `head tilt`, `looking up`, `looking down`, `chin rest` |
 | `arms` | 腕の動き | `arms up`, `arms crossed`, `arm behind head`, `reaching out` |
-| `hands` | 手の形 | `hands on hips`, `peace sign`, `pointing`, `fist`, `open palm` |
+| `hands` | 手の形 | `hands on hips`, `peace sign`, `pointing at viewer`, `fist`, `open palm` |
 | `legs` | 脚の動き | `crossed legs`, `legs together`, `one knee up` |
 
 ```yaml
@@ -184,8 +184,8 @@ pose:
 |------|------|------|
 | `emotion` | 感情 | `happy`, `sad`, `angry`, `embarrassed`, `surprised`, `shy` |
 | `face` | 表情名 | `smile`, `frown`, `pout`, `smirk`, `tears`, `blush` |
-| `eyes` | 目の状態 | `closed eyes`, `half-closed`, `heart eyes`, `crying` |
-| `mouth` | 口の状態 | `open mouth`, `tongue out`, `lip bite`, `drooling` |
+| `eyes` | 目の状態 | `closed eyes`, `half-closed eyes`, `heart-shaped pupils`, `wide-eyed` |
+| `mouth` | 口の状態 | `open mouth`, `tongue out`, `biting lip`, `drooling` |
 
 ```yaml
 expression:
@@ -208,18 +208,18 @@ expression:
 
 | キー | 説明 | 例 |
 |------|------|------|
-| `length` | 長さ | `short`, `medium`, `long`, `very long` |
-| `style` | スタイル | `ponytail`, `twintails`, `braid`, `bob`, `messy`, `straight` |
-| `color` | 色 | `blonde`, `black`, `pink`, `blue`, `gradient`, `multicolored` |
-| `bangs` | 前髪 | `blunt bangs`, `side swept`, `parted`, `curtain bangs` |
-| `extras` | 装飾 | `ribbon`, `hairpin`, `hair ornament`, `flower` |
+| `length` | 長さ | `short hair`, `medium hair`, `long hair`, `very long hair` |
+| `style` | スタイル | `ponytail`, `twintails`, `braid`, `bob cut`, `messy hair`, `straight hair` |
+| `color` | 色 | `blonde hair`, `black hair`, `pink hair`, `blue hair`, `gradient hair`, `multicolored hair` |
+| `bangs` | 前髪 | `blunt bangs`, `swept bangs`, `parted bangs`, `side bangs` |
+| `extras` | 装飾 | `ribbon`, `hair pin`, `hair ornament`, `hair flower` |
 
 ```yaml
 appearance:
   hair:
-    length: long
+    length: long hair
     style: ponytail
-    color: blonde
+    color: blonde hair
     bangs: blunt bangs
     extras: [ribbon]
 ```
@@ -228,23 +228,23 @@ appearance:
 
 | キー | 説明 | 例 |
 |------|------|------|
-| `eyes` | 目の色・形 | `blue`, `green`, `red`, `heterochromia`, `almond`, `droopy` |
-| `skin` | 肌 | `pale`, `fair`, `tan`, `dark`, `freckles` |
-| `face` | 顔の形 | `round face`, `oval face`, `sharp jaw` |
-| `makeup` | メイク | `lipstick`, `eyeshadow`, `blush`, `natural makeup` |
+| `eyes` | 目の色・形 | `blue eyes`, `green eyes`, `red eyes`, `heterochromia` |
+| `skin` | 肌 | `pale skin`, `fair skin`, `tan skin`, `dark skin`, `freckles` |
+| `face` | 顔の形 | `round face`, `oval face`, `strong jawline` |
+| `makeup` | メイク | `red lipstick`, `smoky eyes`, `blush`, `natural makeup` |
 
 #### 体型
 
 | キー | 説明 | 例 |
 |------|------|------|
-| `build` | 体格 | `slim`, `athletic`, `curvy`, `muscular`, `petite`, `chubby` |
-| `proportions` | 頭身 | `chibi`, `normal`, `model`, `8 heads tall` |
+| `build` | 体格 | `slim`, `athletic`, `curvy`, `muscular`, `petite`, `plump` |
+| `proportions` | 頭身 | `chibi`, `normal`, `model proportions`, `8 heads tall` |
 
 #### 部位別（必要な時のみ）
 
 | キー | 説明 | 例 |
 |------|------|------|
-| `breast` | 胸 | `flat chest`, `small`, `medium`, `large` |
+| `breast` | 胸 | `flat chest`, `small breasts`, `medium breasts`, `large breasts` |
 | `hips` | 腰 | `wide hips`, `narrow hips` |
 | `waist` | ウエスト | `slim waist`, `narrow waist` |
 | `legs` | 脚 | `long legs`, `thick thighs`, `slender legs` |
@@ -253,16 +253,16 @@ appearance:
 
 **type**: `array`
 
-`tattoo`, `wings`, `tail`, `elf ears`, `horns`, `halo` など
+`tattoo`, `horns`, `halo`, `pointed ears`, `fangs` など
 
 ```yaml
 appearance:
   hair:
-    color: pink
+    color: pink hair
     style: twintails
   eyes: heterochromia
   build: petite
-  extras: [elf ears, small wings]
+  extras: [pointed ears, horns]
 ```
 
 ---
@@ -291,7 +291,7 @@ outfit:
 | キー | 説明 | 例 |
 |------|------|------|
 | `costume` | コスチューム | `nurse`, `maid`, `witch`, `bunny girl`, `idol`, `schoolgirl` |
-| `style` | 系統 | `casual`, `formal`, `fantasy`, `gothic`, `sporty` |
+| `style` | 系統 | `casual`, `formal`, `elegant`, `gothic`, `sporty` |
 
 ```yaml
 # コスチュームで指定
@@ -307,7 +307,7 @@ outfit:
 | `bottom` | ボトムス | `skirt`, `pants`, `shorts`, `jeans` |
 | `dress` | ドレス | `wedding dress`, `evening gown`, `sundress` |
 | `outerwear` | アウター | `jacket`, `coat`, `cardigan`, `cape`, `hoodie` |
-| `legwear` | レッグウェア | `thighhighs`, `pantyhose`, `stockings`, `knee socks` |
+| `legwear` | レッグウェア | `thigh highs`, `pantyhose`, `stockings`, `knee socks` |
 | `footwear` | 靴 | `high heels`, `boots`, `sneakers`, `barefoot`, `sandals` |
 | `headwear` | 帽子類 | `hat`, `crown`, `ribbon`, `hairband`, `beret` |
 | `swimwear` | 水着 | `bikini`, `one-piece swimsuit`, `school swimsuit` |
@@ -322,12 +322,12 @@ outfit:
 | キー | 説明 | 例 |
 |------|------|------|
 | `type` | アイテムの種類 | `t-shirt`, `blazer`, `pleated skirt` など |
-| `color` | 色 | `white`, `black`, `red`, `navy`, `colorful` |
-| `color_scheme` | 配色 | `monochrome`, `complementary`, `pastel` |
+| `color` | 色 | `white`, `black`, `red`, `navy`, `multicolor` |
+| `color_scheme` | 配色 | `monochrome`, `complementary colors`, `pastel colors` |
 | `material` | 素材 | `silk`, `leather`, `lace`, `denim`, `cotton` |
 | `pattern` | 柄 | `stripes`, `plaid`, `polka dots`, `floral` |
 | `fit` | フィット感 | `tight`, `loose`, `oversized` |
-| `state` | 状態 | `wet`, `torn`, `disheveled` |
+| `state` | 状態 | `wet clothes`, `torn clothes`, `disheveled clothes` |
 | `neckline` | ネックライン | `v-neck`, `off-shoulder`, `turtleneck` |
 | `sleeve` | 袖 | `sleeveless`, `short sleeve`, `long sleeve` |
 | `length` | 丈 | `mini`, `midi`, `maxi`, `cropped` |
@@ -367,12 +367,13 @@ outfit:
 | キー | 説明 | 例 |
 |------|------|------|
 | `world` | 世界観 | `fantasy`, `sci-fi`, `modern`, `historical`, `cyberpunk`, `steampunk` |
-| `background` | 背景タイプ | `simple background`, `detailed background`, `gradient`, `white`, `transparent` |
-| `location` | 場所 | `indoor`, `outdoor`, `beach`, `forest`, `city`, `castle`, `classroom` |
+| `background` | 背景タイプ | `simple background`, `gradient background`, `white background`, `black background` |
+| `color` | 背景色・色調 | `gradient`, `monochrome`, `pastel`, `vivid`, `warm tones`, `cool tones` |
+| `location` | 場所 | `indoors`, `outdoors`, `beach`, `forest`, `city`, `castle`, `classroom` |
 | `time` | 時間帯 | `day`, `night`, `sunset`, `dawn`, `golden hour` |
-| `weather` | 天気 | `sunny`, `rainy`, `snowy`, `cloudy`, `foggy` |
-| `season` | 季節 | `spring`, `summer`, `autumn`, `winter` |
-| `crowd` | 群衆 | `solo`, `duo`, `group`, `crowd` |
+| `weather` | 天気 | `sunny`, `rain`, `snow`, `cloudy`, `fog` |
+| `season` | 季節 | `spring (season)`, `summer`, `autumn`, `winter` |
+| `crowd` | 群衆 | `crowd`, `sparse crowd`, `empty` |
 | `props` | 背景の小物 | `chair`, `table`, `flowers`, `bookshelf`, `lamp` |
 
 ```yaml
@@ -400,13 +401,13 @@ environment:
 |------|------|------|
 | `style` | 画風 | `anime`, `realistic`, `painterly`, `sketch`, `watercolor`, `oil painting`, `pixel art`, `3D render` |
 | `medium` | 画材 | `digital art`, `traditional`, `mixed media` |
-| `color_scheme` | 色調 | `warm tones`, `cool tones`, `pastel`, `vibrant`, `monochrome` |
+| `color_scheme` | 色調 | `warm tones`, `cool tones`, `pastel colors`, `vibrant colors`, `monochrome` |
 
 ```yaml
 aesthetic:
   style: anime
   medium: digital art
-  color_scheme: pastel
+  color_scheme: pastel colors
 ```
 
 > **Note**: アーティスト名は辞書に含めません。
@@ -418,7 +419,7 @@ aesthetic:
 雰囲気・感情的トーンを指定します。
 
 ```yaml
-mood: cheerful      # cheerful, melancholic, dramatic, peaceful, dreamy, tense, eerie
+mood: joyful      # joyful, melancholic, dramatic, peaceful, serene, tense, eerie
 ```
 
 ### effects
@@ -452,8 +453,8 @@ effects: [sparkles, bokeh, lens flare, particles, motion blur, chromatic aberrat
 | キー | 説明 | 例 |
 |------|------|------|
 | `base` | 雰囲気 | `professional`, `dramatic`, `soft`, `natural`, `studio`, `cinematic` |
-| `source` | 光源 | `sunlight`, `moonlight`, `neon`, `candlelight`, `window light` |
-| `technique` | 技法 | `high-key`, `low-key`, `Rembrandt`, `split lighting`, `butterfly` |
+| `source` | 光源 | `sunlight`, `moonlight`, `neon light`, `candlelight`, `window light` |
+| `technique` | 技法 | `high-key`, `low-key`, `Rembrandt`, `split lighting`, `butterfly lighting` |
 | `color` | 色温度 | `warm`, `cool`, `golden`, `blue hour` |
 | `shadow` | 影 | `hard shadow`, `soft shadow`, `no shadow`, `rim light` |
 
@@ -483,8 +484,8 @@ lighting:
 | キー | 説明 | 例 |
 |------|------|------|
 | `shot` | 切り取り範囲 | `full body`, `upper body`, `close-up`, `cowboy shot`, `bust shot` |
-| `angle` | カメラアングル | `from above`, `from below`, `eye level`, `dutch angle`, `from behind` |
-| `method` | 構図技法 | `rule of thirds`, `centered`, `symmetrical`, `golden ratio`, `negative space` |
+| `angle` | カメラアングル | `from above`, `from below`, `eye level`, `dutch angle`, `from side` |
+| `method` | 構図技法 | `rule of thirds`, `centered`, `symmetrical`, `golden ratio`, `diagonal` |
 
 ```yaml
 composition:
@@ -505,15 +506,15 @@ composition:
 
 | キー | 説明 | 例 |
 |------|------|------|
-| `shot_with` | 撮影機材 | `DSLR`, `mirrorless`, `film camera`, `polaroid`, `smartphone` |
-| `lens` | レンズ | `wide angle`, `telephoto`, `fisheye`, `macro`, `85mm portrait` |
-| `film` | フィルム感 | `warm tones`, `grainy`, `faded`, `high contrast` |
+| `shot_with` | 撮影機材 | `shot on DSLR`, `shot on mirrorless camera`, `shot on 35mm film`, `shot on Polaroid`, `shot on smartphone` |
+| `lens` | レンズ | `24mm wide angle`, `200mm telephoto`, `fisheye lens`, `macro lens`, `85mm f/1.4` |
+| `film` | フィルム | `Kodak Portra 400`, `Fuji Pro 400H`, `Cinestill 800T`, `Kodak Tri-X 400` |
 
 ```yaml
 photography:
-  shot_with: film camera
-  lens: 85mm portrait
-  film: warm tones
+  shot_with: shot on 35mm film
+  lens: 85mm f/1.4
+  film: Kodak Portra 400
 ```
 
 ---

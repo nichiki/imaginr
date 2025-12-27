@@ -82,8 +82,6 @@ entries:
         description: 感情
       - key: face
         description: 表情名
-      - key: type
-        description: 表情を一言で
       - key: eyes
         description: 目の状態
       - key: mouth
@@ -293,6 +291,8 @@ entries:
         description: 世界観
       - key: background
         description: 背景タイプ
+      - key: color
+        description: 背景色・色調
       - key: location
         description: 場所
       - key: time
