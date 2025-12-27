@@ -18,6 +18,7 @@ interface YamlEditorProps {
   dictionaryCache?: Map<string, DictionaryEntry[]>;
   keyDictionaryCache?: Map<string, KeyDictionaryEntry[]>;
   onDictionaryChange?: () => void;
+  onGenerate?: () => void;
 }
 
 export interface YamlEditorRef {
@@ -25,7 +26,7 @@ export interface YamlEditorRef {
 }
 
 const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function YamlEditor(
-  { value, onChange, fileList = [], snippets = [], dictionaryCache, keyDictionaryCache, onDictionaryChange },
+  { value, onChange, fileList = [], snippets = [], dictionaryCache, keyDictionaryCache, onDictionaryChange, onGenerate },
   ref
 ) {
   const { t, i18n } = useTranslation();
@@ -37,6 +38,10 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
   const snippetsRef = useRef<Snippet[]>(snippets);
   const dictionaryCacheRef = useRef<Map<string, DictionaryEntry[]> | undefined>(dictionaryCache);
   const keyDictionaryCacheRef = useRef<Map<string, KeyDictionaryEntry[]> | undefined>(keyDictionaryCache);
+  const onGenerateRef = useRef(onGenerate);
+
+  // Keep onGenerate ref updated
+  onGenerateRef.current = onGenerate;
 
   // Dictionary quick add dialog state
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -578,6 +583,11 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
     // Ctrl+Space (Windows/Linux用、MacでもIME設定次第で使える)
     editor.addCommand(monaco.KeyMod.WinCtrl | monaco.KeyCode.Space, () => {
       editor.trigger('keyboard', 'editor.action.triggerSuggest', {});
+    });
+
+    // Ctrl+Enter / Cmd+Enter: 生成（エディタのデフォルト動作を上書き）
+    editor.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, () => {
+      onGenerateRef.current?.();
     });
 
     // 辞書に追加アクションを登録

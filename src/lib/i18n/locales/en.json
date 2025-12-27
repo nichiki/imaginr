@@ -44,7 +44,7 @@
     "allShown": "— All shown —"
   },
   "header": {
-    "save": "Ctrl+S: Save",
+    "save": "Save (Ctrl+S / ⌘S)",
     "unsaved": "Unsaved",
     "saving": "Saving...",
     "layoutUpper": "Upper only",
@@ -82,7 +82,8 @@
     "generating": "Generating..."
   },
   "tabBar": {
-    "close": "Close",
+    "close": "Close (Ctrl+W / ⌘W)",
+    "closeAll": "Close All",
     "splitRight": "Open in Split View"
   },
   "editor": {

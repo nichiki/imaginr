@@ -18,7 +18,12 @@ import {
   horizontalListSortingStrategy,
   useSortable,
 } from '@dnd-kit/sortable';
-import { X, Columns2 } from 'lucide-react';
+import { X, Columns2, XCircle } from 'lucide-react';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from '@/components/ui/tooltip';
 import {
   ContextMenu,
   ContextMenuContent,
@@ -32,6 +37,7 @@ interface TabBarProps {
   dirtyTabs: Set<string>;
   onSelectTab: (path: string) => void;
   onCloseTab: (path: string) => void;
+  onCloseAllTabs?: () => void;
   onReorderTabs: (tabs: string[]) => void;
   onSplitRight?: (path: string) => void;
   paneId?: 'left' | 'right';
@@ -134,10 +140,12 @@ export function TabBar({
   dirtyTabs,
   onSelectTab,
   onCloseTab,
+  onCloseAllTabs,
   onReorderTabs,
   onSplitRight,
   paneId = 'left',
 }: TabBarProps) {
+  const { t } = useTranslation();
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
@@ -182,27 +190,45 @@ export function TabBar({
   }
 
   return (
-    <div className="flex bg-[#2d2d2d] border-b border-[#3c3c3c] overflow-x-auto">
-      <DndContext
-        sensors={sensors}
-        collisionDetection={closestCenter}
-        onDragEnd={handleDragEnd}
-      >
-        <SortableContext items={tabs} strategy={horizontalListSortingStrategy}>
-          {tabs.map((path) => (
-            <SortableTab
-              key={path}
-              path={path}
-              isActive={path === activeTab}
-              isDirty={dirtyTabs.has(path)}
-              onSelect={() => onSelectTab(path)}
-              onClose={handleClose(path)}
-              onSplitRight={handleSplitRight(path)}
-              showSplitOption={paneId === 'left' && !!onSplitRight}
-            />
-          ))}
-        </SortableContext>
-      </DndContext>
+    <div className="flex bg-[#2d2d2d] border-b border-[#3c3c3c]">
+      <div className="flex-1 flex overflow-x-auto">
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={handleDragEnd}
+        >
+          <SortableContext items={tabs} strategy={horizontalListSortingStrategy}>
+            {tabs.map((path) => (
+              <SortableTab
+                key={path}
+                path={path}
+                isActive={path === activeTab}
+                isDirty={dirtyTabs.has(path)}
+                onSelect={() => onSelectTab(path)}
+                onClose={handleClose(path)}
+                onSplitRight={handleSplitRight(path)}
+                showSplitOption={paneId === 'left' && !!onSplitRight}
+              />
+            ))}
+          </SortableContext>
+        </DndContext>
+      </div>
+      {/* Close All button - only show on left pane when there are multiple tabs */}
+      {paneId === 'left' && tabs.length > 1 && onCloseAllTabs && (
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <button
+              onClick={onCloseAllTabs}
+              className="flex-shrink-0 px-2 py-1.5 text-gray-400 hover:text-white hover:bg-[#3c3c3c] border-l border-[#3c3c3c]"
+            >
+              <XCircle size={16} />
+            </button>
+          </TooltipTrigger>
+          <TooltipContent side="bottom">
+            {t('tabBar.closeAll')}
+          </TooltipContent>
+        </Tooltip>
+      )}
     </div>
   );
 }

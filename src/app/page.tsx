@@ -924,6 +924,45 @@ export default function Home() {
     }
   }, [rightTabs, activeRightTab, dirtyFiles, t]);
 
+  // すべてのタブを閉じる
+  const handleCloseAllTabs = useCallback(async () => {
+    // 未保存ファイルがあるか確認
+    const unsavedTabs = openTabs.filter((path) => dirtyFiles.has(path));
+    if (unsavedTabs.length > 0) {
+      const { showConfirm } = await import('@/lib/dialog');
+      const confirmed = await showConfirm(
+        t('dialog.unsavedChanges'),
+        { okLabel: t('common.close') }
+      );
+      if (!confirmed) return;
+    }
+
+    // すべてクリア
+    setOpenTabs([]);
+    setActiveTab('');
+    setFiles({});
+    setDirtyFiles(new Set());
+    setVariableValuesMap({});
+
+    // 右ペインも閉じる
+    if (splitView) {
+      setRightTabs([]);
+      setActiveRightTab('');
+      setSplitView(false);
+      setFocusedPane('left');
+    }
+
+    if (initialized.current) {
+      saveState({
+        openTabs: [],
+        activeTab: '',
+        splitView: false,
+        rightTabs: [],
+        activeRightTab: '',
+      });
+    }
+  }, [openTabs, dirtyFiles, splitView, t]);
+
   // フォルダ開閉ハンドラ
   const handleToggleFolder = useCallback((path: string) => {
     setExpandedFolders((prev) => {
@@ -1430,17 +1469,44 @@ export default function Home() {
     saveState(DEFAULT_PANEL_SIZES);
   }, []);
 
-  // Ctrl+S で保存
+  // キーボードショートカット
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+      const isMod = e.ctrlKey || e.metaKey;
+
+      // Ctrl+S: 保存
+      if (isMod && e.key === 's') {
         e.preventDefault();
         handleSave();
+        return;
+      }
+
+      // Ctrl+Enter: 生成
+      if (isMod && e.key === 'Enter') {
+        e.preventDefault();
+        handleGenerate();
+        return;
+      }
+
+      // Ctrl+E: エンハンス
+      if (isMod && e.key === 'e') {
+        e.preventDefault();
+        handleEnhance();
+        return;
+      }
+
+      // Ctrl+W: タブを閉じる
+      if (isMod && e.key === 'w') {
+        e.preventDefault();
+        if (activeTab) {
+          handleCloseTab(activeTab);
+        }
+        return;
       }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [handleSave]);
+  }, [handleSave, handleGenerate, handleEnhance, activeTab, handleCloseTab]);
 
   // スニペットクリックハンドラ
   const handleSnippetClick = useCallback((snippet: Snippet) => {
@@ -1586,7 +1652,7 @@ export default function Home() {
             className="h-7 px-2 text-[#888] hover:text-white hover:bg-[#3c3c3c] disabled:opacity-50"
             onClick={handleSave}
             disabled={!isCurrentFileDirty || isSaving}
-            title={t('common.save')}
+            title={t('header.save')}
           >
             <Save className="h-4 w-4" />
           </Button>
@@ -1699,6 +1765,7 @@ export default function Home() {
                 setFocusedPane('left');
               }}
               onCloseTab={handleCloseTab}
+              onCloseAllTabs={handleCloseAllTabs}
               onReorderTabs={handleReorderTabs}
               onSplitRight={handleSplitRight}
               paneId="left"
@@ -1725,6 +1792,7 @@ export default function Home() {
                       console.error('Failed to reload dictionary:', e);
                     }
                   }}
+                  onGenerate={handleGenerate}
                 />
               ) : (
                 <div className="flex items-center justify-center h-full text-gray-500">
@@ -1793,6 +1861,7 @@ export default function Home() {
                         console.error('Failed to reload dictionary:', e);
                       }
                     }}
+                    onGenerate={handleGenerate}
                   />
                 ) : (
                   <div className="flex items-center justify-center h-full text-gray-500">

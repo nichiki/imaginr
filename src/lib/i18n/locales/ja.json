@@ -44,7 +44,7 @@
     "allShown": "— すべて表示しました —"
   },
   "header": {
-    "save": "Ctrl+S: 保存",
+    "save": "保存 (Ctrl+S / ⌘S)",
     "unsaved": "未保存",
     "saving": "保存中...",
     "layoutUpper": "上段のみ",
@@ -82,7 +82,8 @@
     "generating": "生成中..."
   },
   "tabBar": {
-    "close": "閉じる",
+    "close": "閉じる (Ctrl+W / ⌘W)",
+    "closeAll": "すべて閉じる",
     "splitRight": "右に分割して開く"
   },
   "editor": {
