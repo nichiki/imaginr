@@ -225,7 +225,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
 
     // YAML言語の補完プロバイダーを登録
     const completionProvider = monaco.languages.registerCompletionItemProvider('yaml', {
-      triggerCharacters: [' ', ':', ','],
+      triggerCharacters: [' ', ':', ',', '[', ']'],
       provideCompletionItems: (
         model: editor.ITextModel,
         position: Position
@@ -306,6 +306,72 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
 
           if (suggestions.length > 0) {
             return { suggestions };
+          }
+        }
+
+        // インライン配列内の補完: key: [value1, value2, |] または key: [|]
+        // Monacoの自動閉じ括弧で [] となるケースも考慮
+        // lineContent全体を見て、カーソルが [ と ] の間にあるかを確認
+        const textAfterPosition = lineContent.substring(position.column - 1);
+        const isInsideBrackets = textUntilPosition.includes('[') && textAfterPosition.includes(']');
+        const inlineArrayMatch = textUntilPosition.match(/^\s*-?\s*(\w+):\s*\[(.*)$/);
+        if (inlineArrayMatch && isInsideBrackets) {
+          const currentKey = inlineArrayMatch[1].toLowerCase();
+          const arrayContent = inlineArrayMatch[2];
+
+          // 配列内の最後の要素（カンマ以降）を取得
+          let typedValue = '';
+          let needsSpace = false;
+          const lastCommaIndex = arrayContent.lastIndexOf(',');
+          if (lastCommaIndex !== -1) {
+            const afterComma = arrayContent.substring(lastCommaIndex + 1);
+            needsSpace = afterComma.length === 0; // カンマ直後はスペースを追加
+            typedValue = afterComma.trimStart();
+          } else {
+            // カンマがない場合は配列の最初の要素
+            typedValue = arrayContent.trimStart();
+          }
+
+          // 辞書から値を検索
+          const contextPath = getContextPath(model, position.lineNumber);
+          let lookupKey = currentKey;
+          let lookupContextPath = contextPath;
+          if (currentKey === 'base' && contextPath.length > 0) {
+            lookupKey = contextPath[contextPath.length - 1];
+            lookupContextPath = contextPath.slice(0, -1);
+          }
+
+          const dictEntries = lookupDictionary(lookupContextPath, lookupKey);
+
+          if (dictEntries.length > 0) {
+            const filteredEntries = dictEntries.filter((entry) =>
+              entry.value.toLowerCase().includes(typedValue.toLowerCase()) ||
+              (entry.description && entry.description.toLowerCase().includes(typedValue.toLowerCase()))
+            );
+
+            if (filteredEntries.length > 0) {
+              return {
+                suggestions: filteredEntries.map((entry) => {
+                  let insertText = entry.value;
+                  if (needsSpace) {
+                    insertText = ` ${entry.value}`;
+                  }
+                  const showDesc = i18n.language === 'ja' && entry.description;
+                  return {
+                    label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
+                    kind: monaco.languages.CompletionItemKind.Value,
+                    insertText,
+                    detail: `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`,
+                    range: {
+                      startLineNumber: position.lineNumber,
+                      startColumn: position.column - typedValue.length,
+                      endLineNumber: position.lineNumber,
+                      endColumn: position.column,
+                    },
+                  };
+                }),
+              };
+            }
           }
         }
 
