@@ -120,12 +120,14 @@ subject: cityscape
 
 | キー | 説明 | 例 |
 |------|------|------|
+| `gender` | 性別 | `woman`, `man`, `girl`, `boy`, `androgynous` |
 | `ethnicity` | 人種・民族 | `japanese`, `asian`, `caucasian`, `dark-skinned` |
 | `race` | ファンタジー種族 | `human`, `elf`, `demon`, `angel`, `catgirl`, `kemonomimi` |
 | `age` | 年齢層 | `child`, `teen`, `young`, `adult`, `mature`, `elderly` |
 
 ```yaml
 demographics:
+  gender: woman
   ethnicity: japanese
   race: elf
   age: young
