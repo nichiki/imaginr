@@ -42,7 +42,9 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
   const onGenerateRef = useRef(onGenerate);
 
   // Keep onGenerate ref updated
-  onGenerateRef.current = onGenerate;
+  useEffect(() => {
+    onGenerateRef.current = onGenerate;
+  }, [onGenerate]);
 
   // Dictionary quick add dialog state
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -213,9 +215,13 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         const textUntilPosition = lineContent.substring(0, position.column - 1);
 
         // キー入力中かどうか判定（コロンの前）
+        // 1. 何か入力中: "  sub" → keyMatch[1] = "sub"
+        // 2. 空行/インデントのみ: "  " → emptyLineMatch
         const keyMatch = textUntilPosition.match(/^\s*(\w+)$/);
-        if (keyMatch) {
-          const typedKey = keyMatch[1].toLowerCase();
+        const emptyLineMatch = textUntilPosition.match(/^\s*$/);
+
+        if (keyMatch || emptyLineMatch) {
+          const typedKey = keyMatch ? keyMatch[1].toLowerCase() : '';
           const suggestions: languages.CompletionItem[] = [];
 
           // キー辞書から候補を検索
@@ -225,11 +231,14 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
             const parentKey = contextPath[contextPath.length - 1] || '*';
             const keyEntries = lookupKeysFromCache(keyCache, parentKey);
 
-            const matchingKeys = keyEntries.filter(
-              (entry) =>
-                entry.childKey.toLowerCase().includes(typedKey) ||
-                (entry.description && entry.description.toLowerCase().includes(typedKey))
-            );
+            // 空行の場合は全候補、入力中の場合はフィルタ
+            const matchingKeys = typedKey
+              ? keyEntries.filter(
+                  (entry) =>
+                    entry.childKey.toLowerCase().includes(typedKey) ||
+                    (entry.description && entry.description.toLowerCase().includes(typedKey))
+                )
+              : keyEntries;
 
             for (const entry of matchingKeys) {
               // 日本語UIの場合のみ説明を表示
@@ -254,13 +263,16 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
 
           // キーに対応するスニペットを検索
           // スニペットは key または category でフィルタ（keyがない場合はcategoryをフォールバック）
-          const matchingSnippets = snippetsRef.current.filter((s) => {
-            const snippetKey = (s.key || s.category || '').toLowerCase();
-            const snippetCategory = (s.category || '').toLowerCase();
-            return (
-              snippetKey.includes(typedKey) || snippetCategory.includes(typedKey)
-            );
-          });
+          // 空行の場合は全スニペットを候補に
+          const matchingSnippets = typedKey
+            ? snippetsRef.current.filter((s) => {
+                const snippetKey = (s.key || s.category || '').toLowerCase();
+                const snippetCategory = (s.category || '').toLowerCase();
+                return (
+                  snippetKey.includes(typedKey) || snippetCategory.includes(typedKey)
+                );
+              })
+            : snippetsRef.current;
 
           for (const snippet of matchingSnippets) {
             // keyがない場合はcategoryを使用
@@ -313,14 +325,27 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
 
           // 辞書から値を検索
           const contextPath = getContextPath(model, position.lineNumber);
-          let lookupKey = currentKey;
-          let lookupContextPath = contextPath;
-          if (currentKey === 'base' && contextPath.length > 0) {
-            lookupKey = contextPath[contextPath.length - 1];
-            lookupContextPath = contextPath.slice(0, -1);
-          }
 
-          const dictEntries = lookupDictionary(lookupContextPath, lookupKey);
+          // YAPS仕様: ルートレベルの場合の検索ロジック
+          // 1. まず {key}.base を検索（pose, lighting など base パターンを持つキー用）
+          // 2. なければ *.{key} を検索（quality, negative など直接値を持つキー用）
+          let lookupContextPath = contextPath;
+          let lookupKey = currentKey;
+          let dictEntries: DictionaryEntry[] = [];
+
+          if (contextPath.length === 0) {
+            // ルートレベル: まず {key}.base を試す
+            dictEntries = lookupDictionary([currentKey], 'base');
+            if (dictEntries.length > 0) {
+              lookupContextPath = [currentKey];
+              lookupKey = 'base';
+            } else {
+              // {key}.base がなければ *.{key} を試す
+              dictEntries = lookupDictionary([], currentKey);
+            }
+          } else {
+            dictEntries = lookupDictionary(contextPath, currentKey);
+          }
 
           if (dictEntries.length > 0) {
             const filteredEntries = dictEntries.filter((entry) =>
@@ -336,7 +361,9 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
                     insertText = ` ${entry.value}`;
                   }
                   const showDesc = i18n.language === 'ja' && entry.description;
-                  const fallbackSource = `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`;
+                  const fallbackSource = lookupContextPath.length > 0
+                    ? `${lookupContextPath.join('.')}.${lookupKey}`
+                    : `*.${currentKey}`;
                   return {
                     label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
                     kind: monaco.languages.CompletionItemKind.Value,
@@ -402,16 +429,27 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
           // 辞書から値を検索（コンテキストを考慮）
           const contextPath = getContextPath(model, position.lineNumber);
 
-          // YAPS仕様: "base" キーは親キーのエイリアス
-          // 例: pose.base の値は pose の値辞書を使う
-          let lookupKey = currentKey;
+          // YAPS仕様: ルートレベルの場合の検索ロジック
+          // 1. まず {key}.base を検索（pose, lighting など base パターンを持つキー用）
+          // 2. なければ *.{key} を検索（quality, negative など直接値を持つキー用）
+          // 3. 非ルートレベルは通常通り contextPath + currentKey で検索
           let lookupContextPath = contextPath;
-          if (currentKey === 'base' && contextPath.length > 0) {
-            lookupKey = contextPath[contextPath.length - 1];
-            lookupContextPath = contextPath.slice(0, -1);
-          }
+          let lookupKey = currentKey;
+          let dictEntries: DictionaryEntry[] = [];
 
-          const dictEntries = lookupDictionary(lookupContextPath, lookupKey);
+          if (contextPath.length === 0) {
+            // ルートレベル: まず {key}.base を試す
+            dictEntries = lookupDictionary([currentKey], 'base');
+            if (dictEntries.length > 0) {
+              lookupContextPath = [currentKey];
+              lookupKey = 'base';
+            } else {
+              // {key}.base がなければ *.{key} を試す
+              dictEntries = lookupDictionary([], currentKey);
+            }
+          } else {
+            dictEntries = lookupDictionary(contextPath, currentKey);
+          }
 
           if (dictEntries.length > 0) {
             // コロン直後でスペースがない場合のみスペースを追加
@@ -433,7 +471,9 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
                   }
                   // 日本語UIの場合のみ説明を表示
                   const showDesc = i18n.language === 'ja' && entry.description;
-                  const fallbackSource = `${contextPath.length > 0 ? contextPath.join('.') + '.' : ''}${currentKey}`;
+                  const fallbackSource = lookupContextPath.length > 0
+                    ? `${lookupContextPath.join('.')}.${lookupKey}`
+                    : `*.${currentKey}`;
                   return {
                     label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
                     kind: monaco.languages.CompletionItemKind.Value,

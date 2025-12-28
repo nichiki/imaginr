@@ -391,15 +391,43 @@ appearance,legs,muscular legs,筋肉質な脚
 *,color,iridescent,虹色光沢
 *,color,transparent,透明
 *,color,translucent,半透明
-*,quality,soft,柔らかい
-*,quality,sharp,シャープ
-*,quality,smooth,滑らか
-*,quality,rough,粗い
-*,quality,glossy,光沢
-*,quality,matte,マット
-*,quality,subtle,控えめ
-*,quality,strong,強い
-*,quality,minimal,最小限
+*,quality,masterpiece,傑作
+*,quality,best quality,最高品質
+*,quality,high quality,高品質
+*,quality,highly detailed,高精細
+*,quality,ultra detailed,超精細
+*,quality,absurdres,超高解像度
+*,quality,highres,高解像度
+*,quality,4k,4K解像度
+*,quality,8k,8K解像度
+*,quality,UHD,超高精細
+*,quality,HDR,ハイダイナミックレンジ
+*,quality,professional,プロ品質
+*,quality,studio quality,スタジオ品質
+*,quality,photorealistic,写実的
+*,quality,hyperrealistic,超写実的
+*,quality,intricate details,緻密なディテール
+*,texture,soft,柔らかい
+*,texture,hard,硬い
+*,texture,sharp,シャープ
+*,texture,smooth,滑らか
+*,texture,rough,粗い
+*,texture,glossy,光沢のある
+*,texture,matte,マット
+*,texture,shiny,艶やか
+*,texture,silky,絹のような
+*,texture,velvety,ベルベットのような
+*,texture,fluffy,ふわふわ
+*,texture,fuzzy,ふわっとした
+*,texture,coarse,ざらざら
+*,texture,grainy,粒状の
+*,texture,bumpy,凸凹した
+*,texture,wrinkled,しわのある
+*,texture,crinkled,しわくちゃ
+*,texture,wet,濡れた
+*,texture,dry,乾いた
+*,texture,oily,油っぽい
+*,texture,dusty,埃っぽい
 composition,shot,headshot,顔のみ
 composition,shot,close-up,顔〜首
 composition,shot,bust shot,胸上

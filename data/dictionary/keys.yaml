@@ -128,6 +128,8 @@ entries:
         description: スタイル
       - key: color
         description: 色
+      - key: texture
+        description: 質感
       - key: bangs
         description: 前髪
       - key: extras
@@ -178,6 +180,8 @@ entries:
         description: 色
       - key: material
         description: 素材
+      - key: texture
+        description: 質感
       - key: pattern
         description: 柄
       - key: fit
@@ -197,6 +201,8 @@ entries:
         description: 色
       - key: material
         description: 素材
+      - key: texture
+        description: 質感
       - key: pattern
         description: 柄
       - key: fit
@@ -216,6 +222,8 @@ entries:
         description: 配色
       - key: material
         description: 素材
+      - key: texture
+        description: 質感
       - key: pattern
         description: 柄
       - key: fit
@@ -237,6 +245,8 @@ entries:
         description: 色
       - key: material
         description: 素材
+      - key: texture
+        description: 質感
       - key: pattern
         description: 柄
       - key: fit
@@ -252,6 +262,8 @@ entries:
         description: 色
       - key: material
         description: 素材
+      - key: texture
+        description: 質感
       - key: pattern
         description: 柄
 
@@ -263,6 +275,8 @@ entries:
         description: 色
       - key: material
         description: 素材
+      - key: texture
+        description: 質感
 
   - parent: swimwear
     children:

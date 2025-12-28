@@ -211,6 +211,7 @@ expression:
 | `length` | 長さ | `short hair`, `medium hair`, `long hair`, `very long hair` |
 | `style` | スタイル | `ponytail`, `twintails`, `braid`, `bob cut`, `messy hair`, `straight hair` |
 | `color` | 色 | `blonde hair`, `black hair`, `pink hair`, `blue hair`, `gradient hair`, `multicolored hair` |
+| `texture` | 質感 | `silky`, `fluffy`, `smooth`, `glossy`, `wet` |
 | `bangs` | 前髪 | `blunt bangs`, `swept bangs`, `parted bangs`, `side bangs` |
 | `extras` | 装飾 | `ribbon`, `hair pin`, `hair ornament`, `hair flower` |
 
@@ -325,6 +326,7 @@ outfit:
 | `color` | 色 | `white`, `black`, `red`, `navy`, `multicolor` |
 | `color_scheme` | 配色 | `monochrome`, `complementary colors`, `pastel colors` |
 | `material` | 素材 | `silk`, `leather`, `lace`, `denim`, `cotton` |
+| `texture` | 質感 | `soft`, `smooth`, `glossy`, `matte`, `fluffy` |
 | `pattern` | 柄 | `stripes`, `plaid`, `polka dots`, `floral` |
 | `fit` | フィット感 | `tight`, `loose`, `oversized` |
 | `state` | 状態 | `wet clothes`, `torn clothes`, `disheveled clothes` |
@@ -684,6 +686,7 @@ source_anime               # ソース指定
 |-----------|------|---------|
 | v1.0 | 2024-12-24 | 初版リリース |
 | v1.1 | 2024-12-28 | 辞書との同期・例示値の更新、`environment.color` 追加 |
+| v1.2 | 2024-12-29 | `texture` キー追加（hair、outfit各アイテムの汎用質感属性） |
 
 ---
 
