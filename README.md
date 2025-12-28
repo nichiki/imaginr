@@ -1,4 +1,4 @@
-# Imaginr - Prompt Builder for AI Image Generation
+# Imaginr - YAML Prompt Builder for AI Image Generation
 
 **画像生成AIのプロンプト、管理できていますか？**
 
