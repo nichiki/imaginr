@@ -78,6 +78,11 @@ function areValuesEqual(a: VariableValues, b: VariableValues): boolean {
   });
 }
 
+// ロケールに基づいて適切な説明を取得
+function getDescription(entry: DictionaryEntry, locale: string): string | undefined {
+  return locale === 'ja' ? entry.descriptionJa : entry.descriptionEn;
+}
+
 // オートコンプリート付きインプット
 function AutocompleteInput({
   id,
@@ -87,6 +92,7 @@ function AutocompleteInput({
   suggestions,
   clearTitle,
   showDescription = true,
+  locale = 'en',
 }: {
   id: string;
   value: string;
@@ -95,6 +101,7 @@ function AutocompleteInput({
   suggestions: DictionaryEntry[];
   clearTitle: string;
   showDescription?: boolean;
+  locale?: string;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(-1);
@@ -112,7 +119,8 @@ function AutocompleteInput({
     return suggestions.filter(
       (s) =>
         s.value.toLowerCase().includes(lower) ||
-        s.description?.toLowerCase().includes(lower)
+        s.descriptionJa?.toLowerCase().includes(lower) ||
+        s.descriptionEn?.toLowerCase().includes(lower)
     );
   }, [value, suggestions]);
 
@@ -250,8 +258,8 @@ function AutocompleteInput({
               onMouseEnter={() => setSelectedIndex(index)}
             >
               <span>{entry.value}</span>
-              {showDescription && entry.description && (
-                <span className="text-[#888] ml-2">{entry.description}</span>
+              {showDescription && getDescription(entry, locale) && (
+                <span className="text-[#888] ml-2">{getDescription(entry, locale)}</span>
               )}
             </div>
           ))}
@@ -270,6 +278,7 @@ function MultiSelectCheckboxes({
   noOptionsText,
   addCustomPlaceholder,
   showDescription = true,
+  locale = 'en',
 }: {
   id: string;
   value: string[];
@@ -278,6 +287,7 @@ function MultiSelectCheckboxes({
   noOptionsText: string;
   addCustomPlaceholder: string;
   showDescription?: boolean;
+  locale?: string;
 }) {
   const [customInput, setCustomInput] = useState('');
 
@@ -334,8 +344,9 @@ function MultiSelectCheckboxes({
       {/* チェックボックス（辞書の値） */}
       <div className="flex flex-col gap-1 max-h-32 overflow-y-auto">
         {suggestions.map((entry) => {
-          const label = showDescription && entry.description
-            ? `${entry.value}（${entry.description}）`
+          const desc = getDescription(entry, locale);
+          const label = showDescription && desc
+            ? `${entry.value}（${desc}）`
             : entry.value;
           return (
             <label
@@ -702,7 +713,8 @@ function VariableFormInner({
                     suggestions={suggestions}
                     noOptionsText={t('common.noOptions')}
                     addCustomPlaceholder={t('variables.addCustomValue')}
-                    showDescription={i18n.language === 'ja'}
+                    showDescription={true}
+                    locale={i18n.language}
                   />
                 ) : hasSuggestions ? (
                   <AutocompleteInput
@@ -712,7 +724,8 @@ function VariableFormInner({
                     placeholder={variable.defaultValue || t('variables.enterValue', { name: variable.name })}
                     suggestions={suggestions}
                     clearTitle={t('common.clear')}
-                    showDescription={i18n.language === 'ja'}
+                    showDescription={true}
+                    locale={i18n.language}
                   />
                 ) : (
                   <Input
