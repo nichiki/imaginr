@@ -321,10 +321,6 @@ export default function Home() {
         try {
           await initializeFromBundledKeyFile();
           const keyCache = await buildKeyDictionaryCache();
-          console.log('Key dictionary cache loaded:', keyCache.size, 'parent keys');
-          for (const [key, entries] of keyCache) {
-            console.log(`  ${key}: ${entries.length} entries`);
-          }
           setKeyDictionaryCache(keyCache);
         } catch (e) {
           console.error('Failed to load key dictionary:', e);
@@ -402,10 +398,7 @@ export default function Home() {
       const parsed = yaml.load(mergedYaml) as Record<string, unknown>;
       if (!parsed || typeof parsed !== 'object') return mergedYaml;
       const withoutNegative = excludeNegative(parsed);
-      const result = yaml.dump(withoutNegative, { indent: 2, lineWidth: -1 });
-      console.log('[mergedYamlForPrompt] Input has negative:', 'negative' in parsed);
-      console.log('[mergedYamlForPrompt] Output has negative:', result.includes('negative'));
-      return result;
+      return yaml.dump(withoutNegative, { indent: 2, lineWidth: -1 });
     } catch {
       return mergedYaml;
     }
@@ -448,10 +441,6 @@ export default function Home() {
       const client = new OllamaClient(ollamaSettings.baseUrl);
       const systemPrompt = getEnhancerSystemPrompt(ollamaSettings);
       const currentPresetId = ollamaSettings.activePresetId || '';
-      const currentPreset = ollamaSettings.enhancerPresets?.find(p => p.id === currentPresetId);
-      const presetName = currentPreset?.name || 'default';
-
-      console.log(`[Enhance] Using preset: "${presetName}" (${currentPresetId})`);
 
       const result = await client.generate(
         mergedYamlForPrompt,
@@ -471,7 +460,6 @@ export default function Home() {
           yaml: mergedYamlForPrompt,
           presetId: currentPresetId,
         };
-        console.log(`[Enhance] Completed with preset: "${presetName}"`);
       } else {
         setEnhanceError(result.error || 'Enhancement failed');
       }
@@ -504,8 +492,6 @@ export default function Home() {
       // エンハンスが有効な場合
       if (enhanceEnabled && ollamaSettings?.enabled) {
         const currentPresetId = ollamaSettings.activePresetId || '';
-        const currentPreset = ollamaSettings.enhancerPresets?.find(p => p.id === currentPresetId);
-        const presetName = currentPreset?.name || 'default';
         const lastConfig = lastEnhancedConfigRef.current;
         const isCacheValid = enhancedPrompt &&
           lastConfig.yaml === mergedYamlForPrompt &&
@@ -513,13 +499,7 @@ export default function Home() {
 
         if (isCacheValid) {
           promptToUse = enhancedPrompt;
-          console.log(`[Generate] Using cached enhanced prompt (preset: "${presetName}")`);
         } else {
-          const reason = !enhancedPrompt ? 'no cache' :
-            lastConfig.yaml !== mergedYamlForPrompt ? 'YAML changed' :
-            lastConfig.presetId !== currentPresetId ? `preset changed from "${lastConfig.presetId}" to "${currentPresetId}"` : 'unknown';
-          console.log(`[Generate] Running enhancement first (${reason})...`);
-          console.log(`[Generate] Using preset: "${presetName}" (${currentPresetId})`);
           const client = new OllamaClient(ollamaSettings.baseUrl);
           const systemPrompt = getEnhancerSystemPrompt(ollamaSettings);
 
@@ -537,9 +517,6 @@ export default function Home() {
               yaml: mergedYamlForPrompt,
               presetId: currentPresetId,
             };
-            console.log(`[Generate] Enhancement completed with preset: "${presetName}"`);
-          } else {
-            console.warn('[Generate] Enhancement failed, using raw prompt');
           }
         }
       }
@@ -580,10 +557,7 @@ export default function Home() {
         overrides: effectiveOverrides,
       });
 
-      console.log('Generation result:', result);
-
       if (result.success && result.images.length > 0) {
-        console.log('Saving images:', result.images);
 
         // パラメーターをオブジェクトに変換
         const parametersObj: Record<string, unknown> = {};
@@ -595,7 +569,6 @@ export default function Home() {
 
         for (const imageUrl of result.images) {
           try {
-            console.log('Saving image from:', imageUrl);
             await imageAPI.save({
               imageUrl,
               prompt: promptToUse,
@@ -604,16 +577,13 @@ export default function Home() {
               negativePrompt: resolvedNegativePrompt || undefined,
               parameters: Object.keys(parametersObj).length > 0 ? parametersObj : undefined,
             });
-            console.log('Image saved successfully');
-          } catch (e) {
-            console.error('Failed to save image:', e);
+          } catch {
+            // Ignore save errors for individual images
           }
         }
       } else if (!result.success) {
-        console.error('Generation failed:', result.error);
         setGenerationError(result.error || 'Generation failed');
       } else {
-        console.warn('Generation succeeded but no images returned');
         setGenerationError('No images returned from ComfyUI');
       }
     } catch (error) {

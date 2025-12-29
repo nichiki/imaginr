@@ -40,11 +40,17 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
   const dictionaryCacheRef = useRef<Map<string, DictionaryEntry[]> | undefined>(dictionaryCache);
   const keyDictionaryCacheRef = useRef<Map<string, KeyDictionaryEntry[]> | undefined>(keyDictionaryCache);
   const onGenerateRef = useRef(onGenerate);
+  const languageRef = useRef(i18n.language);
 
   // Keep onGenerate ref updated
   useEffect(() => {
     onGenerateRef.current = onGenerate;
   }, [onGenerate]);
+
+  // Keep language ref updated
+  useEffect(() => {
+    languageRef.current = i18n.language;
+  }, [i18n.language]);
 
   // Dictionary quick add dialog state
   const [quickAddOpen, setQuickAddOpen] = useState(false);
@@ -231,21 +237,27 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
             const parentKey = contextPath[contextPath.length - 1] || '*';
             const keyEntries = lookupKeysFromCache(keyCache, parentKey);
 
+            // 言語に応じた説明を取得する関数
+            const getKeyDescription = (entry: KeyDictionaryEntry) =>
+              languageRef.current === 'ja' ? entry.descriptionJa : entry.descriptionEn;
+
             // 空行の場合は全候補、入力中の場合はフィルタ
             const matchingKeys = typedKey
               ? keyEntries.filter(
-                  (entry) =>
-                    entry.childKey.toLowerCase().includes(typedKey) ||
-                    (entry.description && entry.description.toLowerCase().includes(typedKey))
+                  (entry) => {
+                    const desc = getKeyDescription(entry);
+                    return entry.childKey.toLowerCase().includes(typedKey) ||
+                      (desc && desc.toLowerCase().includes(typedKey));
+                  }
                 )
               : keyEntries;
 
             for (const entry of matchingKeys) {
-              // 日本語UIの場合のみ説明を表示
-              const showDesc = i18n.language === 'ja' && entry.description;
+              // 言語に応じた説明を表示
+              const description = getKeyDescription(entry);
               suggestions.push({
-                label: showDesc
-                  ? `${entry.childKey}（${entry.description}）`
+                label: description
+                  ? `${entry.childKey}（${description}）`
                   : entry.childKey,
                 kind: monaco.languages.CompletionItemKind.Property,
                 insertText: `${entry.childKey}: `,
@@ -348,10 +360,15 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
           }
 
           if (dictEntries.length > 0) {
-            const filteredEntries = dictEntries.filter((entry) =>
-              entry.value.toLowerCase().includes(typedValue.toLowerCase()) ||
-              (entry.description && entry.description.toLowerCase().includes(typedValue.toLowerCase()))
-            );
+            // 言語に応じた説明を取得する関数
+            const getDescription = (entry: DictionaryEntry) =>
+              languageRef.current === 'ja' ? entry.descriptionJa : entry.descriptionEn;
+
+            const filteredEntries = dictEntries.filter((entry) => {
+              const desc = getDescription(entry);
+              return entry.value.toLowerCase().includes(typedValue.toLowerCase()) ||
+                (desc && desc.toLowerCase().includes(typedValue.toLowerCase()));
+            });
 
             if (filteredEntries.length > 0) {
               return {
@@ -360,12 +377,12 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
                   if (needsSpace) {
                     insertText = ` ${entry.value}`;
                   }
-                  const showDesc = i18n.language === 'ja' && entry.description;
+                  const description = getDescription(entry);
                   const fallbackSource = lookupContextPath.length > 0
                     ? `${lookupContextPath.join('.')}.${lookupKey}`
                     : `*.${currentKey}`;
                   return {
-                    label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
+                    label: description ? `${entry.value}（${description}）` : entry.value,
                     kind: monaco.languages.CompletionItemKind.Value,
                     insertText,
                     detail: entry.source || fallbackSource,
@@ -457,10 +474,15 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
             // カンマ直後（スペースなし）の場合、スペースを追加
             const needsSpaceAfterComma = commaOffset > 0 && !hasSpaceAfterComma;
 
-            const filteredEntries = dictEntries.filter((entry) =>
-              entry.value.toLowerCase().includes(typedValue.toLowerCase()) ||
-              (entry.description && entry.description.toLowerCase().includes(typedValue.toLowerCase()))
-            );
+            // 言語に応じた説明を取得する関数
+            const getDescription = (entry: DictionaryEntry) =>
+              languageRef.current === 'ja' ? entry.descriptionJa : entry.descriptionEn;
+
+            const filteredEntries = dictEntries.filter((entry) => {
+              const desc = getDescription(entry);
+              return entry.value.toLowerCase().includes(typedValue.toLowerCase()) ||
+                (desc && desc.toLowerCase().includes(typedValue.toLowerCase()));
+            });
 
             if (filteredEntries.length > 0) {
               return {
@@ -469,13 +491,12 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
                   if (needsSpaceAfterColon || needsSpaceAfterComma) {
                     insertText = ` ${entry.value}`;
                   }
-                  // 日本語UIの場合のみ説明を表示
-                  const showDesc = i18n.language === 'ja' && entry.description;
+                  const description = getDescription(entry);
                   const fallbackSource = lookupContextPath.length > 0
                     ? `${lookupContextPath.join('.')}.${lookupKey}`
                     : `*.${currentKey}`;
                   return {
-                    label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
+                    label: description ? `${entry.value}（${description}）` : entry.value,
                     kind: monaco.languages.CompletionItemKind.Value,
                     insertText,
                     detail: entry.source || fallbackSource,
@@ -557,28 +578,32 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
             const dictEntries = lookupDictionary(lookupContext, parentKey);
 
             if (dictEntries.length > 0) {
-              const filteredEntries = dictEntries.filter((entry) =>
-                entry.value.toLowerCase().includes(typedValue.toLowerCase()) ||
-                (entry.description && entry.description.toLowerCase().includes(typedValue.toLowerCase()))
-              );
+              // 言語に応じた説明を取得する関数
+              const getDescription = (entry: DictionaryEntry) =>
+                languageRef.current === 'ja' ? entry.descriptionJa : entry.descriptionEn;
+
+              const filteredEntries = dictEntries.filter((entry) => {
+                const desc = getDescription(entry);
+                return entry.value.toLowerCase().includes(typedValue.toLowerCase()) ||
+                  (desc && desc.toLowerCase().includes(typedValue.toLowerCase()));
+              });
 
               if (filteredEntries.length > 0) {
                 return {
                   suggestions: filteredEntries.map((entry) => {
-                    // 日本語UIの場合のみ説明を表示
-                    const showDesc = i18n.language === 'ja' && entry.description;
+                    const description = getDescription(entry);
                     return {
-                    label: showDesc ? `${entry.value}（${entry.description}）` : entry.value,
-                    kind: monaco.languages.CompletionItemKind.Value,
-                    insertText: entry.value,
-                    detail: entry.source,
-                    range: {
-                      startLineNumber: position.lineNumber,
-                      startColumn: position.column - typedValue.length,
-                      endLineNumber: position.lineNumber,
-                      endColumn: position.column,
-                    },
-                  };
+                      label: description ? `${entry.value}（${description}）` : entry.value,
+                      kind: monaco.languages.CompletionItemKind.Value,
+                      insertText: entry.value,
+                      detail: entry.source,
+                      range: {
+                        startLineNumber: position.lineNumber,
+                        startColumn: position.column - typedValue.length,
+                        endLineNumber: position.lineNumber,
+                        endColumn: position.column,
+                      },
+                    };
                   }),
                 };
               }
@@ -649,7 +674,7 @@ const YamlEditorInner = forwardRef<YamlEditorRef, YamlEditorProps>(function Yaml
         },
       });
     }
-  }, [getContextPath, lookupDictionary, onChange, openQuickAddDialog, t, i18n.language]);
+  }, [getContextPath, lookupDictionary, onChange, openQuickAddDialog, t]);
 
   const handleChange: OnChange = useCallback(
     (newValue) => {

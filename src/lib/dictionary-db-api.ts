@@ -8,7 +8,8 @@ export interface DictionaryEntry {
   context: string;
   key: string;
   value: string;
-  description?: string;
+  descriptionJa?: string;
+  descriptionEn?: string;
   createdAt: string;
 }
 
@@ -17,7 +18,8 @@ interface DictionaryRow {
   context: string;
   key: string;
   value: string;
-  description: string | null;
+  description_ja: string | null;
+  description_en: string | null;
   created_at: string;
 }
 
@@ -60,7 +62,8 @@ export async function addEntry(
   context: string,
   key: string,
   value: string,
-  description?: string
+  descriptionJa?: string,
+  descriptionEn?: string
 ): Promise<DictionaryEntry> {
   const { getDatabase } = await import('./db/tauri-db');
   const db = await getDatabase();
@@ -68,9 +71,9 @@ export async function addEntry(
   const now = new Date().toISOString();
 
   await db.execute(
-    `INSERT INTO dictionary (context, key, value, description, created_at)
-     VALUES (?, ?, ?, ?, ?)`,
-    [context, key, value, description || null, now]
+    `INSERT INTO dictionary (context, key, value, description_ja, description_en, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [context, key, value, descriptionJa || null, descriptionEn || null, now]
   );
 
   // Fetch the inserted entry
@@ -90,14 +93,15 @@ export async function addEntry(
 export async function updateEntry(
   id: number,
   value: string,
-  description?: string
+  descriptionJa?: string,
+  descriptionEn?: string
 ): Promise<void> {
   const { getDatabase } = await import('./db/tauri-db');
   const db = await getDatabase();
 
   await db.execute(
-    'UPDATE dictionary SET value = ?, description = ? WHERE id = ?',
-    [value, description || null, id]
+    'UPDATE dictionary SET value = ?, description_ja = ?, description_en = ? WHERE id = ?',
+    [value, descriptionJa || null, descriptionEn || null, id]
   );
 }
 
@@ -167,10 +171,10 @@ export async function searchEntries(query: string): Promise<DictionaryEntry[]> {
   const likeQuery = `%${query}%`;
   const rows = await db.select<DictionaryRow>(
     `SELECT * FROM dictionary
-     WHERE context LIKE ? OR key LIKE ? OR value LIKE ? OR description LIKE ?
+     WHERE context LIKE ? OR key LIKE ? OR value LIKE ? OR description_ja LIKE ? OR description_en LIKE ?
      ORDER BY context, key, value
      LIMIT 100`,
-    [likeQuery, likeQuery, likeQuery, likeQuery]
+    [likeQuery, likeQuery, likeQuery, likeQuery, likeQuery]
   );
 
   return rows.map(rowToEntry);
@@ -186,7 +190,8 @@ interface DictionaryYamlFile {
     context: string;
     values: Array<{
       value: string;
-      description?: string;
+      description_ja?: string;
+      description_en?: string;
     }>;
   }>;
 }
@@ -236,11 +241,11 @@ export async function importFromYaml(
           );
 
           if (existing.length > 0) {
-            // Update description if provided
-            if (val.description) {
+            // Update descriptions if provided
+            if (val.description_ja || val.description_en) {
               await db.execute(
-                'UPDATE dictionary SET description = ? WHERE id = ?',
-                [val.description, existing[0].id]
+                'UPDATE dictionary SET description_ja = ?, description_en = ? WHERE id = ?',
+                [val.description_ja || null, val.description_en || null, existing[0].id]
               );
               updated++;
             } else {
@@ -248,18 +253,18 @@ export async function importFromYaml(
             }
           } else {
             await db.execute(
-              `INSERT INTO dictionary (context, key, value, description, created_at)
-               VALUES (?, ?, ?, ?, ?)`,
-              [entry.context, entry.key, val.value, val.description || null, now]
+              `INSERT INTO dictionary (context, key, value, description_ja, description_en, created_at)
+               VALUES (?, ?, ?, ?, ?, ?)`,
+              [entry.context, entry.key, val.value, val.description_ja || null, val.description_en || null, now]
             );
             added++;
           }
         } else {
           // Replace mode: just insert
           await db.execute(
-            `INSERT INTO dictionary (context, key, value, description, created_at)
-             VALUES (?, ?, ?, ?, ?)`,
-            [entry.context, entry.key, val.value, val.description || null, now]
+            `INSERT INTO dictionary (context, key, value, description_ja, description_en, created_at)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [entry.context, entry.key, val.value, val.description_ja || null, val.description_en || null, now]
           );
           added++;
         }
@@ -283,7 +288,7 @@ export async function exportToYaml(): Promise<string> {
   );
 
   // Group by context and key
-  const entriesMap = new Map<string, Map<string, Array<{ value: string; description?: string }>>>();
+  const entriesMap = new Map<string, Map<string, Array<{ value: string; description_ja?: string; description_en?: string }>>>();
 
   for (const row of rows) {
     if (!entriesMap.has(row.context)) {
@@ -295,7 +300,8 @@ export async function exportToYaml(): Promise<string> {
     }
     contextMap.get(row.key)!.push({
       value: row.value,
-      ...(row.description ? { description: row.description } : {}),
+      ...(row.description_ja ? { description_ja: row.description_ja } : {}),
+      ...(row.description_en ? { description_en: row.description_en } : {}),
     });
   }
 
@@ -319,7 +325,7 @@ export async function exportToYaml(): Promise<string> {
 const UTF8_BOM = '\uFEFF';
 
 // CSV header
-const CSV_HEADER = 'context,key,value,description';
+const CSV_HEADER = 'context,key,value,description_ja,description_en';
 
 // Escape a field for CSV (RFC 4180)
 function escapeCsvField(field: string): string {
@@ -403,6 +409,11 @@ export async function importFromCsv(
     throw new Error('Invalid CSV format: missing required columns (context, key, value)');
   }
 
+  // Detect if using old format (4 columns: description) or new format (5 columns: description_ja, description_en)
+  const headerFields = parseCsvLine(lines[0].toLowerCase());
+  const hasDescriptionJa = headerFields.includes('description_ja');
+  const hasOldDescription = headerFields.includes('description') && !hasDescriptionJa;
+
   let added = 0;
   let updated = 0;
   let skipped = 0;
@@ -422,7 +433,19 @@ export async function importFromCsv(
       continue;
     }
 
-    const [context, key, value, description] = fields;
+    const [context, key, value] = fields;
+    // Support both old format (4th column = description → description_ja) and new format
+    let descriptionJa: string | undefined;
+    let descriptionEn: string | undefined;
+
+    if (hasOldDescription) {
+      // Old format: 4th column is description (treat as description_ja)
+      descriptionJa = fields[3] || undefined;
+    } else {
+      // New format: 4th = description_ja, 5th = description_en
+      descriptionJa = fields[3] || undefined;
+      descriptionEn = fields[4] || undefined;
+    }
 
     if (!context || !key || !value) {
       skipped++;
@@ -438,10 +461,11 @@ export async function importFromCsv(
         );
 
         if (existing.length > 0) {
-          // Update description if provided
-          if (description) {
-            await db.execute('UPDATE dictionary SET description = ? WHERE id = ?', [
-              description,
+          // Update descriptions if provided
+          if (descriptionJa || descriptionEn) {
+            await db.execute('UPDATE dictionary SET description_ja = ?, description_en = ? WHERE id = ?', [
+              descriptionJa || null,
+              descriptionEn || null,
               existing[0].id,
             ]);
             updated++;
@@ -450,18 +474,18 @@ export async function importFromCsv(
           }
         } else {
           await db.execute(
-            `INSERT INTO dictionary (context, key, value, description, created_at)
-             VALUES (?, ?, ?, ?, ?)`,
-            [context, key, value, description || null, now]
+            `INSERT INTO dictionary (context, key, value, description_ja, description_en, created_at)
+             VALUES (?, ?, ?, ?, ?, ?)`,
+            [context, key, value, descriptionJa || null, descriptionEn || null, now]
           );
           added++;
         }
       } else {
         // Replace mode: just insert
         await db.execute(
-          `INSERT INTO dictionary (context, key, value, description, created_at)
-           VALUES (?, ?, ?, ?, ?)`,
-          [context, key, value, description || null, now]
+          `INSERT INTO dictionary (context, key, value, description_ja, description_en, created_at)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [context, key, value, descriptionJa || null, descriptionEn || null, now]
         );
         added++;
       }
@@ -490,7 +514,8 @@ export async function exportToCsv(): Promise<string> {
       escapeCsvField(row.context),
       escapeCsvField(row.key),
       escapeCsvField(row.value),
-      escapeCsvField(row.description || ''),
+      escapeCsvField(row.description_ja || ''),
+      escapeCsvField(row.description_en || ''),
     ];
     lines.push(fields.join(','));
   }
@@ -574,7 +599,8 @@ function rowToEntry(row: DictionaryRow): DictionaryEntry {
     context: row.context,
     key: row.key,
     value: row.value,
-    description: row.description ?? undefined,
+    descriptionJa: row.description_ja ?? undefined,
+    descriptionEn: row.description_en ?? undefined,
     createdAt: row.created_at,
   };
 }

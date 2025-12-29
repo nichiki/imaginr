@@ -4,6 +4,7 @@ import { useState, useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { Plus, Pencil, Trash2, Check, X } from 'lucide-react';
 import type { DictionaryEntry } from '@/lib/dictionary-db-api';
 
@@ -11,8 +12,8 @@ interface DictionaryEntryListProps {
   context: string;
   keyName: string;
   entries: DictionaryEntry[];
-  onAdd: (value: string, description?: string) => Promise<void>;
-  onUpdate: (id: number, value: string, description?: string) => Promise<void>;
+  onAdd: (value: string, descriptionJa?: string, descriptionEn?: string) => Promise<void>;
+  onUpdate: (id: number, value: string, descriptionJa?: string, descriptionEn?: string) => Promise<void>;
   onDelete: (id: number) => Promise<void>;
 }
 
@@ -27,61 +28,69 @@ export function DictionaryEntryList({
   const { t } = useTranslation();
   const [isAdding, setIsAdding] = useState(false);
   const [newValue, setNewValue] = useState('');
-  const [newDescription, setNewDescription] = useState('');
+  const [newDescriptionJa, setNewDescriptionJa] = useState('');
+  const [newDescriptionEn, setNewDescriptionEn] = useState('');
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editValue, setEditValue] = useState('');
-  const [editDescription, setEditDescription] = useState('');
+  const [editDescriptionJa, setEditDescriptionJa] = useState('');
+  const [editDescriptionEn, setEditDescriptionEn] = useState('');
   const [isSaving, setIsSaving] = useState(false);
 
   const handleStartAdd = useCallback(() => {
     setIsAdding(true);
     setNewValue('');
-    setNewDescription('');
+    setNewDescriptionJa('');
+    setNewDescriptionEn('');
   }, []);
 
   const handleCancelAdd = useCallback(() => {
     setIsAdding(false);
     setNewValue('');
-    setNewDescription('');
+    setNewDescriptionJa('');
+    setNewDescriptionEn('');
   }, []);
 
   const handleSaveAdd = useCallback(async () => {
     if (!newValue.trim()) return;
     setIsSaving(true);
     try {
-      await onAdd(newValue.trim(), newDescription.trim() || undefined);
+      await onAdd(newValue.trim(), newDescriptionJa.trim() || undefined, newDescriptionEn.trim() || undefined);
       setIsAdding(false);
       setNewValue('');
-      setNewDescription('');
+      setNewDescriptionJa('');
+      setNewDescriptionEn('');
     } finally {
       setIsSaving(false);
     }
-  }, [newValue, newDescription, onAdd]);
+  }, [newValue, newDescriptionJa, newDescriptionEn, onAdd]);
 
   const handleStartEdit = useCallback((entry: DictionaryEntry) => {
     setEditingId(entry.id);
     setEditValue(entry.value);
-    setEditDescription(entry.description || '');
+    setEditDescriptionJa(entry.descriptionJa || '');
+    setEditDescriptionEn(entry.descriptionEn || '');
   }, []);
 
   const handleCancelEdit = useCallback(() => {
     setEditingId(null);
     setEditValue('');
-    setEditDescription('');
+    setEditDescriptionJa('');
+    setEditDescriptionEn('');
   }, []);
 
   const handleSaveEdit = useCallback(async () => {
     if (editingId === null || !editValue.trim()) return;
     setIsSaving(true);
     try {
-      await onUpdate(editingId, editValue.trim(), editDescription.trim() || undefined);
+      await onUpdate(editingId, editValue.trim(), editDescriptionJa.trim() || undefined, editDescriptionEn.trim() || undefined);
       setEditingId(null);
       setEditValue('');
-      setEditDescription('');
+      setEditDescriptionJa('');
+      setEditDescriptionEn('');
     } finally {
       setIsSaving(false);
     }
-  }, [editingId, editValue, editDescription, onUpdate]);
+  }, [editingId, editValue, editDescriptionJa, editDescriptionEn, onUpdate]);
 
   const handleDelete = useCallback(
     async (id: number) => {
@@ -115,20 +124,34 @@ export function DictionaryEntryList({
               >
                 {editingId === entry.id ? (
                   // Edit mode
-                  <div className="space-y-2">
-                    <Input
-                      value={editValue}
-                      onChange={(e) => setEditValue(e.target.value)}
-                      placeholder={t('dictionary.value')}
-                      className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
-                      autoFocus
-                    />
-                    <Input
-                      value={editDescription}
-                      onChange={(e) => setEditDescription(e.target.value)}
-                      placeholder={t('dictionary.description')}
-                      className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
-                    />
+                  <div className="space-y-3">
+                    <div className="space-y-1">
+                      <Label className="text-xs text-[#888]">
+                        {t('dictionary.value')} <span className="text-[#f48771]">*</span>
+                      </Label>
+                      <Input
+                        value={editValue}
+                        onChange={(e) => setEditValue(e.target.value)}
+                        className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
+                        autoFocus
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-[#888]">{t('dictionary.descriptionJaLabel')}</Label>
+                      <Input
+                        value={editDescriptionJa}
+                        onChange={(e) => setEditDescriptionJa(e.target.value)}
+                        className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
+                      />
+                    </div>
+                    <div className="space-y-1">
+                      <Label className="text-xs text-[#888]">{t('dictionary.descriptionEnLabel')}</Label>
+                      <Input
+                        value={editDescriptionEn}
+                        onChange={(e) => setEditDescriptionEn(e.target.value)}
+                        className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
+                      />
+                    </div>
                     <div className="flex justify-end gap-1">
                       <Button
                         variant="ghost"
@@ -157,9 +180,14 @@ export function DictionaryEntryList({
                       <div className="text-sm text-[#cccccc] break-all">
                         {entry.value}
                       </div>
-                      {entry.description && (
+                      {entry.descriptionJa && (
                         <div className="text-xs text-[#888] mt-0.5">
-                          {entry.description}
+                          <span className="text-[#666]">JA:</span> {entry.descriptionJa}
+                        </div>
+                      )}
+                      {entry.descriptionEn && (
+                        <div className="text-xs text-[#888] mt-0.5">
+                          <span className="text-[#666]">EN:</span> {entry.descriptionEn}
                         </div>
                       )}
                     </div>
@@ -192,34 +220,51 @@ export function DictionaryEntryList({
       {/* Add new entry */}
       <div className="border-t border-[#454545] p-2">
         {isAdding ? (
-          <div className="space-y-2">
-            <Input
-              value={newValue}
-              onChange={(e) => setNewValue(e.target.value)}
-              placeholder={t('dictionary.value')}
-              className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
-              autoFocus
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && newValue.trim()) {
-                  handleSaveAdd();
-                } else if (e.key === 'Escape') {
-                  handleCancelAdd();
-                }
-              }}
-            />
-            <Input
-              value={newDescription}
-              onChange={(e) => setNewDescription(e.target.value)}
-              placeholder={t('dictionary.description')}
-              className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' && newValue.trim()) {
-                  handleSaveAdd();
-                } else if (e.key === 'Escape') {
-                  handleCancelAdd();
-                }
-              }}
-            />
+          <div className="space-y-3">
+            <div className="space-y-1">
+              <Label className="text-xs text-[#888]">
+                {t('dictionary.value')} <span className="text-[#f48771]">*</span>
+              </Label>
+              <Input
+                value={newValue}
+                onChange={(e) => setNewValue(e.target.value)}
+                className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    handleCancelAdd();
+                  }
+                }}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-[#888]">{t('dictionary.descriptionJaLabel')}</Label>
+              <Input
+                value={newDescriptionJa}
+                onChange={(e) => setNewDescriptionJa(e.target.value)}
+                className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
+                onKeyDown={(e) => {
+                  if (e.key === 'Escape') {
+                    handleCancelAdd();
+                  }
+                }}
+              />
+            </div>
+            <div className="space-y-1">
+              <Label className="text-xs text-[#888]">{t('dictionary.descriptionEnLabel')}</Label>
+              <Input
+                value={newDescriptionEn}
+                onChange={(e) => setNewDescriptionEn(e.target.value)}
+                className="h-7 text-sm bg-[#3c3c3c] border-[#454545] text-[#cccccc]"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' && newValue.trim()) {
+                    handleSaveAdd();
+                  } else if (e.key === 'Escape') {
+                    handleCancelAdd();
+                  }
+                }}
+              />
+            </div>
             <div className="flex justify-end gap-1">
               <Button
                 variant="ghost"

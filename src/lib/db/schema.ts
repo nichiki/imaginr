@@ -4,7 +4,7 @@
 
 import type { UnifiedDatabase } from './index';
 
-const SCHEMA_VERSION = 5;
+const SCHEMA_VERSION = 7;
 
 // Async version for UnifiedDatabase interface
 export async function initializeSchemaAsync(db: UnifiedDatabase): Promise<void> {
@@ -40,6 +40,12 @@ async function runMigrationsAsync(db: UnifiedDatabase, fromVersion: number): Pro
   }
   if (fromVersion < 5) {
     await migrateToV5Async(db);
+  }
+  if (fromVersion < 6) {
+    await migrateToV6Async(db);
+  }
+  if (fromVersion < 7) {
+    await migrateToV7Async(db);
   }
 
   // Update schema version
@@ -249,6 +255,48 @@ async function migrateToV5Async(db: UnifiedDatabase): Promise<void> {
       VALUES (new.rowid, new.id, new.prompt);
     END
   `);
+}
+
+async function migrateToV6Async(db: UnifiedDatabase): Promise<void> {
+  // Add bilingual description columns to dictionary table
+  // Rename existing 'description' to 'description_ja', add 'description_en'
+  const tableInfo = await db.select<{ name: string }>(`PRAGMA table_info(dictionary)`);
+  const hasDescriptionJa = tableInfo.some(col => col.name === 'description_ja');
+  const hasDescriptionEn = tableInfo.some(col => col.name === 'description_en');
+  const hasDescription = tableInfo.some(col => col.name === 'description');
+
+  // Rename description to description_ja if not already done
+  if (hasDescription && !hasDescriptionJa) {
+    await db.execute(`ALTER TABLE dictionary RENAME COLUMN description TO description_ja`);
+  }
+
+  // Add description_en column if not exists
+  if (!hasDescriptionEn) {
+    await db.execute(`ALTER TABLE dictionary ADD COLUMN description_en TEXT`);
+  }
+}
+
+async function migrateToV7Async(db: UnifiedDatabase): Promise<void> {
+  // Add bilingual description columns to key_dictionary table
+  // Rename existing 'description' to 'description_ja', add 'description_en'
+  const tableInfo = await db.select<{ name: string }>(`PRAGMA table_info(key_dictionary)`);
+  const hasDescriptionJa = tableInfo.some(col => col.name === 'description_ja');
+  const hasDescriptionEn = tableInfo.some(col => col.name === 'description_en');
+  const hasDescription = tableInfo.some(col => col.name === 'description');
+
+  // Rename description to description_ja if not already done
+  if (hasDescription && !hasDescriptionJa) {
+    await db.execute(`ALTER TABLE key_dictionary RENAME COLUMN description TO description_ja`);
+  }
+
+  // Add description_en column if not exists
+  if (!hasDescriptionEn) {
+    await db.execute(`ALTER TABLE key_dictionary ADD COLUMN description_en TEXT`);
+  }
+
+  // Clear key_dictionary data and migration marker to re-import with new bilingual format
+  await db.execute(`DELETE FROM _migrations WHERE id = 'initial_key_dictionary_import'`);
+  await db.execute(`DELETE FROM key_dictionary`);
 }
 
 

@@ -3,8 +3,9 @@
 
 export interface DictionaryEntry {
   value: string;
-  description?: string;  // 補足説明（省略可）
-  source?: string;       // 由来元コンテキスト (例: "outfit.color", "*.color")
+  descriptionJa?: string;  // 日本語説明
+  descriptionEn?: string;  // 英語説明
+  source?: string;         // 由来元コンテキスト (例: "outfit.color", "*.color")
 }
 
 // フラット化された辞書エントリ（API経由で取得する形式）
@@ -13,7 +14,8 @@ export interface FlatDictionaryEntry {
   key: string;
   context: string;
   value: string;
-  description?: string;
+  descriptionJa?: string;
+  descriptionEn?: string;
 }
 
 // Tauri版の実装（DBベース）
@@ -27,7 +29,8 @@ const tauriDictionaryAPI = {
       key: entry.key,
       context: entry.context,
       value: entry.value,
-      description: entry.description,
+      descriptionJa: entry.descriptionJa,
+      descriptionEn: entry.descriptionEn,
     }));
   },
 
@@ -53,7 +56,8 @@ export function buildDictionaryCache(
     }
     cache.get(cacheKey)!.push({
       value: entry.value,
-      description: entry.description,
+      descriptionJa: entry.descriptionJa,
+      descriptionEn: entry.descriptionEn,
     });
   }
 

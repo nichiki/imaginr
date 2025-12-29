@@ -89,11 +89,11 @@ export function DictionaryManagerDialog({
     setSelectedKey(key);
   }, []);
 
-  const handleAddEntry = async (value: string, description?: string) => {
+  const handleAddEntry = async (value: string, descriptionJa?: string, descriptionEn?: string) => {
     if (!selectedContext || !selectedKey) return;
 
     try {
-      await dictAPI.addEntry(selectedContext, selectedKey, value, description);
+      await dictAPI.addEntry(selectedContext, selectedKey, value, descriptionJa, descriptionEn);
       await loadEntries(selectedContext, selectedKey);
       onDictionaryChange?.();
     } catch (e) {
@@ -103,9 +103,9 @@ export function DictionaryManagerDialog({
     }
   };
 
-  const handleUpdateEntry = async (id: number, value: string, description?: string) => {
+  const handleUpdateEntry = async (id: number, value: string, descriptionJa?: string, descriptionEn?: string) => {
     try {
-      await dictAPI.updateEntry(id, value, description);
+      await dictAPI.updateEntry(id, value, descriptionJa, descriptionEn);
       if (selectedContext && selectedKey) {
         await loadEntries(selectedContext, selectedKey);
       }

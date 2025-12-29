@@ -8,7 +8,8 @@ export interface KeyDictionaryEntry {
   id: number;
   parentKey: string;
   childKey: string;
-  description?: string;
+  descriptionJa?: string;
+  descriptionEn?: string;
   sortOrder: number;
   createdAt: string;
 }
@@ -17,7 +18,8 @@ interface KeyDictionaryRow {
   id: number;
   parent_key: string;
   child_key: string;
-  description: string | null;
+  description_ja: string | null;
+  description_en: string | null;
   sort_order: number;
   created_at: string;
 }
@@ -60,7 +62,8 @@ export async function getAllKeyEntries(): Promise<KeyDictionaryEntry[]> {
 export async function addKeyEntry(
   parentKey: string,
   childKey: string,
-  description?: string,
+  descriptionJa?: string,
+  descriptionEn?: string,
   sortOrder: number = 0
 ): Promise<KeyDictionaryEntry> {
   const { getDatabase } = await import('./db/tauri-db');
@@ -69,9 +72,9 @@ export async function addKeyEntry(
   const now = new Date().toISOString();
 
   await db.execute(
-    `INSERT INTO key_dictionary (parent_key, child_key, description, sort_order, created_at)
-     VALUES (?, ?, ?, ?, ?)`,
-    [parentKey, childKey, description || null, sortOrder, now]
+    `INSERT INTO key_dictionary (parent_key, child_key, description_ja, description_en, sort_order, created_at)
+     VALUES (?, ?, ?, ?, ?, ?)`,
+    [parentKey, childKey, descriptionJa || null, descriptionEn || null, sortOrder, now]
   );
 
   const rows = await db.select<KeyDictionaryRow>(
@@ -113,9 +116,11 @@ export async function getKeyEntryCount(): Promise<number> {
 interface KeyDictionaryYamlFile {
   entries: Array<{
     parent: string;
-    description?: string;
     children: Array<{
       key: string;
+      description_ja?: string;
+      description_en?: string;
+      // Legacy support
       description?: string;
     }>;
   }>;
@@ -171,10 +176,14 @@ export async function importKeyDictionaryFromYaml(
           }
         }
 
+        // Support both new format (description_ja/description_en) and legacy (description → description_ja)
+        const descJa = child.description_ja || child.description || null;
+        const descEn = child.description_en || null;
+
         await db.execute(
-          `INSERT INTO key_dictionary (parent_key, child_key, description, sort_order, created_at)
-           VALUES (?, ?, ?, ?, ?)`,
-          [entry.parent, child.key, child.description || null, sortOrder, now]
+          `INSERT INTO key_dictionary (parent_key, child_key, description_ja, description_en, sort_order, created_at)
+           VALUES (?, ?, ?, ?, ?, ?)`,
+          [entry.parent, child.key, descJa, descEn, sortOrder, now]
         );
         added++;
         sortOrder++;
@@ -199,16 +208,12 @@ export async function initializeFromBundledKeyFile(): Promise<boolean> {
 
   // Check if already imported
   const alreadyImported = await isMigrationCompletedAsync(db, 'initial_key_dictionary_import');
-  console.log('Key dictionary migration already completed:', alreadyImported);
   if (alreadyImported) {
-    const count = await getKeyEntryCount();
-    console.log('Key dictionary entry count:', count);
     return false;
   }
 
   // Check if key dictionary table is empty
   const count = await getKeyEntryCount();
-  console.log('Key dictionary entry count (before import):', count);
   if (count > 0) {
     await markMigrationCompletedAsync(db, 'initial_key_dictionary_import');
     return false;
@@ -243,10 +248,9 @@ export async function initializeFromBundledKeyFile(): Promise<boolean> {
 
   try {
     const content = await readTextFile(keyFilePath);
-    const result = await importKeyDictionaryFromYaml(content, 'merge');
-    console.log(`Imported ${result.added} key dictionary entries from bundled resources`);
-  } catch (err) {
-    console.error('Error importing key dictionary:', err);
+    await importKeyDictionaryFromYaml(content, 'merge');
+  } catch {
+    // Silently ignore import errors
   }
 
   await markMigrationCompletedAsync(db, 'initial_key_dictionary_import');
@@ -293,11 +297,14 @@ export function lookupKeysFromCache(
 
 // Helper function to convert row to entry
 function rowToEntry(row: KeyDictionaryRow): KeyDictionaryEntry {
+  // DBカラム名の互換性対応: description (旧) と description_ja (新) の両方をサポート
+  const rawRow = row as KeyDictionaryRow & { description?: string | null };
   return {
     id: row.id,
     parentKey: row.parent_key,
     childKey: row.child_key,
-    description: row.description ?? undefined,
+    descriptionJa: row.description_ja ?? rawRow.description ?? undefined,
+    descriptionEn: row.description_en ?? undefined,
     sortOrder: row.sort_order,
     createdAt: row.created_at,
   };

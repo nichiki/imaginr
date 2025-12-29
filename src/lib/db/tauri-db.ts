@@ -40,12 +40,18 @@ class TauriDatabaseWrapper implements UnifiedDatabase {
 async function initTauriDatabase(): Promise<UnifiedDatabase> {
   const Database = await import('@tauri-apps/plugin-sql');
   const dbDir = await getDatabasePath();
-  const dbPath = await joinPath(dbDir, 'images.db');
+  const dbPath = await joinPath(dbDir, 'imaginr.db');
 
   // Ensure directory exists
-  const { mkdir, exists } = await import('@tauri-apps/plugin-fs');
+  const { mkdir, exists, rename } = await import('@tauri-apps/plugin-fs');
   if (!(await exists(dbDir))) {
     await mkdir(dbDir, { recursive: true });
+  }
+
+  // Migrate from old DB name if exists
+  const oldDbPath = await joinPath(dbDir, 'images.db');
+  if (!(await exists(dbPath)) && await exists(oldDbPath)) {
+    await rename(oldDbPath, dbPath);
   }
 
   const db = await Database.default.load(`sqlite:${dbPath}`) as TauriSqlDatabase;
