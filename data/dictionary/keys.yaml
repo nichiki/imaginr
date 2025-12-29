@@ -140,8 +140,6 @@ entries:
   # ========================================
   - parent: outfit
     children:
-      - key: base
-        description: 全体のスタイル
       - key: costume
         description: コスチューム
       - key: style

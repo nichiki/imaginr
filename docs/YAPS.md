@@ -71,9 +71,20 @@ YAPS v1のトップレベルキー一覧:
 | `negative` | ネガティブプロンプト | △ |
 | `interaction` | 複数人の相互作用 | - |
 
-### 共通パターン: `base` キー
+### `base` キー（pose, lighting）
 
-多くのカテゴリで `base` キーを使用します。これは「そのカテゴリを一言で表す代表値」です。
+`pose` と `lighting` では、直接文字列で指定するか、`base` キーを使って指定できます。
+
+```yaml
+# 直接文字列（シンプル）
+pose: standing
+
+# base キー使用（上と同義）
+pose:
+  base: standing
+```
+
+詳細を追加したい場合は `base` キーを使います：
 
 ```yaml
 pose:
@@ -82,7 +93,7 @@ pose:
 
 lighting:
   base: dramatic      # ← 全体としては「ドラマチック」
-  # 詳細が不要ならこれだけでOK
+  source: window light
 ```
 
 ---
@@ -282,9 +293,9 @@ appearance:
 # 直接文字列
 outfit: casual
 
-# または base キー
+# または style キー
 outfit:
-  base: casual
+  style: casual
 ```
 
 #### 一発指定（コスチューム・系統）
@@ -594,22 +605,22 @@ interaction: holding hands, looking at each other
 
 ## 設計思想
 
-### 1. base パターン
+### 1. base パターン（pose, lighting）
 
-各カテゴリで `base` は「そのカテゴリ全体を一言で表す代表値」として使用します。
+`pose` と `lighting` では、直接文字列指定と `base` キー指定が同義です。
 
-- 雰囲気だけ決めたい → `base` だけ指定
-- 詳細に制御したい → 詳細キーを追加
+- シンプルに指定 → 直接文字列
+- 詳細を追加したい → `base` キー + 他のキー
 
 ```yaml
-# シンプル（直接文字列）
+# 直接文字列（シンプル）
 pose: standing
 
-# 同義（baseキー使用）
+# base キー使用（上と同義）
 pose:
   base: standing
 
-# 詳細追加
+# 詳細を追加する場合
 pose:
   base: standing
   hands: peace sign

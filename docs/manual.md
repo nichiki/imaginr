@@ -138,6 +138,39 @@ environment:
 
 後から適用されるものが、前のものを上書きします。
 
+#### `_replace`: マージではなく置換
+
+デフォルトでは、オブジェクトは深くマージされます。親ファイルに定義があれば、その上に子の設定が重なります。
+
+```yaml
+# 親ファイル
+outfit:
+  top: blazer
+  bottom: skirt
+  legwear: tights
+```
+
+```yaml
+# 子ファイル（通常のマージ）
+outfit:
+  top: sweater
+# → 結果: top=sweater, bottom=skirt, legwear=tights（マージされる）
+```
+
+しかし、親の内容を引き継ぎたくない場合もあります。`_replace` を使うと、指定したキーは深いマージではなく**完全置換**になります。
+
+```yaml
+# 子ファイル（_replace使用）
+_replace:
+  - outfit
+
+outfit:
+  top: sweater
+# → 結果: top=sweater のみ（bottom, legwear は消える）
+```
+
+**使いどころ**: 親の設定を「部分的に上書き」ではなく「まるごと差し替え」したいとき。
+
 #### `_base` vs `_layers` の使い分け
 
 | | `_base` | `_layers` |
