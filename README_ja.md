@@ -1,5 +1,7 @@
 # Imaginr - YAML Prompt Builder for AI Image Generation
 
+![Imaginr Banner](docs/images/banner.png)
+
 [English](README.md) | 日本語
 
 **画像生成AIのプロンプト、管理できていますか？**
