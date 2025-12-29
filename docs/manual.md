@@ -421,10 +421,40 @@ A: No, there's no auto-save. Save explicitly with **Ctrl+S** (Mac: **Cmd+S**). A
 
 #### Keyboard Shortcuts
 
+**General**
+
 | Action | Windows | Mac |
 |--------|---------|-----|
 | Save | Ctrl+S | Cmd+S |
-| New file | Ctrl+N | Cmd+N |
-| Autocomplete | Ctrl+Space | Cmd+J |
+| Close tab | Ctrl+W | Cmd+W |
 | Undo | Ctrl+Z | Cmd+Z |
 | Redo | Ctrl+Y | Cmd+Shift+Z |
+
+**Editor**
+
+| Action | Windows | Mac |
+|--------|---------|-----|
+| Autocomplete | Ctrl+J / Ctrl+Space | Cmd+J |
+| Add to dictionary | Ctrl+Shift+D | Cmd+Shift+D |
+
+**Generation**
+
+| Action | Windows | Mac |
+|--------|---------|-----|
+| Generate image | Ctrl+Enter | Cmd+Enter |
+| Enhance prompt | Ctrl+E | Cmd+E |
+
+**Gallery (enlarged view)**
+
+| Action | Key |
+|--------|-----|
+| Previous image | ← |
+| Next image | → |
+| Close | Esc |
+
+**Other**
+
+| Action | Operation |
+|--------|-----------|
+| Open in split editor | Cmd/Ctrl + click on file |
+| Range select in gallery | Shift + click |
