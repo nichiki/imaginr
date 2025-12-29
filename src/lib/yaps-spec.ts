@@ -1,26 +1,26 @@
 // YAPS Specification embedded as a constant
 // This is auto-generated from docs/YAPS.md
 
-export const YAPS_SPEC = `# YAPS v1 仕様書 - Yet Another Prompt Schema
+export const YAPS_SPEC = `# YAPS v1 Specification - Yet Another Prompt Schema
 
-画像生成AIプロンプト用の構造化スキーマ仕様
+A structured schema specification for AI image generation prompts.
 
 ---
 
-## 概要
+## Overview
 
-YAPS (Yet Another Prompt Schema) は、画像生成AIプロンプトを構造化するためのYAMLスキーマです。
+YAPS (Yet Another Prompt Schema) is a YAML schema for structuring AI image generation prompts.
 
-### 特徴
+### Features
 
-- **必要なキーだけ使用** - 全てを埋める必要なし
-- **シンプルと詳細の両立** - ざっくり指定も細かい指定も可能
-- **LLMフレンドリー** - 意味が明確でAIが理解しやすい構造
+- **Use only the keys you need** - No need to fill everything
+- **Simple and detailed coexist** - Rough or fine-grained specification both work
+- **LLM-friendly** - Clear meaning, easy for AI to understand
 
-### 基本的な使い方
+### Basic Usage
 
 \`\`\`yaml
-# 最小限の例
+# Minimal example
 subject: 1girl
 pose:
   base: standing
@@ -31,65 +31,76 @@ quality: [masterpiece, best quality]
 
 ---
 
-## 基本構造
+## Basic Structure
 
-YAPS v1のトップレベルキー一覧:
+YAPS v1 top-level keys:
 
-| キー | 説明 | 必須 |
-|------|------|------|
-| \`subject\` | 被写体 | ○ |
-| \`demographics\` | 人物属性（年齢・人種等） | - |
-| \`pose\` | ポーズ・姿勢 | - |
-| \`expression\` | 表情 | - |
-| \`appearance\` | 外見・身体的特徴 | - |
-| \`outfit\` | 服装・衣装 | - |
-| \`environment\` | 背景・環境 | - |
-| \`aesthetic\` | 画風・スタイル | - |
-| \`mood\` | 雰囲気 | - |
-| \`effects\` | 視覚エフェクト | - |
-| \`lighting\` | 照明 | - |
-| \`composition\` | 構図 | - |
-| \`photography\` | 撮影技法 | - |
-| \`quality\` | 品質タグ | △ |
-| \`negative\` | ネガティブプロンプト | △ |
-| \`interaction\` | 複数人の相互作用 | - |
+| Key | Description | Required |
+|-----|-------------|----------|
+| \`subject\` | Main subject | ○ |
+| \`demographics\` | Person attributes (age, ethnicity, etc.) | - |
+| \`pose\` | Pose and posture | - |
+| \`expression\` | Facial expression | - |
+| \`appearance\` | Physical features | - |
+| \`outfit\` | Clothing and costume | - |
+| \`environment\` | Background and setting | - |
+| \`aesthetic\` | Art style | - |
+| \`mood\` | Atmosphere | - |
+| \`effects\` | Visual effects | - |
+| \`lighting\` | Lighting | - |
+| \`composition\` | Composition | - |
+| \`photography\` | Photography techniques | - |
+| \`quality\` | Quality tags | △ |
+| \`negative\` | Negative prompt | △ |
+| \`interaction\` | Multi-character interactions | - |
 
-### 共通パターン: \`base\` キー
+### \`base\` Key (pose, lighting)
 
-多くのカテゴリで \`base\` キーを使用します。これは「そのカテゴリを一言で表す代表値」です。
+For \`pose\` and \`lighting\`, you can specify directly as a string or use the \`base\` key.
+
+\`\`\`yaml
+# Direct string (simple)
+pose: standing
+
+# Using base key (equivalent)
+pose:
+  base: standing
+\`\`\`
+
+Use the \`base\` key when you want to add details:
 
 \`\`\`yaml
 pose:
-  base: standing      # ← 全体としては「立っている」
-  hands: peace sign   # ← 細かく指定したい部分だけ追加
+  base: standing      # ← Overall "standing"
+  hands: peace sign   # ← Add specific details
 
 lighting:
-  base: dramatic      # ← 全体としては「ドラマチック」
-  # 詳細が不要ならこれだけでOK
+  base: dramatic      # ← Overall "dramatic"
+  source: window light
 \`\`\`
 
 ---
 
-## Subject - 被写体
+## Subject
 
 ### subject
 
 **type**: \`string\`
 
-被写体を指定します。人物・動物・物体・風景など。
+Specifies the main subject. Person, animal, object, landscape, etc.
 
 \`\`\`yaml
-# 人物（実写向け）
+# Person (realistic)
 subject: person
 subject: woman
 subject: man
 
-# 人物（イラスト向け）
+# Person (illustration)
 subject: 1girl
 subject: 1boy
 subject: 2girls
 
-# 人物以外
+# Non-person
 subject: cat
 subject: cherry blossom tree
 subject: cityscape
@@ -99,252 +110,418 @@ subject: cityscape
 
 **type**: \`object\`
 
-人物の属性を指定します。
+Specifies person attributes.
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`ethnicity\` | 人種・民族 | \`japanese\`, \`asian\`, \`caucasian\`, \`dark-skinned\` |
-| \`race\` | ファンタジー種族 | \`human\`, \`elf\`, \`demon\`, \`angel\`, \`catgirl\`, \`kemonomimi\` |
-| \`age\` | 年齢層 | \`child\`, \`teen\`, \`young\`, \`adult\`, \`mature\`, \`elderly\` |
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`gender\` | Gender | \`woman\`, \`man\`, \`girl\`, \`boy\`, \`androgynous\` |
+| \`ethnicity\` | Ethnicity | \`Japanese\`, \`Asian\`, \`Caucasian\`, \`African\`, \`Hispanic\` |
+| \`race\` | Fantasy race | \`human\`, \`elf\`, \`demon\`, \`angel\`, \`catgirl\`, \`kemonomimi\` |
+| \`age\` | Age range | \`teenage\`, \`young\`, \`young adult\`, \`middle-aged\`, \`elderly\` |
+
+\`\`\`yaml
+demographics:
+  gender: woman
+  ethnicity: Japanese
+  race: elf
+  age: young
+\`\`\`
+
+> **Note**: \`ethnicity\` refers to real-world ethnicity, \`race\` refers to fantasy races.
 
 ---
 
-## Pose - ポーズ
+## Pose
 
 ### pose
 
 **type**: \`object\`
 
-ポーズ・姿勢を指定します。
+Specifies pose and posture.
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`base\` | 全体のポーズ | \`standing\`, \`sitting\`, \`lying\`, \`jumping\`, \`running\` |
-| \`facing\` | 向き・視線方向 | \`facing viewer\`, \`looking back\`, \`profile\`, \`turned away\` |
-| \`action\` | 動作 | \`walking\`, \`dancing\`, \`fighting\`, \`sleeping\`, \`eating\` |
-| \`head\` | 頭の動き | \`head tilt\`, \`looking up\`, \`looking down\`, \`chin rest\` |
-| \`arms\` | 腕の動き | \`arms up\`, \`arms crossed\`, \`arm behind head\`, \`reaching out\` |
-| \`hands\` | 手の形 | \`hands on hips\`, \`peace sign\`, \`pointing\`, \`fist\`, \`open palm\` |
-| \`legs\` | 脚の動き | \`crossed legs\`, \`legs together\`, \`one knee up\` |
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`base\` | Overall pose | \`standing\`, \`sitting\`, \`lying\`, \`jumping\`, \`running\` |
+| \`facing\` | Direction/gaze | \`facing viewer\`, \`looking back\`, \`profile\`, \`turned away\` |
+| \`action\` | Action | \`walking\`, \`dancing\`, \`fighting\`, \`sleeping\`, \`eating\` |
+| \`head\` | Head movement | \`head tilt\`, \`looking up\`, \`looking down\`, \`chin rest\` |
+| \`arms\` | Arm movement | \`arms up\`, \`arms crossed\`, \`arm behind head\`, \`reaching out\` |
+| \`hands\` | Hand shape | \`hands on hips\`, \`peace sign\`, \`pointing at viewer\`, \`fist\`, \`open palm\` |
+| \`legs\` | Leg movement | \`crossed legs\`, \`legs together\`, \`one knee up\` |
+
+\`\`\`yaml
+# Simple
+pose:
+  base: standing
+
+# Detailed
+pose:
+  base: standing
+  facing: looking back
+  hands: peace sign
+  head: head tilt
+\`\`\`
+
+> **Note**: \`facing\` is the model's direction; camera angle (from behind, etc.) is specified in \`composition.angle\`.
 
 ---
 
-## Expression - 表情
+## Expression
 
 ### expression
 
 **type**: \`object\`
 
-表情を指定します。
+Specifies facial expression. Flat structure for ease of use.
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`emotion\` | 感情 | \`happy\`, \`sad\`, \`angry\`, \`embarrassed\`, \`surprised\`, \`shy\` |
-| \`face\` | 表情名 | \`smile\`, \`frown\`, \`pout\`, \`smirk\`, \`tears\`, \`blush\` |
-| \`eyes\` | 目の状態 | \`closed eyes\`, \`half-closed\`, \`heart eyes\`, \`crying\` |
-| \`mouth\` | 口の状態 | \`open mouth\`, \`tongue out\`, \`lip bite\`, \`drooling\` |
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`emotion\` | Emotion | \`happy\`, \`sad\`, \`angry\`, \`embarrassed\`, \`surprised\`, \`shy\` |
+| \`face\` | Expression name | \`smile\`, \`frown\`, \`pout\`, \`smirk\`, \`tears\`, \`blush\` |
+| \`eyes\` | Eye state | \`closed eyes\`, \`half-closed eyes\`, \`heart-shaped pupils\`, \`wide-eyed\` |
+| \`mouth\` | Mouth state | \`open mouth\`, \`tongue out\`, \`biting lip\`, \`drooling\` |
+
+\`\`\`yaml
+expression:
+  emotion: happy
+  face: smile
+  eyes: closed eyes
+\`\`\`
 
 ---
 
-## Appearance - 外見
+## Appearance
 
 ### appearance
 
 **type**: \`object\`
 
-外見・身体的特徴を指定します。
+Specifies physical features.
 
-#### hair（髪）
+#### hair
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`length\` | 長さ | \`short\`, \`medium\`, \`long\`, \`very long\` |
-| \`style\` | スタイル | \`ponytail\`, \`twintails\`, \`braid\`, \`bob\`, \`messy\`, \`straight\` |
-| \`color\` | 色 | \`blonde\`, \`black\`, \`pink\`, \`blue\`, \`gradient\`, \`multicolored\` |
-| \`bangs\` | 前髪 | \`blunt bangs\`, \`side swept\`, \`parted\`, \`curtain bangs\` |
-| \`extras\` | 装飾 | \`ribbon\`, \`hairpin\`, \`hair ornament\`, \`flower\` |
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`length\` | Length | \`short hair\`, \`medium hair\`, \`long hair\`, \`very long hair\` |
+| \`style\` | Style | \`ponytail\`, \`twintails\`, \`braid\`, \`bob cut\`, \`messy hair\`, \`straight hair\` |
+| \`color\` | Color | \`blonde hair\`, \`black hair\`, \`pink hair\`, \`blue hair\`, \`gradient hair\`, \`multicolored hair\` |
+| \`texture\` | Texture | \`silky\`, \`fluffy\`, \`smooth\`, \`glossy\`, \`wet\` |
+| \`bangs\` | Bangs | \`blunt bangs\`, \`swept bangs\`, \`parted bangs\`, \`side bangs\` |
+| \`extras\` | Decorations | \`ribbon\`, \`hair pin\`, \`hair ornament\`, \`hair flower\` |
 
-#### 顔・肌
+\`\`\`yaml
+appearance:
+  hair:
+    length: long hair
+    style: ponytail
+    color: blonde hair
+    bangs: blunt bangs
+    extras: [ribbon]
+\`\`\`
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`eyes\` | 目の色・形 | \`blue\`, \`green\`, \`red\`, \`heterochromia\`, \`almond\`, \`droopy\` |
-| \`skin\` | 肌 | \`pale\`, \`fair\`, \`tan\`, \`dark\`, \`freckles\` |
-| \`face\` | 顔の形 | \`round face\`, \`oval face\`, \`sharp jaw\` |
-| \`makeup\` | メイク | \`lipstick\`, \`eyeshadow\`, \`blush\`, \`natural makeup\` |
+#### Face & Skin
 
-#### 体型
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`eyes\` | Eye color/shape | \`blue eyes\`, \`green eyes\`, \`red eyes\`, \`heterochromia\` |
+| \`skin\` | Skin | \`pale skin\`, \`fair skin\`, \`tan skin\`, \`dark skin\`, \`freckles\` |
+| \`face\` | Face shape | \`round face\`, \`oval face\`, \`strong jawline\` |
+| \`makeup\` | Makeup | \`red lipstick\`, \`smoky eyes\`, \`blush\`, \`natural makeup\` |
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`build\` | 体格 | \`slim\`, \`athletic\`, \`curvy\`, \`muscular\`, \`petite\`, \`chubby\` |
-| \`proportions\` | 頭身 | \`chibi\`, \`normal\`, \`model\`, \`8 heads tall\` |
+#### Build
 
-#### extras（追加要素）
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`build\` | Body type | \`slim\`, \`athletic\`, \`curvy\`, \`muscular\`, \`petite\`, \`plump\` |
+| \`proportions\` | Proportions | \`chibi\`, \`normal\`, \`model proportions\`, \`8 heads tall\` |
+
+#### Body Parts (when needed)
+
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`breast\` | Chest | \`flat chest\`, \`small breasts\`, \`medium breasts\`, \`large breasts\` |
+| \`hips\` | Hips | \`wide hips\`, \`narrow hips\` |
+| \`waist\` | Waist | \`slim waist\`, \`narrow waist\` |
+| \`legs\` | Legs | \`long legs\`, \`thick thighs\`, \`slender legs\` |
+
+#### extras
 
 **type**: \`array\`
 
-\`tattoo\`, \`wings\`, \`tail\`, \`elf ears\`, \`horns\`, \`halo\` など
+\`tattoo\`, \`horns\`, \`halo\`, \`pointed ears\`, \`fangs\`, etc.
+
+\`\`\`yaml
+appearance:
+  hair:
+    color: pink hair
+    style: twintails
+  eyes: heterochromia
+  build: petite
+  extras: [pointed ears, horns]
+\`\`\`
 
 ---
 
-## Outfit - 服装
+## Outfit
 
 ### outfit
 
 **type**: \`object\`
 
-服装・衣装を指定します。
+Specifies clothing and costume.
 
-#### 一発指定（コスチューム・系統）
+#### Quick Specification
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`costume\` | コスチューム | \`nurse\`, \`maid\`, \`witch\`, \`bunny girl\`, \`idol\`, \`schoolgirl\` |
-| \`style\` | 系統 | \`casual\`, \`formal\`, \`fantasy\`, \`gothic\`, \`sporty\` |
+\`\`\`yaml
+# Direct string
+outfit: casual
 
-#### アイテム別
+# Or with style key
+outfit:
+  style: casual
+\`\`\`
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`top\` | トップス | \`shirt\`, \`blouse\`, \`t-shirt\`, \`sweater\`, \`crop top\` |
-| \`bottom\` | ボトムス | \`skirt\`, \`pants\`, \`shorts\`, \`jeans\` |
-| \`dress\` | ドレス | \`wedding dress\`, \`evening gown\`, \`sundress\` |
-| \`outerwear\` | アウター | \`jacket\`, \`coat\`, \`cardigan\`, \`cape\`, \`hoodie\` |
-| \`legwear\` | レッグウェア | \`thighhighs\`, \`pantyhose\`, \`stockings\`, \`knee socks\` |
-| \`footwear\` | 靴 | \`high heels\`, \`boots\`, \`sneakers\`, \`barefoot\`, \`sandals\` |
-| \`headwear\` | 帽子類 | \`hat\`, \`crown\`, \`ribbon\`, \`hairband\`, \`beret\` |
-| \`swimwear\` | 水着 | \`bikini\`, \`one-piece swimsuit\`, \`school swimsuit\` |
-| \`underwear\` | 下着 | \`bra\`, \`panties\`, \`lingerie\` |
-| \`accessories\` | アクセサリ | \`necklace\`, \`earrings\`, \`glasses\`, \`bag\`, \`watch\` |
-| \`props\` | 持ち物 | \`sword\`, \`umbrella\`, \`book\`, \`phone\`, \`cup\` |
+#### One-word Specification (costume/style)
 
-#### アイテムの属性
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`costume\` | Costume | \`nurse\`, \`maid\`, \`witch\`, \`bunny girl\`, \`idol\`, \`schoolgirl\` |
+| \`style\` | Style category | \`casual\`, \`formal\`, \`elegant\`, \`gothic\`, \`sporty\` |
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`type\` | アイテムの種類 | \`t-shirt\`, \`blazer\`, \`pleated skirt\` など |
-| \`color\` | 色 | \`white\`, \`black\`, \`red\`, \`navy\`, \`colorful\` |
-| \`material\` | 素材 | \`silk\`, \`leather\`, \`lace\`, \`denim\`, \`cotton\` |
-| \`pattern\` | 柄 | \`stripes\`, \`plaid\`, \`polka dots\`, \`floral\` |
-| \`fit\` | フィット感 | \`tight\`, \`loose\`, \`oversized\` |
-| \`state\` | 状態 | \`wet\`, \`torn\`, \`disheveled\` |
+\`\`\`yaml
+# Specify by costume
+outfit:
+  costume: maid
+\`\`\`
+
+#### Individual Items
+
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`top\` | Top | \`shirt\`, \`blouse\`, \`t-shirt\`, \`sweater\`, \`crop top\` |
+| \`bottom\` | Bottom | \`skirt\`, \`pants\`, \`shorts\`, \`jeans\` |
+| \`dress\` | Dress | \`wedding dress\`, \`evening gown\`, \`sundress\` |
+| \`outerwear\` | Outerwear | \`jacket\`, \`coat\`, \`cardigan\`, \`cape\`, \`hoodie\` |
+| \`legwear\` | Legwear | \`thigh highs\`, \`pantyhose\`, \`stockings\`, \`knee socks\` |
+| \`footwear\` | Footwear | \`high heels\`, \`boots\`, \`sneakers\`, \`barefoot\`, \`sandals\` |
+| \`headwear\` | Headwear | \`hat\`, \`crown\`, \`ribbon\`, \`hairband\`, \`beret\` |
+| \`swimwear\` | Swimwear | \`bikini\`, \`one-piece swimsuit\`, \`school swimsuit\` |
+| \`underwear\` | Underwear | \`bra\`, \`panties\`, \`lingerie\` |
+| \`accessories\` | Accessories | \`necklace\`, \`earrings\`, \`glasses\`, \`bag\`, \`watch\` |
+| \`props\` | Held items | \`sword\`, \`umbrella\`, \`book\`, \`phone\`, \`cup\` |
+
+#### Item Attributes
+
+For detailed item specification, use these attributes.
+
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`type\` | Item type | \`t-shirt\`, \`blazer\`, \`pleated skirt\`, etc. |
+| \`color\` | Color | \`white\`, \`black\`, \`red\`, \`navy\`, \`multicolor\` |
+| \`color_scheme\` | Color scheme | \`monochrome\`, \`complementary colors\`, \`pastel colors\` |
+| \`material\` | Material | \`silk\`, \`leather\`, \`lace\`, \`denim\`, \`cotton\` |
+| \`texture\` | Texture | \`soft\`, \`smooth\`, \`glossy\`, \`matte\`, \`fluffy\` |
+| \`pattern\` | Pattern | \`stripes\`, \`plaid\`, \`polka dots\`, \`floral\` |
+| \`fit\` | Fit | \`tight\`, \`loose\`, \`oversized\` |
+| \`state\` | State | \`wet clothes\`, \`torn clothes\`, \`disheveled clothes\` |
+| \`neckline\` | Neckline | \`v-neck\`, \`off-shoulder\`, \`turtleneck\` |
+| \`sleeve\` | Sleeve | \`sleeveless\`, \`short sleeve\`, \`long sleeve\` |
+| \`length\` | Length | \`mini\`, \`midi\`, \`maxi\`, \`cropped\` |
+
+#### Writing Patterns
+
+\`\`\`yaml
+# Simple
+outfit:
+  top: blazer
+  bottom: pleated skirt
+
+# Detailed
+outfit:
+  top:
+    type: blazer
+    color: navy
+    material: wool
+    fit: slim
+  bottom:
+    type: pleated skirt
+    color: gray
+    pattern: plaid
+    length: mini
+\`\`\`
 
 ---
 
-## Environment - 環境
+## Environment
 
 ### environment
 
 **type**: \`object\`
 
-背景・環境を指定します。
+Specifies background and setting.
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`world\` | 世界観 | \`fantasy\`, \`sci-fi\`, \`modern\`, \`historical\`, \`cyberpunk\` |
-| \`background\` | 背景タイプ | \`simple background\`, \`detailed background\`, \`gradient\`, \`white\` |
-| \`location\` | 場所 | \`indoor\`, \`outdoor\`, \`beach\`, \`forest\`, \`city\`, \`castle\`, \`classroom\` |
-| \`time\` | 時間帯 | \`day\`, \`night\`, \`sunset\`, \`dawn\`, \`golden hour\` |
-| \`weather\` | 天気 | \`sunny\`, \`rainy\`, \`snowy\`, \`cloudy\`, \`foggy\` |
-| \`season\` | 季節 | \`spring\`, \`summer\`, \`autumn\`, \`winter\` |
-| \`props\` | 背景の小物 | \`chair\`, \`table\`, \`flowers\`, \`bookshelf\`, \`lamp\` |
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`world\` | World setting | \`fantasy\`, \`sci-fi\`, \`modern\`, \`historical\`, \`cyberpunk\`, \`steampunk\` |
+| \`background\` | Background type | \`simple background\`, \`gradient background\`, \`white background\`, \`black background\` |
+| \`color\` | Background color/tone | \`gradient\`, \`monochrome\`, \`pastel\`, \`vivid\`, \`warm tones\`, \`cool tones\` |
+| \`location\` | Location | \`indoors\`, \`outdoors\`, \`beach\`, \`forest\`, \`city\`, \`castle\`, \`classroom\` |
+| \`time\` | Time of day | \`day\`, \`night\`, \`sunset\`, \`dawn\`, \`golden hour\` |
+| \`weather\` | Weather | \`sunny\`, \`rain\`, \`snow\`, \`cloudy\`, \`fog\` |
+| \`season\` | Season | \`spring (season)\`, \`summer\`, \`autumn\`, \`winter\` |
+| \`crowd\` | Crowd | \`crowd\`, \`sparse crowd\`, \`empty\` |
+| \`props\` | Background props | \`chair\`, \`table\`, \`flowers\`, \`bookshelf\`, \`lamp\` |
+
+\`\`\`yaml
+environment:
+  world: fantasy
+  location: castle
+  time: sunset
+  weather: cloudy
+  props: [throne, candles]
+\`\`\`
+
+> **Note**: \`props\` is for things in the background. Held items go in \`outfit.props\`.
 
 ---
 
-## Aesthetic / Mood / Effects - スタイル
+## Aesthetic / Mood / Effects - Style
 
 ### aesthetic
 
 **type**: \`object\`
 
-画風・スタイルを指定します。
+Specifies art style.
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`style\` | 画風 | \`anime\`, \`realistic\`, \`painterly\`, \`sketch\`, \`watercolor\`, \`oil painting\`, \`pixel art\`, \`3D render\` |
-| \`medium\` | 画材 | \`digital art\`, \`traditional\`, \`mixed media\` |
-| \`color_scheme\` | 色調 | \`warm tones\`, \`cool tones\`, \`pastel\`, \`vibrant\`, \`monochrome\` |
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`style\` | Art style | \`anime\`, \`realistic\`, \`painterly\`, \`sketch\`, \`watercolor\`, \`oil painting\`, \`pixel art\`, \`3D render\` |
+| \`medium\` | Medium | \`digital art\`, \`traditional\`, \`mixed media\` |
+| \`color_scheme\` | Color scheme | \`warm tones\`, \`cool tones\`, \`pastel colors\`, \`vibrant colors\`, \`monochrome\` |
+
+\`\`\`yaml
+aesthetic:
+  style: anime
+  medium: digital art
+  color_scheme: pastel colors
+\`\`\`
+
+> **Note**: Artist names are not included in the dictionary.
 
 ### mood
 
 **type**: \`string\`
 
-雰囲気・感情的トーンを指定します。
+Specifies atmosphere and emotional tone.
 
 \`\`\`yaml
-mood: cheerful      # cheerful, melancholic, dramatic, peaceful, dreamy, tense, eerie
+mood: joyful      # joyful, melancholic, dramatic, peaceful, serene, tense, eerie
 \`\`\`
 
 ### effects
 
 **type**: \`array\`
 
-視覚エフェクトを指定します。
+Specifies visual effects.
 
 \`\`\`yaml
 effects: [sparkles, bokeh, lens flare, particles, motion blur, chromatic aberration]
 \`\`\`
 
+#### Decision Guide
+
+| When in doubt | Classification |
+|---------------|----------------|
+| "How to draw it" (technique) | \`aesthetic\` |
+| "What mood" (atmosphere) | \`mood\` |
+| "Effects to add on top" | \`effects\` |
+
 ---
 
-## Lighting - 照明
+## Lighting
 
 ### lighting
 
 **type**: \`object\`
 
-照明を指定します。
+Specifies lighting.
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`base\` | 雰囲気 | \`professional\`, \`dramatic\`, \`soft\`, \`natural\`, \`studio\`, \`cinematic\` |
-| \`source\` | 光源 | \`sunlight\`, \`moonlight\`, \`neon\`, \`candlelight\`, \`window light\` |
-| \`technique\` | 技法 | \`high-key\`, \`low-key\`, \`Rembrandt\`, \`split lighting\`, \`butterfly\` |
-| \`color\` | 色温度 | \`warm\`, \`cool\`, \`golden\`, \`blue hour\` |
-| \`shadow\` | 影 | \`hard shadow\`, \`soft shadow\`, \`no shadow\`, \`rim light\` |
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`base\` | Overall feel | \`professional\`, \`dramatic\`, \`soft\`, \`natural\`, \`studio\`, \`cinematic\` |
+| \`source\` | Light source | \`sunlight\`, \`moonlight\`, \`neon light\`, \`candlelight\`, \`window light\` |
+| \`technique\` | Technique | \`high-key\`, \`low-key\`, \`Rembrandt\`, \`split lighting\`, \`butterfly lighting\` |
+| \`color\` | Color temperature | \`warm\`, \`cool\`, \`golden\`, \`blue hour\` |
+| \`shadow\` | Shadow | \`hard shadow\`, \`soft shadow\`, \`no shadow\`, \`rim light\` |
+
+\`\`\`yaml
+# Simple (just atmosphere)
+lighting:
+  base: professional
+
+# Detailed
+lighting:
+  base: dramatic
+  source: window light
+  technique: Rembrandt
+  shadow: hard shadow
+\`\`\`
 
 ---
 
-## Composition - 構図
+## Composition
 
 ### composition
 
 **type**: \`object\`
 
-構図を指定します。
+Specifies composition.
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`shot\` | 切り取り範囲 | \`full body\`, \`upper body\`, \`close-up\`, \`cowboy shot\`, \`bust shot\` |
-| \`angle\` | カメラアングル | \`from above\`, \`from below\`, \`eye level\`, \`dutch angle\`, \`from behind\` |
-| \`method\` | 構図技法 | \`rule of thirds\`, \`centered\`, \`symmetrical\`, \`golden ratio\`, \`negative space\` |
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`shot\` | Framing | \`full body\`, \`upper body\`, \`close-up\`, \`cowboy shot\`, \`bust shot\` |
+| \`angle\` | Camera angle | \`from above\`, \`from below\`, \`eye level\`, \`dutch angle\`, \`from side\` |
+| \`method\` | Composition technique | \`rule of thirds\`, \`centered\`, \`symmetrical\`, \`golden ratio\`, \`diagonal\` |
+
+\`\`\`yaml
+composition:
+  shot: upper body
+  angle: from below
+  method: rule of thirds
+\`\`\`
 
 ---
 
-## Photography - 撮影技法
+## Photography
 
 ### photography
 
 **type**: \`object\`
 
-撮影技法を指定します。主に実写風の画像に使用。
+Specifies photography techniques. Mainly for realistic images.
 
-| キー | 説明 | 例 |
-|------|------|------|
-| \`camera\` | カメラ種類 | \`DSLR\`, \`mirrorless\`, \`film camera\`, \`polaroid\`, \`smartphone\` |
-| \`lens\` | レンズ | \`wide angle\`, \`telephoto\`, \`fisheye\`, \`macro\`, \`85mm portrait\` |
-| \`film\` | フィルム感 | \`warm tones\`, \`grainy\`, \`faded\`, \`high contrast\` |
+| Key | Description | Examples |
+|-----|-------------|----------|
+| \`shot_with\` | Camera equipment | \`shot on DSLR\`, \`shot on mirrorless camera\`, \`shot on 35mm film\`, \`shot on Polaroid\`, \`shot on smartphone\` |
+| \`lens\` | Lens | \`24mm wide angle\`, \`200mm telephoto\`, \`fisheye lens\`, \`macro lens\`, \`85mm f/1.4\` |
+| \`film\` | Film | \`Kodak Portra 400\`, \`Fuji Pro 400H\`, \`Cinestill 800T\`, \`Kodak Tri-X 400\` |
+
+\`\`\`yaml
+photography:
+  shot_with: shot on 35mm film
+  lens: 85mm f/1.4
+  film: Kodak Portra 400
+\`\`\`
 
 ---
 
-## Quality / Negative - 品質
+## Quality / Negative
 
 ### quality
 
 **type**: \`array\`
 
-品質向上タグを指定します。
+Specifies quality enhancement tags.
 
 \`\`\`yaml
 quality: [masterpiece, best quality, highly detailed, 4k, 8k, absurdres]
@@ -354,7 +531,7 @@ quality: [masterpiece, best quality, highly detailed, 4k, 8k, absurdres]
 
 **type**: \`array\`
 
-ネガティブプロンプト（除外したいもの）を指定します。
+Specifies negative prompt (things to exclude).
 
 \`\`\`yaml
 negative: [worst quality, low quality, bad anatomy, extra fingers, bad hands, watermark, blurry, signature]
@@ -362,16 +539,16 @@ negative: [worst quality, low quality, bad anatomy, extra fingers, bad hands, wa
 
 ---
 
-## 複数人の記述
+## Multiple Characters
 
-2人以上の人物を描く場合の書き方。
+How to describe 2 or more characters.
 
-### 基本構造
+### Basic Structure
 
 \`\`\`yaml
 subject: 2girls
 
-# キー名は自由（名前でもOK）
+# Key names are flexible (names work too)
 character_1:
   demographics:
     age: young
@@ -394,16 +571,118 @@ character_2:
   outfit:
     costume: idol
 
-# 相互作用
+# Interaction
 interaction: holding hands, looking at each other
 \`\`\`
 
-### interaction の語彙
+### interaction Vocabulary
 
-| カテゴリ | 例 |
-|---------|------|
-| 接触 | \`holding hands\`, \`hugging\`, \`kissing\`, \`hand on shoulder\` |
-| 位置関係 | \`back to back\`, \`facing each other\`, \`side by side\` |
-| アクション | \`fighting\`, \`dancing together\`, \`playing\` |
-| 視線 | \`looking at each other\`, \`whispering\` |
+| Category | Examples |
+|----------|----------|
+| Contact | \`holding hands\`, \`hugging\`, \`kissing\`, \`hand on shoulder\` |
+| Position | \`back to back\`, \`facing each other\`, \`side by side\` |
+| Action | \`fighting\`, \`dancing together\`, \`playing\` |
+| Gaze | \`looking at each other\`, \`whispering\` |
+
+---
+
+## Design Philosophy
+
+### 1. base Pattern (pose, lighting)
+
+For \`pose\` and \`lighting\`, direct string specification and \`base\` key specification are equivalent.
+
+- Simple specification → direct string
+- Want to add details → \`base\` key + other keys
+
+\`\`\`yaml
+# Direct string (simple)
+pose: standing
+
+# Using base key (equivalent)
+pose:
+  base: standing
+
+# Adding details
+pose:
+  base: standing
+  hands: peace sign
+\`\`\`
+
+### 2. outfit Item Detail Specification
+
+When specifying outfit items in detail, use the \`type\` key for item type.
+\`type\` is a key exclusive to outfit items.
+
+\`\`\`yaml
+# Simple (direct string)
+outfit:
+  top: t-shirt
+
+# Detailed (using type key)
+outfit:
+  top:
+    type: t-shirt
+    color: white
+    fit: oversized
+\`\`\`
+
+### 3. props Placement
+
+- \`outfit.props\` = Held items (sword, umbrella...)
+- \`environment.props\` = Background items (chair, table...)
+
+### 4. ethnicity vs race
+
+- \`ethnicity\` = Real-world ethnicity (japanese, caucasian...)
+- \`race\` = Fantasy race (elf, demon, catgirl...)
+
+### 5. facing vs angle
+
+- \`pose.facing\` = Model's direction (facing viewer, looking back...)
+- \`composition.angle\` = Camera angle (from above, from behind...)
+
+### 6. Dictionary Vocabulary Selection Criteria
+
+**Include:**
+- AI image generation-specific terms
+- Specialized terms with unclear effects
+- Style and technique-related
+- "Can't use if you don't know" type
+
+**Exclude:**
+- Common nouns (bus, apple, dog)
+- Words anyone would think of
+- Artist names
+- Too specific combinations
+
+### 7. Model-Specific Tags
+
+Some models require special tags. YAPS doesn't restrict these. You can freely add keys at the top level.
+
+\`\`\`yaml
+# Animagine-XL
+rating: sensitive          # Content rating
+temporal: year 2020        # Era setting
+
+# Pony Diffusion
+score_9, score_8_up         # Quality score tags
+source_anime               # Source specification
+\`\`\`
+
+These are not standard YAPS keys, but adding them to the dictionary enables autocomplete.
+
+---
+
+## Version History
+
+| Version | Date | Changes |
+|---------|------|---------|
+| v1.0 | 2024-12-24 | Initial release |
+| v1.1 | 2024-12-28 | Dictionary sync, example value updates, added \`environment.color\` |
+| v1.2 | 2024-12-29 | Added \`texture\` key (generic texture attribute for hair, outfit items) |
+
+---
+
+*YAPS - Yet Another Prompt Schema*
 `;
