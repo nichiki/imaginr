@@ -1,6 +1,6 @@
 # shot_01-03
 
-_base: 90_examples/01_fashion_photography/look_01.yaml
+_base: 01_examples/01_fashion_photography/look_01.yaml
 
 pose:
   base: sitting on white pedestal or cube

@@ -1,6 +1,6 @@
 # child
 
-_base: 99_tutorial/05_variables/base.yaml
+_base: 02_tutorial/05_variables/base.yaml
 
 outfit:
   top: t-shirt

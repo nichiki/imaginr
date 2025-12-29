@@ -86,25 +86,6 @@ function fileExistsInTree(items: FileTreeItem[], path: string): boolean {
   return false;
 }
 
-// ツリーから最初のファイルを探す
-function findFirstFile(items: FileTreeItem[], preferFolder?: string): string | null {
-  for (const item of items) {
-    if (item.type === 'folder' && item.children) {
-      if (!preferFolder || item.name === preferFolder) {
-        const found = findFirstFile(item.children);
-        if (found) return found;
-      }
-    } else if (item.type === 'file') {
-      return item.path;
-    }
-  }
-  // preferFolderで見つからなかったら全体から探す
-  if (preferFolder) {
-    return findFirstFile(items);
-  }
-  return null;
-}
-
 export default function Home() {
   const { t } = useTranslation();
 
@@ -281,14 +262,7 @@ export default function Home() {
           active = tabs[0] || '';
         }
 
-        // タブが空の場合、最初のファイルを開く
-        if (tabs.length === 0) {
-          const firstFile = findFirstFile(tree, 'shots');
-          if (firstFile) {
-            tabs = [firstFile];
-            active = firstFile;
-          }
-        }
+        // タブが空の場合は何も開かない（空のエディタを表示）
 
         // 開いているタブのファイルを読み込み
         const filesData: FileData = {};

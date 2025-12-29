@@ -1,6 +1,6 @@
 # look_02
 
-_base: 90_examples/01_fashion_photography/base.yaml
+_base: 01_examples/01_fashion_photography/base.yaml
 
 environment:
   background: white studio or soft natural light setting

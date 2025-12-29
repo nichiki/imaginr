@@ -1,6 +1,6 @@
 # child1
 
-_base: 99_tutorial/03_inheritance/base.yaml
+_base: 02_tutorial/03_inheritance/base.yaml
 
 outfit:
   top: t-shirt

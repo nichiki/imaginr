@@ -1,6 +1,6 @@
 # shot-02-02
 
-_base: 90_examples/01_fashion_photography/look_02.yaml
+_base: 01_examples/01_fashion_photography/look_02.yaml
 
 pose:
   base: standing
