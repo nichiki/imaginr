@@ -91,6 +91,7 @@
   },
   "dialog": {
     "unsavedChanges": "未保存の変更があります。保存せずに閉じますか？",
+    "unsavedChangesOnClose": "未保存のファイルがあります。保存せずにアプリを終了しますか？",
     "confirmDelete": "削除しますか？",
     "confirmDeleteImage": "この画像を削除しますか？",
     "confirmDeleteFile": "\"{{path}}\" を削除しますか？",

@@ -91,6 +91,7 @@
   },
   "dialog": {
     "unsavedChanges": "You have unsaved changes. Close without saving?",
+    "unsavedChangesOnClose": "You have unsaved files. Quit without saving?",
     "confirmDelete": "Are you sure you want to delete this?",
     "confirmDeleteImage": "Delete this image?",
     "confirmDeleteFile": "Delete \"{{path}}\"?",

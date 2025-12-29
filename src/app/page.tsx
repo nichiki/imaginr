@@ -195,6 +195,49 @@ export default function Home() {
   const startPos = useRef(0);
   const startSize = useRef(0);
 
+  // ウィンドウを閉じる前の確認（未保存ファイルがある場合）
+  const isClosingRef = useRef(false);
+  useEffect(() => {
+    let unlisten: (() => void) | undefined;
+
+    (async () => {
+      const { getCurrentWindow } = await import('@tauri-apps/api/window');
+      const currentWindow = getCurrentWindow();
+
+      unlisten = await currentWindow.onCloseRequested(async (event) => {
+        // 既に閉じる処理中なら許可
+        if (isClosingRef.current) {
+          return;
+        }
+
+        // dirtyFilesの最新値を取得するためにsetDirtyFilesのコールバック形式を使用
+        let hasDirty = false;
+        setDirtyFiles((prev) => {
+          hasDirty = prev.size > 0;
+          return prev;
+        });
+
+        if (hasDirty) {
+          event.preventDefault();
+          const { showConfirm } = await import('@/lib/dialog');
+          const confirmed = await showConfirm(
+            t('dialog.unsavedChangesOnClose'),
+            { okLabel: t('common.close') }
+          );
+          if (confirmed) {
+            // 確認後にウィンドウを強制終了
+            isClosingRef.current = true;
+            await currentWindow.destroy();
+          }
+        }
+      });
+    })();
+
+    return () => {
+      unlisten?.();
+    };
+  }, [t]);
+
   // 初期読み込み
   useEffect(() => {
     async function loadFiles() {
