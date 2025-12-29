@@ -1,41 +1,41 @@
-# チュートリアル
+# Tutorial
 
-このチュートリアルでは、Imaginrを使って効率的にプロンプトを作成・管理する方法を学びます。
+This tutorial will teach you how to efficiently create and manage prompts using Imaginr.
 
-## はじめに
+## Introduction
 
-画像生成AIを使うとき、毎回ゼロからプロンプトを書いていませんか？
+When using AI image generation, do you write prompts from scratch every time?
 
-「前に作ったあのキャラクターをベースに、服装だけ変えたい」
-「同じ構図で、髪の色だけ何パターンか試したい」
+"I want to use that character from before but just change the outfit"
+"I want to try a few different hair colors with the same composition"
 
-こんなとき、テキストをコピペして編集するのは面倒ですし、ミスも起きやすいです。
+Copy-pasting and editing text for these tasks is tedious and error-prone.
 
-Imaginrは、プロンプトを**構造化されたYAML形式**で管理することで、この問題を解決します。
+Imaginr solves this by managing prompts in **structured YAML format**.
 
 ---
 
-## Step 1: 最初のプロンプトを作る
+## Step 1: Create Your First Prompt
 
-まずは、最もシンプルなプロンプトから始めましょう。
+Let's start with the simplest possible prompt.
 
-### 従来の書き方（自然言語）
+### Traditional Approach (Natural Language)
 
 ```
 young Japanese woman, long straight hair, wearing t-shirt and jeans
 ```
 
-これでも画像は生成できます。でも、このプロンプトには少し問題があります：
+This can generate images. But there are some issues with this prompt:
 
-- 髪の長さを変えたいとき、どこを直せばいい？
-- 服装だけ変えたバリエーションを作りたいけど、どこからどこまでが服装？
-- 他のプロンプトと共通部分を使い回したいけど、どうやって？
+- When you want to change the hair length, where do you edit?
+- Want to create variations with just the outfit changed, but where does the outfit begin and end?
+- Want to reuse common parts across prompts, but how?
 
-現実的には、この程度の長さであれば困ることはないでしょう。ただしAIによる画像生成では、指定しなかったものはAIにお任せ（＝ランダム）になるため、自分の意図通りの生成結果を得ようと思うと、プロンプトはどんどん細かく複雑になっていく傾向があります。
+Realistically, a prompt this short won't cause problems. However, in AI image generation, anything you don't specify is left up to the AI (= random), so to get results that match your intent, prompts tend to get increasingly detailed and complex.
 
-### YAMLで書くと
+### Written in YAML
 
-**ファイル: `99_tutorial/01_getting_started/getting_started.yaml`**
+**File: `99_tutorial/01_getting_started/getting_started.yaml`**
 
 ```yaml
 subject: person
@@ -55,30 +55,30 @@ outfit:
   bottom: jeans
 ```
 
-### ポイント
+### Key Points
 
-- YAMLは**階層構造**でデータを表現できます
-- `appearance`の下に`hair`、その下に`length`と`style`...というように、入れ子にできます
-- **どこに何が書いてあるか一目瞭然**です
-- 「Merged YAML」タブで、最終的なYAMLの内容を確認できます
+- YAML expresses data in a **hierarchical structure**
+- You can nest: `appearance` contains `hair`, which contains `length` and `style`...
+- **Everything is easy to find at a glance**
+- Check the "Merged YAML" tab to see the final YAML content
 
 ---
 
-## Step 2: より詳細な構造化
+## Step 2: More Detailed Structuring
 
-もう少し詳細なプロンプトを作ってみましょう。
+Let's create a more detailed prompt.
 
-### 自然言語で書くと...
+### In Natural Language...
 
 ```
 young Japanese woman with long straight chestnut hair and brown eyes, wearing yellow t-shirt and indigo jeans with purple hair ribbon, simple red background
 ```
 
-一文が長くなると、どこに何が書いてあるかわかりにくくなりますよね。
+As sentences get longer, it becomes harder to tell what's where.
 
-### YAMLで書くと
+### Written in YAML
 
-**ファイル: `99_tutorial/02_structured/structured.yaml`**
+**File: `99_tutorial/02_structured/structured.yaml`**
 
 ```yaml
 subject: person
@@ -111,81 +111,81 @@ environment:
   color: red
 ```
 
-### ポイント
+### Key Points
 
-- `accessories`は配列（リスト）です。`-`で複数のアイテムを列挙できます
-- `outfit.top`のように、さらに細かく構造化することで、後から特定の部分だけを変更しやすくなります
-- `environment`を追加して、背景も指定しました
+- `accessories` is an array (list). Use `-` to list multiple items
+- By structuring `outfit.top` further, you make it easier to change specific parts later
+- Added `environment` to specify the background
 
-### なぜ構造化するのか？
+### Why Structure?
 
-自然言語との比較でわかるように：
+As the comparison with natural language shows:
 
-1. **どこに何が書いてあるか**が一目でわかる
-2. **特定の部分だけ変更**しやすい（例：髪の色だけ変えたい）
-3. **再利用**しやすい（次のStepで説明します）
+1. **Easy to find** what's where
+2. **Easy to change** specific parts (e.g., just the hair color)
+3. **Easy to reuse** (explained in the next step)
 
-### 構造は自由に決められます
+### Structure is Flexible
 
-「こんな構造を覚えなきゃいけないの？」と思うかもしれません。
+You might think "Do I have to memorize this structure?"
 
-**安心してください。構造は自分がわかりやすければOKです。**
+**Don't worry. Any structure that makes sense to you is fine.**
 
-例えば、「白いTシャツ」を表現するのに、以下のどの書き方でもOKです：
+For example, to express "white t-shirt", any of these work:
 
 ```yaml
-# シンプルに1行で
+# Simple one-liner
 outfit: white t-shirt
 ```
 
 ```yaml
-# トップスとして分類
+# Categorized as a top
 outfit:
   top: white t-shirt
 ```
 
 ```yaml
-# 色と種類を分けて管理
+# Color and type separated
 outfit:
   top:
     type: t-shirt
     color: white
 ```
 
-どれが正解ということはありません。**あなたが管理しやすい形**で書いてください。
+None of these is "correct." Write it in whatever way is **easiest for you to manage**.
 
-- 色をよく変えるなら、`color`を分けておくと便利
-- そこまで細かく管理しないなら、1行でシンプルに
-- 後から構造を変えることもできます
+- If you often change colors, separating `color` is convenient
+- If you don't need that much detail, keep it simple on one line
+- You can always restructure later
 
-#### アプリが提供するおすすめの書き方
+#### App-Provided Recommended Structure
 
-「自由に書いていい」と言われても、最初は何をどう書けばいいかわからないですよね。
+"Write freely" is easy to say, but it's hard to know what to write at first.
 
-そこで、このアプリでは**辞書機能**を通じて、おすすめの構造を提案しています：
+That's why this app suggests recommended structures through the **dictionary feature**:
 
-- エディタで入力中に**オートコンプリート**が表示されます
-- 辞書には、よく使うキー名や値があらかじめ登録されています
-- 辞書の提案に沿って書けば、自然と整理された構造になります
-- 候補の右側には「どの辞書コンテキストから来たか」が表示されます
+- **Autocomplete** appears as you type in the editor
+- The dictionary has common key names and values pre-registered
+- Following dictionary suggestions naturally leads to organized structure
+- The right side of suggestions shows "which dictionary context they came from"
 
-ただし、これはあくまで**ガイド**です。辞書にない書き方をしても全く問題ありません。辞書は設定ダイアログから自由に編集・追加できます。
+However, this is just a **guide**. Using structures not in the dictionary is perfectly fine. You can freely edit and add to the dictionary from the settings dialog.
 
-自分のワークフローに合わせて、自由にカスタマイズしてください。
+Customize it to fit your workflow.
 
 ---
 
-## Step 3: 継承 - ベースを使い回す
+## Step 3: Inheritance - Reusing a Base
 
-ここからがImaginrの真骨頂です。
+This is where Imaginr really shines.
 
-同じキャラクターで服装だけ変えたいとき、ファイルをコピーして編集していませんか？
+When you want to use the same character but just change the outfit, are you copying and editing files?
 
-**継承**を使えば、共通部分を1つのファイルにまとめて、差分だけを別ファイルに書けます。
+With **inheritance**, you can put common parts in one file and write only the differences in separate files.
 
-### ベースファイル
+### Base File
 
-**ファイル: `99_tutorial/03_inheritance/base.yaml`**
+**File: `99_tutorial/03_inheritance/base.yaml`**
 
 ```yaml
 subject: person
@@ -201,11 +201,11 @@ appearance:
     style: straight hair
 ```
 
-キャラクターの基本設定だけを定義します。
+This defines just the basic character settings.
 
-### 派生ファイル1: カジュアルな服装
+### Child File 1: Casual Outfit
 
-**ファイル: `99_tutorial/03_inheritance/child1.yaml`**
+**File: `99_tutorial/03_inheritance/child1.yaml`**
 
 ```yaml
 _base: 99_tutorial/03_inheritance/base.yaml
@@ -219,9 +219,9 @@ pose:
   action: hands on hips
 ```
 
-### 派生ファイル2: フォーマルな服装
+### Child File 2: Formal Outfit
 
-**ファイル: `99_tutorial/03_inheritance/child2.yaml`**
+**File: `99_tutorial/03_inheritance/child2.yaml`**
 
 ```yaml
 _base: 99_tutorial/03_inheritance/base.yaml
@@ -236,33 +236,33 @@ pose:
   action: hand in own hair
 ```
 
-### ポイント
+### Key Points
 
-- `_base`で親ファイルを指定すると、その内容を**継承**します
-- 子ファイルでは、**追加・上書きしたい部分だけ**を書きます
-- base.yamlを修正すると、child1とchild2の両方に反映されます
+- Specifying a parent file with `_base` **inherits** its content
+- In child files, write only the **parts you want to add or override**
+- Modifying base.yaml reflects in both child1 and child2
 
-### メリット
+### Benefits
 
-- **一箇所を直せば全部に反映**される
-- **差分だけ管理**すればいいので、ファイルがシンプルに
-- **バリエーション展開**が楽
+- **Change one place, update everything**
+- **Manage only the differences**, keeping files simple
+- **Easy to create variations**
 
 ---
 
-## Step 4: レイヤー - パーツを組み合わせる
+## Step 4: Layers - Combining Parts
 
-継承は「親子関係」でした。でも、もっと柔軟に「パーツを組み合わせたい」こともあります。
+Inheritance is about "parent-child relationships." But sometimes you want to "combine parts" more flexibly.
 
-たとえば：
-- 「ストリートウェア」の服装セット
-- 「スタジオ撮影」の環境セット
+For example:
+- A "streetwear" outfit set
+- A "studio photography" environment set
 
-これらを自由に組み合わせられたら便利ですよね。
+Being able to freely combine these would be convenient.
 
-### レイヤーファイル
+### Layer Files
 
-**ファイル: `99_tutorial/04_layers_library/layers/streetwear.yaml`**
+**File: `99_tutorial/04_layers_library/layers/streetwear.yaml`**
 
 ```yaml
 outfit:
@@ -271,7 +271,7 @@ outfit:
   shoes: sneakers
 ```
 
-**ファイル: `99_tutorial/04_layers_library/layers/studio.yaml`**
+**File: `99_tutorial/04_layers_library/layers/studio.yaml`**
 
 ```yaml
 environment:
@@ -279,9 +279,9 @@ environment:
   lighting: softbox lighting
 ```
 
-### 組み合わせて使う
+### Using Them Together
 
-**ファイル: `99_tutorial/04_layers_library/child1.yaml`**
+**File: `99_tutorial/04_layers_library/child1.yaml`**
 
 ```yaml
 _base: 99_tutorial/04_layers_library/base.yaml
@@ -295,26 +295,26 @@ pose:
   action: peace sign
 ```
 
-### ポイント
+### Key Points
 
-- `_layers`は配列で、複数のファイルを指定できます
-- 上から順番に適用され、後のファイルが前のファイルを上書きします
-- **適用順序**: `_base` → `_layers`（順番に） → 自分自身
+- `_layers` is an array that can specify multiple files
+- Applied in order from top to bottom, with later files overwriting earlier ones
+- **Application order**: `_base` → `_layers` (in sequence) → self
 
-### 使い分け
+### When to Use Which
 
-| 機能 | 用途 |
-|------|------|
-| `_base` | 「〇〇をベースに」という親子関係 |
-| `_layers` | 「〇〇と△△を組み合わせる」というミックス |
+| Feature | Use case |
+|---------|----------|
+| `_base` | "Based on X" parent-child relationship |
+| `_layers` | "Combining X and Y" mix-and-match |
 
 ---
 
-## Step 5: 変数 - 動的に値を変える
+## Step 5: Variables - Dynamic Value Changes
 
-最後に、**変数**を使って、同じテンプレートから異なるバリエーションを生成する方法を学びます。
+Finally, learn how to use **variables** to generate different variations from the same template.
 
-**ファイル: `99_tutorial/05_variables/base.yaml`**
+**File: `99_tutorial/05_variables/base.yaml`**
 
 ```yaml
 subject: person
@@ -330,7 +330,7 @@ appearance:
     style: ${hair_style}
 ```
 
-**ファイル: `99_tutorial/05_variables/child.yaml`**
+**File: `99_tutorial/05_variables/child.yaml`**
 
 ```yaml
 _base: 99_tutorial/05_variables/base.yaml
@@ -344,54 +344,54 @@ environment:
   color: ${background_color}
 ```
 
-### ポイント
+### Key Points
 
-- `${変数名}`の形式で変数を定義します
-- ファイルを選択すると、画面左下に変数入力フォームが表示されます
-- 値を入力すると、リアルタイムでYAMLに反映されます
-- 継承やレイヤーを使った場合も問題なく使用できます（ただし、変数を固定値で上書きした場合は、変数ではなくなります）
+- Define variables with the `${variableName}` format
+- When you select a file, a variable input form appears in the bottom-left of the screen
+- Enter values and they're reflected in real-time in the YAML
+- Works with inheritance and layers too (though overwriting a variable with a fixed value removes the variable)
 
-### 便利な使い方
+### Convenient Uses
 
-- **髪型を何パターンか試す**：`${hair_style}`を変えるだけ
-- **背景色のバリエーション**：`${background_color}`を変えるだけ
-- **同じ構図で男女両方作る**：`${gender}`を変えるだけ
+- **Try different hairstyles**: Just change `${hair_style}`
+- **Background color variations**: Just change `${background_color}`
+- **Create both male and female with same composition**: Just change `${gender}`
 
-### プリセット機能
+### Preset Feature
 
-よく使う変数の組み合わせは「プリセット」として保存できます。
+Save frequently used variable combinations as "presets".
 
-1. 変数に値を入力
-2. 「Save Preset」をクリック
-3. 名前をつけて保存
+1. Enter values for variables
+2. Click "Save Preset"
+3. Give it a name and save
 
-次回からはプリセットを選ぶだけで、同じ設定を呼び出せます。
-
----
-
-## まとめ
-
-| 機能 | できること |
-|------|-----------|
-| YAML構造化 | プロンプトを整理して管理 |
-| `_base` | 共通部分を継承して再利用 |
-| `_layers` | パーツを自由に組み合わせ |
-| `${変数}` | 動的に値を変更 |
-
-これらを組み合わせることで、プロンプトの管理が格段に楽になります。
+Next time, just select the preset to recall the same settings.
 
 ---
 
-## 次のステップ
+## Summary
 
-- 自分のキャラクターのベースファイルを作ってみましょう
-- 服装や背景のレイヤーライブラリを作ってみましょう
-- よく変える部分を変数にしてみましょう
+| Feature | What it does |
+|---------|--------------|
+| YAML Structuring | Organize and manage prompts |
+| `_base` | Inherit and reuse common parts |
+| `_layers` | Freely combine parts |
+| `${variable}` | Change values dynamically |
+
+Combining these makes prompt management dramatically easier.
+
+---
+
+## Next Steps
+
+- Create a base file for your own character
+- Build an outfit and background layer library
+- Turn frequently changed parts into variables
 
 Happy prompting!
 
 ---
 
-## 参考資料
+## Reference
 
-- [YAPS仕様書](YAPS.md) - 構造化スキーマの詳細（上級者向け）
+- [YAPS Specification](YAPS.md) - Structured schema details (advanced)

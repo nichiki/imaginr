@@ -1,125 +1,125 @@
-# マニュアル
+# Manual
 
-このドキュメントでは、Imaginrの機能と設計思想を詳しく説明します。
+This document explains Imaginr's features and design philosophy in detail.
 
-初めての方は、まず[チュートリアル](tutorial.md)をご覧ください。
+If you're new, please check the [Tutorial](tutorial.md) first.
 
 ---
 
-## コンセプト
+## Concepts
 
-### なぜYAMLでプロンプトを管理するのか
+### Why Manage Prompts with YAML
 
-画像生成AIのプロンプトは、細部まで指定しようとするとどんどん長く複雑になります。
+AI image generation prompts become longer and more complex as you try to specify more details.
 
-自然言語で長いプロンプトを書くと：
-- どこに何が書いてあるかわかりにくい
-- 一部だけ変更したいとき、編集箇所を探すのが大変
-- 似たプロンプトを作るとき、コピペして微調整...ミスも起きやすい
+When writing long prompts in natural language:
+- Hard to tell where things are
+- Finding where to edit when you want to change one part is tedious
+- Creating similar prompts means copy-paste and tweaking... prone to mistakes
 
-YAMLで構造化すると：
-- 階層構造で整理され、見通しが良くなる
-- 継承・合成で共通部分を再利用できる
-- 変数で動的に値を変えられる
+With YAML structuring:
+- Hierarchical structure keeps things organized with good visibility
+- Inheritance & composition lets you reuse common parts
+- Variables let you change values dynamically
 
-### プロンプトの構造: YAPS
+### Prompt Structure: YAPS
 
-Imaginrでは、**YAPS (Yet Another Prompt Schema)** という構造化スキーマを採用しています。
+Imaginr uses **YAPS (Yet Another Prompt Schema)**, a structured schema.
 
-- `subject`, `pose`, `outfit`, `environment` などのキーで階層的に整理
-- 詳細は [YAPS仕様書](YAPS.md) を参照
+- Hierarchically organized with keys like `subject`, `pose`, `outfit`, `environment`
+- See [YAPS Specification](YAPS.md) for details
 
-YAPSはあくまでガイドラインです。辞書のオートコンプリートで提案されますが、自分のワークフローに合わせて自由にカスタマイズできます。
+YAPS is just a guideline. It's suggested via dictionary autocomplete, but you can freely customize it to fit your workflow.
 
-### 4層構造: 変化頻度による整理
+### 4-Layer Structure: Organizing by Change Frequency
 
-プロンプトを「どれくらい変わるか」で層に分けると、管理が楽になります。
+Organizing prompts by "how often they change" makes management easier.
 
 ```
-変わりにくい（上位で固定）
+Less likely to change (fixed at upper levels)
     │
     ▼
 ┌─────────────────────────────────────────┐
-│ 01_base: システム（品質、ブロック順序）  │  ← 絶対変わらない
+│ 01_base: System (quality, block order)  │  ← Never changes
 ├─────────────────────────────────────────┤
-│ 02_look: 企画レベル                      │  ← 撮影を通して固定
-│   被写体、ロケ地、機材、aesthetic        │
+│ 02_look: Project level                  │  ← Fixed throughout shoot
+│   Subject, location, equipment, aesthetic│
 ├─────────────────────────────────────────┤
-│ 03_layers: パーツライブラリ              │  ← 組み合わせて使う
-│   照明、ポーズ、表情のパターン           │
+│ 03_layers: Parts library                │  ← Mix and match
+│   Lighting, pose, expression patterns   │
 ├─────────────────────────────────────────┤
-│ 04_shot: カットレベル                    │  ← ショット毎に変わる
-│   構図、ポーズ、表情、時間帯、小道具     │
+│ 04_shot: Shot level                     │  ← Changes per shot
+│   Composition, pose, expression, time   │
 ├─────────────────────────────────────────┤
-│ ${変数}: ランタイム                      │  ← 毎回変わる・まだ決めてない
+│ ${variable}: Runtime                    │  ← Changes every time / undecided
 └─────────────────────────────────────────┘
     │
     ▼
-変わりやすい（下位 or 変数で残す）
+More likely to change (at lower levels or as variables)
 ```
 
-| 層 | 何を置く | 例 |
-|---|---|---|
-| **01_base** | 絶対不変、全ブロックの順序定義 | quality タグ、ブロック構造 |
-| **02_look** | 企画で固定するもの | 被写体、ロケ、カメラ、aesthetic |
-| **03_layers** | 再利用パターン（横から合成） | lighting, pose, expression のパターン |
-| **04_shot** | カット毎に変わるもの | composition, time, 背景詳細 |
-| **${変数}** | 決めきれない・都度変えたい | hair_color, outfit_top 等 |
+| Layer | What to put | Example |
+|-------|-------------|---------|
+| **01_base** | Never changes, defines all block order | quality tags, block structure |
+| **02_look** | Fixed for the project | subject, location, camera, aesthetic |
+| **03_layers** | Reusable patterns (horizontal composition) | lighting, pose, expression patterns |
+| **04_shot** | Changes per shot | composition, time, background details |
+| **${variable}** | Can't decide / want to change each time | hair_color, outfit_top, etc. |
 
-これはあくまで一つの整理方法です。自分のワークフローに合わせてカスタマイズしてください。
+This is just one way to organize. Customize it to fit your workflow.
 
 ---
 
-## 機能リファレンス
+## Feature Reference
 
-### エディタ
+### Editor
 
-#### 複数タブ
+#### Multiple Tabs
 
-複数のファイルをタブで開くことができます。
+You can open multiple files in tabs.
 
-- **タブ追加**: タブバー右端の「+」ボタン、またはファイルツリーからファイルを選択
-- **タブ切り替え**: タブをクリック
-- **タブを閉じる**: タブの「×」ボタン（未保存の変更がある場合は確認あり）
+- **Add tab**: "+" button on the right of the tab bar, or select a file from the file tree
+- **Switch tabs**: Click on a tab
+- **Close tab**: "×" button on the tab (confirmation if there are unsaved changes)
 
-#### エディタ分割
+#### Editor Split
 
-エディタを左右に分割して、2つのファイルを同時に編集できます。
+Split the editor left/right to edit two files simultaneously.
 
-- タブを右クリック → 「右で開く」または「左で開く」
-- 分割を解除するには、片方のタブをすべて閉じる
+- Right-click a tab → "Open in right pane" or "Open in left pane"
+- To unsplit, close all tabs in one pane
 
-#### レイアウトモード
+#### Layout Mode
 
-画面右上のアイコンで、レイアウトを切り替えられます。
+Switch layouts with the icons in the top-right corner.
 
-| モード | 説明 |
-|--------|------|
-| **全表示** | 上段（エディタ）と下段（プレビュー・生成）両方を表示 |
-| **上段のみ** | エディタに集中したいとき |
-| **下段のみ** | ギャラリーや生成パネルに集中したいとき |
+| Mode | Description |
+|------|-------------|
+| **Full view** | Show both upper (editor) and lower (preview/generate) sections |
+| **Upper only** | Focus on the editor |
+| **Lower only** | Focus on gallery or generate panel |
 
-### テンプレート継承
+### Template Inheritance
 
-#### `_base`: 縦の継承（IS-A）
+#### `_base`: Vertical Inheritance (IS-A)
 
-親ファイルの内容をすべて引き継ぎ、差分だけを記述します。
+Inherit all content from a parent file and write only the differences.
 
 ```yaml
 # 04_shot/shot_01.yaml
 _base: 02_look/summer_casual.yaml
 
-# このファイル固有の設定
+# Settings specific to this file
 pose:
   base: standing
   action: peace sign
 ```
 
-親ファイルを修正すると、すべての子ファイルに反映されます。
+Modifying the parent file reflects in all child files.
 
-#### `_layers`: 横の合成（HAS-A）
+#### `_layers`: Horizontal Composition (HAS-A)
 
-複数のファイルを順番にマージします。
+Merge multiple files in order.
 
 ```yaml
 _base: 02_look/summer_casual.yaml
@@ -129,21 +129,21 @@ _layers:
   - 03_layers/pose/standing.yaml
   - 03_layers/expression/smile.yaml
 
-# このファイル固有の設定
+# Settings specific to this file
 environment:
   time: evening
 ```
 
-**適用順序**: `_base` → `_layers`（上から順に） → 自分自身
+**Application order**: `_base` → `_layers` (top to bottom) → self
 
-後から適用されるものが、前のものを上書きします。
+Later applied content overwrites earlier content.
 
-#### `_replace`: マージではなく置換
+#### `_replace`: Replace Instead of Merge
 
-デフォルトでは、オブジェクトは深くマージされます。親ファイルに定義があれば、その上に子の設定が重なります。
+By default, objects are deeply merged. If the parent file has a definition, child settings layer on top.
 
 ```yaml
-# 親ファイル
+# Parent file
 outfit:
   top: blazer
   bottom: skirt
@@ -151,280 +151,280 @@ outfit:
 ```
 
 ```yaml
-# 子ファイル（通常のマージ）
+# Child file (normal merge)
 outfit:
   top: sweater
-# → 結果: top=sweater, bottom=skirt, legwear=tights（マージされる）
+# → Result: top=sweater, bottom=skirt, legwear=tights (merged)
 ```
 
-しかし、親の内容を引き継ぎたくない場合もあります。`_replace` を使うと、指定したキーは深いマージではなく**完全置換**になります。
+However, sometimes you don't want to inherit the parent's content. Using `_replace` makes the specified keys **fully replace** instead of deep merge.
 
 ```yaml
-# 子ファイル（_replace使用）
+# Child file (using _replace)
 _replace:
   - outfit
 
 outfit:
   top: sweater
-# → 結果: top=sweater のみ（bottom, legwear は消える）
+# → Result: top=sweater only (bottom, legwear are gone)
 ```
 
-**使いどころ**: 親の設定を「部分的に上書き」ではなく「まるごと差し替え」したいとき。
+**Use case**: When you want to "completely replace" instead of "partially override" parent settings.
 
-#### `_base` vs `_layers` の使い分け
+#### `_base` vs `_layers` Comparison
 
 | | `_base` | `_layers` |
 |---|---|---|
-| **関係性** | 「〇〇である」（IS-A） | 「〇〇を持つ」（HAS-A） |
-| **用途** | キャラ設定など本質的な継承 | 照明・ポーズなどパーツの組み合わせ |
-| **数** | 1つだけ | 複数OK |
+| **Relationship** | "Is a" (IS-A) | "Has a" (HAS-A) |
+| **Use** | Essential inheritance like character settings | Combining parts like lighting, pose |
+| **Count** | Only one | Multiple OK |
 
-### 変数システム
+### Variable System
 
-#### 基本構文
+#### Basic Syntax
 
 ```yaml
 hair:
-  color: ${hair_color}           # 変数
-  style: ${hair_style|straight}  # デフォルト値付き
+  color: ${hair_color}           # variable
+  style: ${hair_style|straight}  # with default value
 ```
 
-- `${変数名}`: 変数を定義
-- `${変数名|デフォルト値}`: 値が入力されなかった場合のデフォルト
+- `${variableName}`: Define a variable
+- `${variableName|defaultValue}`: Default when no value is entered
 
-#### 変数入力フォーム
+#### Variable Input Form
 
-変数を含むファイルを選択すると、画面左下に入力フォームが表示されます。
-値を入力すると、リアルタイムでMerged YAMLに反映されます。
+When you select a file containing variables, an input form appears in the bottom-left.
+Enter values and they're reflected in real-time in the Merged YAML.
 
-#### プリセット
+#### Presets
 
-よく使う変数の組み合わせは、プリセットとして保存できます。
+Save frequently used variable combinations as presets.
 
-1. 変数に値を入力
-2. 「Save Preset」をクリック
-3. 名前をつけて保存
+1. Enter values for variables
+2. Click "Save Preset"
+3. Give it a name and save
 
-次回からはドロップダウンでプリセットを選ぶだけで、同じ設定を呼び出せます。
+Next time, just select the preset from the dropdown to recall the same settings.
 
-### 辞書とオートコンプリート
+### Dictionary and Autocomplete
 
-#### 辞書の役割
+#### Dictionary Role
 
-辞書には、よく使うキー名と値があらかじめ登録されています。
+The dictionary has common key names and values pre-registered.
 
-- エディタで入力中に**オートコンプリート**が表示されます
-- 親キーのコンテキストを認識して、適切な候補を提示します
-- 手動トリガー: **Cmd+J** (Mac) / **Ctrl+Space** (Windows)
+- **Autocomplete** appears as you type in the editor
+- Recognizes parent key context to suggest appropriate candidates
+- Manual trigger: **Cmd+J** (Mac) / **Ctrl+Space** (Windows)
 
-#### 辞書の管理
+#### Dictionary Management
 
-辞書はアプリ内から直接管理できます。
+Manage the dictionary directly from within the app.
 
-1. ヘッダーの歯車アイコンから設定ダイアログを開く
-2. 「辞書マネージャー」を選択
-3. 以下の操作が可能:
-   - **検索・フィルタリング**: キーワードやコンテキストで絞り込み
-   - **追加**: 新しいエントリを登録
-   - **編集**: 既存エントリの修正
-   - **削除**: 不要なエントリを削除
-   - **インポート/エクスポート**: CSV形式でのバックアップ・復元
+1. Open settings dialog from the gear icon in the header
+2. Select "Dictionary Manager"
+3. Available operations:
+   - **Search & filter**: Filter by keyword or context
+   - **Add**: Register new entries
+   - **Edit**: Modify existing entries
+   - **Delete**: Remove unwanted entries
+   - **Import/Export**: Backup and restore in CSV format
 
-#### オートコンプリートの詳細
+#### Autocomplete Details
 
-オートコンプリートでは、候補の右側に**ソースコンテキスト**が表示されます。
+Autocomplete shows the **source context** on the right side of suggestions.
 
-例えば `outfit.top.color` を編集中に補完候補が表示された場合:
-- `*.color` - 汎用の色辞書から
-- `outfit.color` - outfit固有の色表現から
+For example, when editing `outfit.top.color`:
+- `*.color` - From generic color dictionary
+- `outfit.color` - From outfit-specific color expressions
 
-この情報により、候補がどの辞書コンテキストから来ているか確認できます。
+This information helps you understand which dictionary context suggestions come from.
 
-#### 辞書ファイルの直接編集
+#### Direct Dictionary File Editing
 
-辞書ファイルは `dictionary/` フォルダにも配置されています。
-設定ダイアログから「Open Data Folder」でデータフォルダを開き、直接編集することも可能です。
+Dictionary files are also located in the `dictionary/` folder.
+You can open the data folder from "Open Data Folder" in the settings dialog and edit directly.
 
-### スニペット
+### Snippets
 
-スニペットは、よく使うYAMLの断片を保存しておく機能です。
+Snippets are a feature for saving frequently used YAML fragments.
 
-#### `_layers`との違い
+#### Difference from `_layers`
 
-| | `_layers` | スニペット |
+| | `_layers` | Snippets |
 |---|---|---|
-| **関係性** | 依存関係が残る | コピペして終わり |
-| **更新時** | 元ファイル変更 → 全ショットに反映 | 挿入後は独立 |
-| **用途** | 統一したい・一括変更したい | 出発点だけ欲しい |
+| **Relationship** | Dependency remains | Copy-paste and done |
+| **On update** | Original file change → reflects in all shots | Independent after insertion |
+| **Use** | Want to unify / bulk change | Just want a starting point |
 
-**判断基準: 「これ、後で一括で変えたくなる？」**
-- YES → `_layers` に外出し
-- NO → スニペットで十分（または直書き）
+**Decision criteria: "Will I want to bulk change this later?"**
+- YES → Extract to `_layers`
+- NO → Snippets are sufficient (or write directly)
 
-#### 操作方法
+#### Operations
 
-右ペインのスニペットパネルで管理します。
+Manage in the snippets panel on the right pane.
 
-- **シングルクリック**: 編集ダイアログを開く
-- **ダブルクリック**: エディタのカーソル位置に挿入
-- **右クリック**: コンテキストメニュー（削除など）
-
----
-
-## ComfyUI連携
-
-### 接続設定
-
-1. ヘッダーの歯車アイコンから設定ダイアログを開く
-2. 「ComfyUI設定」を選択
-3. APIエンドポイントを入力（デフォルト: `http://localhost:8188`）
-4. 「テスト」で接続確認
-
-### ワークフロー設定
-
-ComfyUIのワークフローJSONをアップロードして、プロンプトの注入先を設定します。
-事前準備として、使いたいワークフローをAPI形式でエクスポートしておきます。
-
-1. 「ComfyUI設定」の下の「追加」を選択
-2. エクスポートしたワークフローJSONをアップロード
-3. 以下を設定:
-   - **名前**: 表示名
-   - **プロンプトノード ID**: プロンプトを注入するノード（例：CLIPTextEncode）のID
-   - **サンプラーノード ID**: シードをランダム化するノード（例：KSampler）のID
-   - **ネガティブプロンプトノード ID**: ネガティブプロンプトをYAMLで制御したい場合のみ
-   - **プロパティ上書き**: 画像サイズやステップ数などを上書きしたい場合
-
-#### ノードIDの確認方法
-
-ワークフローJSONをテキストエディタなどで開いて確認できます。
-
-### 画像生成
-
-1. YAMLテンプレートを選択・編集
-2. ワークフローを選択（生成パネルのドロップダウン）
-3. 「生成」ボタンをクリック
-
-生成された画像は自動的に保存され、ギャラリーに表示されます。
-
-### ギャラリー
-
-プレビューパネルの「Gallery」タブで、生成した画像を一覧表示できます。
-
-- **サムネイルクリック**: 拡大表示
-- **←→キー**: 前後の画像に移動
-- **Escキー**: 拡大表示を閉じる
-- **ダウンロードボタン**: 画像をファイルとして保存
+- **Single click**: Open edit dialog
+- **Double click**: Insert at cursor position in editor
+- **Right click**: Context menu (delete, etc.)
 
 ---
 
-## Ollama連携（LLMエンハンサー）
+## ComfyUI Integration
 
-Ollamaを使って、YAMLプロンプトをテキストエンコーダーに最適化された形式に変換できます。
+### Connection Settings
 
-### Ollamaのインストール
+1. Open settings dialog from the gear icon in the header
+2. Select "ComfyUI Settings"
+3. Enter API endpoint (default: `http://localhost:8188`)
+4. Click "Test" to verify connection
 
-1. [Ollama公式サイト](https://ollama.ai/)からインストーラーをダウンロード
-2. インストール後、ターミナルで使いたいモデルをダウンロード:
+### Workflow Settings
+
+Upload ComfyUI workflow JSON and set up prompt injection targets.
+As preparation, export the workflow you want to use in API format.
+
+1. Select "Add" under "ComfyUI Settings"
+2. Upload the exported workflow JSON
+3. Configure:
+   - **Name**: Display name
+   - **Prompt Node ID**: Node ID to inject prompt (e.g., CLIPTextEncode)
+   - **Sampler Node ID**: Node ID to randomize seed (e.g., KSampler)
+   - **Negative Prompt Node ID**: Only if you want to control negative prompt via YAML
+   - **Property Overrides**: If you want to override image size, steps, etc.
+
+#### How to Find Node IDs
+
+Open the workflow JSON in a text editor to check.
+
+### Image Generation
+
+1. Select and edit a YAML template
+2. Select a workflow (dropdown in generate panel)
+3. Click "Generate" button
+
+Generated images are automatically saved and displayed in the gallery.
+
+### Gallery
+
+View generated images in the "Gallery" tab of the preview panel.
+
+- **Thumbnail click**: Enlarged view
+- **←→ keys**: Navigate to previous/next image
+- **Esc key**: Close enlarged view
+- **Download button**: Save image as file
+
+---
+
+## Ollama Integration (LLM Enhancer)
+
+Use Ollama to transform YAML prompts into formats optimized for text encoders.
+
+### Installing Ollama
+
+1. Download installer from [Ollama official site](https://ollama.ai/)
+2. After installation, download the model you want in terminal:
 
 ```bash
-# 例: Llama 3.2
+# Example: Llama 3.2
 ollama pull llama3.2
 
-# 例: Qwen 2.5
+# Example: Qwen 2.5
 ollama pull qwen2.5
 ```
 
-### 接続設定
+### Connection Settings
 
-1. ヘッダーの歯車アイコンから設定ダイアログを開く
-2. 「Ollama設定」を選択
-3. 以下を設定:
-   - **API URL**: Ollamaのエンドポイント（デフォルト: `http://localhost:11434`）
-   - **モデル**: 使用するモデルを選択
-   - **Temperature**: 生成の多様性（0.0〜1.0、デフォルト: 0.7）
-4. 「テスト」で接続確認
+1. Open settings dialog from the gear icon in the header
+2. Select "Ollama Settings"
+3. Configure:
+   - **API URL**: Ollama endpoint (default: `http://localhost:11434`)
+   - **Model**: Select model to use
+   - **Temperature**: Generation diversity (0.0-1.0, default: 0.7)
+4. Click "Test" to verify connection
 
-### エンハンサープリセット
+### Enhancer Presets
 
-プリセットは、YAMLをどのような形式に変換するかを定義します。
+Presets define how to transform YAML into different formats.
 
-| プリセット | 用途 | 出力形式 |
-|------------|------|----------|
-| **CLIP (SDXL)** | Stable Diffusion XL | カンマ区切りのタグ形式 |
-| **T5 (Flux)** | Flux | 自然言語の文章形式 |
-| **Qwen** | Qwen系モデル（Qwen-Image等） | 詳細な自然言語形式 |
+| Preset | Use | Output Format |
+|--------|-----|---------------|
+| **CLIP (SDXL)** | Stable Diffusion XL | Comma-separated tags |
+| **T5 (Flux)** | Flux | Natural language sentences |
+| **Qwen** | Qwen models (Qwen-Image, etc.) | Detailed natural language |
 
-プリセットはドロップダウンから選択できます。また、「Add Preset」で独自のプリセットを追加することもできます。
+Select presets from the dropdown. You can also add custom presets with "Add Preset".
 
-### 使い方
+### Usage
 
-#### 手動エンハンス
+#### Manual Enhance
 
-1. YAMLテンプレートを選択・編集
-2. 生成パネルの「エンハンス」ボタンをクリック
-3. 変換されたプロンプトが「プロンプト」タブの「エンハンス済み」に表示される
+1. Select and edit a YAML template
+2. Click "Enhance" button in the generate panel
+3. Transformed prompt appears in "Enhanced" in the "Prompt" tab
 
-#### 生成時に自動エンハンス
+#### Auto-Enhance on Generate
 
-1. 生成パネルの「生成時にエンハンス」をオンにする
-2. 「生成」ボタンをクリック
-3. 自動的にエンハンス → 画像生成が実行される
+1. Turn on "Enhance before generate" in the generate panel
+2. Click "Generate" button
+3. Automatically enhances → generates image
 
-### AI アシスト（Text-to-Prompt）
+### AI Assist (Text-to-Prompt)
 
-自然言語の説明からYAPSフォーマットのYAMLを生成する機能です。
+Generate YAPS-format YAML from natural language descriptions.
 
-1. ファイルの新規作成時に「AI アシスト」をオンにする
-2. 作りたい画像の説明を入力（例：「夕暮れの浜辺で佇む少女」）
-3. 「作成」をクリック
-4. 生成されたYAMLがエディタに挿入される
+1. Turn on "AI Assist" when creating a new file
+2. Enter description of the image you want (e.g., "girl standing on beach at sunset")
+3. Click "Create"
+4. Generated YAML is inserted into the editor
 
-この機能はざっくりとした説明から詳細なYAMLを生成するので、そこから微調整していくワークフローに適しています。
+This feature generates detailed YAML from rough descriptions, suitable for workflows where you refine from there.
 
 ---
 
 ## FAQ / Tips
 
-### よくある質問
+### Frequently Asked Questions
 
-#### Q: ブラウザで動作しますか？
+#### Q: Does it work in a browser?
 
-A: いいえ、Imaginrはデスクトップアプリ専用です。Tauri経由でファイルシステムやデータベースにアクセスするため、ブラウザでは動作しません。
+A: No, Imaginr is a desktop app only. It accesses the file system and database via Tauri, so it doesn't work in browsers.
 
-#### Q: データはどこに保存されますか？
+#### Q: Where is data saved?
 
-A: 以下の場所に保存されます:
+A: Saved in the following locations:
 - **Windows**: `%APPDATA%/studio.imaginr/`
 - **Mac**: `~/Library/Application Support/studio.imaginr/`
 
-設定ダイアログの「Open Data Folder」からフォルダを開けます。
+You can open the folder from "Open Data Folder" in the settings dialog.
 
-#### Q: ComfyUIなしでも使えますか？
+#### Q: Can I use it without ComfyUI?
 
-A: はい、プロンプトの作成・管理機能は単独で使えます。画像生成だけがComfyUI連携が必要です。
+A: Yes, prompt creation and management features work standalone. Only image generation requires ComfyUI integration.
 
-#### Q: 辞書に自分で値を追加できますか？
+#### Q: Can I add my own values to the dictionary?
 
-A: はい、設定ダイアログの「辞書マネージャー」から追加・編集・削除ができます。CSV形式でのインポート/エクスポートも可能です。
+A: Yes, you can add, edit, and delete from "Dictionary Manager" in the settings dialog. CSV import/export is also available.
 
-#### Q: 自動保存はありますか？
+#### Q: Is there auto-save?
 
-A: いいえ、自動保存はありません。**Ctrl+S**（Mac: **Cmd+S**）で明示的に保存してください。未保存の変更がある場合、タブに「●」マークが表示されます。
+A: No, there's no auto-save. Save explicitly with **Ctrl+S** (Mac: **Cmd+S**). A "●" mark appears on tabs with unsaved changes.
 
 ### Tips
 
-#### 効率的なワークフロー
+#### Efficient Workflow
 
-1. **ベースを先に固める**: キャラクターの基本設定を `_base` ファイルにまとめておく
-2. **レイヤーライブラリを作る**: 照明・ポーズ・表情のバリエーションを `_layers` で再利用
-3. **変数は最後に**: まずは固定値で画作りし、後から変数化する
+1. **Solidify the base first**: Put basic character settings in a `_base` file
+2. **Build a layer library**: Create lighting, pose, expression variations with `_layers` for reuse
+3. **Variables last**: First work with fixed values, then convert to variables later
 
-#### キーボードショートカット
+#### Keyboard Shortcuts
 
-| 操作 | Windows | Mac |
-|------|---------|-----|
-| 保存 | Ctrl+S | Cmd+S |
-| 新規ファイル | Ctrl+N | Cmd+N |
-| オートコンプリート | Ctrl+Space | Cmd+J |
-| 元に戻す | Ctrl+Z | Cmd+Z |
-| やり直し | Ctrl+Y | Cmd+Shift+Z |
+| Action | Windows | Mac |
+|--------|---------|-----|
+| Save | Ctrl+S | Cmd+S |
+| New file | Ctrl+N | Cmd+N |
+| Autocomplete | Ctrl+Space | Cmd+J |
+| Undo | Ctrl+Z | Cmd+Z |
+| Redo | Ctrl+Y | Cmd+Shift+Z |

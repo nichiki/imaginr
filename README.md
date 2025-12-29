@@ -1,28 +1,30 @@
 # Imaginr - YAML Prompt Builder for AI Image Generation
 
-**画像生成AIのプロンプト、管理できていますか？**
+English | [日本語](README_ja.md)
 
-## こんな経験ありませんか？
+**Struggling to manage your AI image generation prompts?**
 
-- プロンプトが長くなって、どこに何を書いたかわからない
-- 「あのとき上手くいったプロンプト、どこいった？」
-- 髪の色だけ変えたいのに、全部コピペして編集...
-- 似たプロンプトが大量に散らばって収拾つかない
+## Sound familiar?
 
-画像生成AIを使い込むほど、プロンプトは長く複雑になります。自然言語のまま管理し続けるのは限界があります。
+- Prompts get long and you lose track of what's where
+- "Where did that prompt go that worked so well last time?"
+- Want to change just the hair color, but have to copy-paste and edit everything...
+- Similar prompts scattered everywhere, impossible to organize
 
-## 解決策：プロンプトを構造化する
+The more you use AI image generation, the longer and more complex your prompts become. Managing them as plain text has its limits.
 
-**Before（自然言語）**
+## The Solution: Structure Your Prompts
+
+**Before (Natural Language)**
 ```
 young Japanese woman with long straight chestnut hair and brown eyes,
 wearing yellow t-shirt and indigo jeans, standing, peace sign,
 simple red background, professional lighting
 ```
 
-どこからどこまでが服装？髪の色だけ変えたいときは？
+Where does the outfit end? How do you change just the hair color?
 
-**After（YAML構造化）**
+**After (YAML Structure)**
 ```yaml
 subject: person
 
@@ -35,99 +37,99 @@ appearance:
   hair:
     length: long hair
     style: straight hair
-    color: ${hair_color}  # ← 変数化して簡単に変更
+    color: ${hair_color}  # ← Use variables for easy changes
 
 outfit:
   top: t-shirt
   bottom: jeans
 ```
 
-- **階層構造**で整理され、見通しが良い
-- **継承・合成**で共通部分を再利用できる
-- **変数**で動的に値を変えられる
+- **Hierarchical structure** keeps things organized and easy to navigate
+- **Inheritance & composition** lets you reuse common parts
+- **Variables** make dynamic value changes a breeze
 
-## Imaginrとは
+## What is Imaginr?
 
-この「構造化プロンプト」を簡単に作成・管理するためのデスクトップアプリです。
+A desktop app for easily creating and managing "structured prompts".
 
 ![Imaginr Screenshot](docs/images/screenshot.png)
 
-### 主な機能
+### Key Features
 
-| 機能 | できること |
-|------|-----------|
-| **テンプレート継承** | `_base`で共通部分を親ファイルにまとめ、差分だけ管理 |
-| **レイヤー合成** | `_layers`で服装・照明・ポーズなどのパーツを自由に組み合わせ |
-| **変数システム** | `${varName}`で髪の色や背景をワンクリックで切り替え |
-| **オートコンプリート** | 辞書ベースの入力補完（ソースコンテキスト表示付き） |
-| **辞書管理** | アプリ内から辞書の追加・編集・削除・インポート/エクスポート |
-| **複数タブ・分割** | 複数ファイルをタブで開き、左右分割で同時編集 |
-| **ComfyUI連携** | ワークフロー選択 → Generate → 画像生成、ギャラリー管理 |
-| **LLMエンハンサー** | Ollama連携でYAMLを自然言語プロンプトに変換 |
+| Feature | What it does |
+|---------|--------------|
+| **Template Inheritance** | Use `_base` to share common settings across files, only manage the differences |
+| **Layer Composition** | Use `_layers` to freely combine outfit, lighting, pose modules |
+| **Variable System** | `${varName}` lets you switch hair color, background, etc. with one click |
+| **Autocomplete** | Dictionary-based input completion with source context display |
+| **Dictionary Manager** | Add, edit, delete, import/export dictionary entries from within the app |
+| **Multi-tab & Split** | Open multiple files in tabs, edit side-by-side with split view |
+| **ComfyUI Integration** | Select workflow → Generate → Image generation, gallery management |
+| **LLM Enhancer** | Ollama integration to transform YAML into natural language prompts |
 
-### どんな人向け？
+### Who is this for?
 
-- プロンプトを**体系的に管理したい**人
-- 同じキャラで**バリエーション展開**したい人
-- ComfyUIを使っていて、プロンプト作成を**効率化したい**人
+- People who want to **systematically manage** their prompts
+- People who want to create **variations** of the same character
+- ComfyUI users who want to **streamline** prompt creation
 
-## インストール
+## Installation
 
-[Releases](https://github.com/nichiki/imaginr/releases)から最新版をダウンロード。
+Download the latest version from [Releases](https://github.com/nichiki/imaginr/releases).
 
-| OS | ファイル |
-|----|----------|
-| Windows | `.msi` または `.exe` |
+| OS | File |
+|----|------|
+| Windows | `.msi` or `.exe` |
 | macOS | `.dmg` |
 
-## クイックスタート
+## Quick Start
 
-1. アプリを起動
-2. 左ペインでサンプルテンプレートを選択
-3. 中央エディタで内容を確認・編集
-4. 変数があれば左下フォームで値を入力
-5. ComfyUI接続済みなら「Generate」で画像生成
+1. Launch the app
+2. Select a sample template from the left pane
+3. Review and edit the content in the central editor
+4. If there are variables, enter values in the bottom-left form
+5. If ComfyUI is connected, click "Generate" to create images
 
-詳しくは [チュートリアル](docs/tutorial.md) へ。
+See the [Tutorial](docs/tutorial.md) for more details.
 
-## ドキュメント
+## Documentation
 
-- [チュートリアル](docs/tutorial.md) - 初めての方はこちら
-- [マニュアル](docs/manual.md) - 全機能リファレンス
-- [YAPS仕様書](docs/YAPS.md) - 構造化スキーマの詳細
+- [Tutorial](docs/tutorial.md) - Start here if you're new
+- [Manual](docs/manual.md) - Complete feature reference
+- [YAPS Specification](docs/YAPS.md) - Structured schema details
 
 ---
 
-## 開発者向け
+## For Developers
 
-### 技術スタック
+### Tech Stack
 
-| 領域 | 技術 |
-|------|------|
+| Area | Technology |
+|------|------------|
 | Desktop | Tauri 2 |
 | Frontend | Next.js 16 + React 19 |
 | Editor | Monaco Editor |
 | Database | SQLite (tauri-plugin-sql) |
 | UI | shadcn/ui + Tailwind CSS v4 |
 
-### コマンド
+### Commands
 
 ```bash
-npm install          # 依存関係インストール
-npm run tauri:dev    # 開発モード
-npm run tauri:build  # ビルド
+npm install          # Install dependencies
+npm run tauri:dev    # Development mode
+npm run tauri:build  # Build
 npm run lint         # Lint
 ```
 
-### ディレクトリ構成
+### Directory Structure
 
 ```
-src/          # Next.js フロントエンド
-src-tauri/    # Tauri Rustバックエンド
-data/         # バンドルリソース（templates, dictionary, snippets）
-docs/         # ドキュメント
+src/          # Next.js frontend
+src-tauri/    # Tauri Rust backend
+data/         # Bundled resources (templates, dictionary, snippets)
+docs/         # Documentation
 ```
 
-## ライセンス
+## License
 
 MIT
