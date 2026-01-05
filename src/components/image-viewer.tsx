@@ -126,14 +126,14 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
   return (
     <Dialog open={!!image} onOpenChange={(open) => !open && onClose()}>
       <DialogContent
-        className="!w-[90vw] !max-w-[90vw] h-[90vh] p-0 bg-[#1e1e1e] border-[#333] overflow-hidden"
+        className="!flex !flex-col !w-[90vw] !max-w-[90vw] h-[90vh] p-0 bg-[#1e1e1e] border-[#333] overflow-hidden"
         showCloseButton={false}
       >
         <VisuallyHidden>
           <DialogTitle>{t('imageViewer.title')}</DialogTitle>
         </VisuallyHidden>
         {image && (
-          <div className="flex flex-col h-full">
+          <div className="flex-1 flex flex-col min-h-0">
             {/* ヘッダー */}
             <div className="flex items-center justify-between p-2 bg-[#252526] border-b border-[#333]">
               <div className="text-xs text-[#888]">
@@ -162,7 +162,7 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
             </div>
 
             {/* コンテンツ（左：画像、右：プロンプト） */}
-            <div className="flex-1 flex overflow-hidden min-h-0">
+            <div className="flex-1 flex min-h-0">
               {/* 左側：画像 */}
               <div className="relative flex-1 flex items-center justify-center bg-[#1e1e1e] border-r border-[#333] min-w-0 overflow-hidden">
                 {imageUrl ? (
@@ -197,8 +197,8 @@ export function ImageViewer({ image, images, onClose, onNavigate }: ImageViewerP
                 )}
               </div>
               {/* 右側：詳細情報 */}
-              <div className="w-[350px] flex-shrink-0 flex flex-col bg-[#252526]">
-                <div className="flex-1 overflow-auto p-3">
+              <div className="w-[350px] flex-shrink-0 flex flex-col bg-[#252526] min-h-0 overflow-hidden">
+                <div className="flex-1 overflow-auto p-3 min-h-0">
                   {/* メタ情報 */}
                   {detail && (detail.seed || detail.negativePrompt || detail.parameters) && (
                     <div className="mb-4 space-y-3">
